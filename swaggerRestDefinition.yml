@@ -17,9 +17,9 @@ produces:
 paths:
   /build:
     post:
-      summary: Start a build process.
+      summary: Start a building process.
       description: |
-        Start a build process for several images described as _Dockerfile_ + _puppet manifest_.
+        Start a building process for several images described as _Dockerfile_ + _puppet manifest_.
       responses:
         200:
           description: OK
@@ -28,9 +28,9 @@ paths:
         400:
           description: Bad request. Problem with provided files.
     get:
-      summary: Get list with build processes.
+      summary: Get list with building processes.
       description: |
-        Retrieve a list with the build processes that are running, cancelled, stopped or finished.
+        Retrieve a list with the building processes that are running, cancelled, stopped or finished.
       responses:
         200:
           description: OK
@@ -39,14 +39,14 @@ paths:
 
   /build/{operationToken}:
     get:
-      summary: Get information about a build process.
+      summary: Get information about a building process.
       description: |
-        Retrieve information about the status of build process.
+        Retrieve information about the status of building process.
       parameters:
         - name: operationToken
           in: path
           type: string
-          description: Token that identifies the build process.
+          description: Token that identifies the building process.
           required: true
       responses:
         200:
@@ -54,22 +54,22 @@ paths:
           schema:
             $ref: '#/definitions/BuildStatus'
         404:
-          description: Build process not found.
+          description: building process not found.
     delete:
-      summary: Remove a build process and the related data.
+      summary: Remove a building process and the related data.
       description: |
-        Remove a build process and the related data.
+        Remove a building process and the related data.
       parameters:
         - name: operationToken
           in: path
           type: string
-          description: Token that identifies the build process.
+          description: Token that identifies the building process.
           required: true
       responses:
         200:
           description: OK
         404:
-          description: Build process not found.
+          description: building process not found.
 
   /cluster:
     post:
@@ -104,22 +104,73 @@ paths:
         200:
           description: OK
         404:
-          description: Build process not found.
+          description: cluster not found.
     delete:
-      summary: Remove a build process and the related data.
+      summary: Destroy a cluster.
       description: |
-        Remove a build process and the related data.
+        Destroy a cluster and the related data.
       parameters:
         - name: operationToken
           in: path
           type: string
-          description: Token that identifies the build process.
+          description: Token that identifies the cluster.
           required: true
       responses:
         200:
           description: OK
         404:
-          description: Build process not found.
+          description: building process not found.
+
+  /composer:
+    post:
+      summary: Create a container composition
+      description: |
+        Instance a container based services deploying and linking the containers defined in the docker-compose.yml
+      parameters:
+        - in: body
+          name: body
+          description: List of user object
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/VmsDescription"
+      responses:
+        200:
+          description: OK
+
+  /composer/{operationToken}:
+    get:
+      summary: Get information about a docker container composition.
+      description: |
+        Retrieve information about the status of a docker composition.
+      parameters:
+        - name: operationToken
+          in: path
+          type: string
+          description: Token that identifies the docker composition.
+          required: true
+      responses:
+        200:
+          description: OK
+        404:
+          description: composition not found.
+    delete:
+      summary: Destroy the container composition
+      description: |
+        Destroy the container composition and the related data.
+      parameters:
+        - name: operationToken
+          in: path
+          type: string
+          description: Token that identifies the building process.
+          required: true
+      responses:
+        200:
+          description: OK
+        404:
+          description: composition not found.
+
 
 definitions:
 
@@ -163,5 +214,3 @@ definitions:
             $ref: "#/definitions/AuthTypes"
   AuthTypes:
     properties:
-
-      
