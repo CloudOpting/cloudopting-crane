@@ -1,0 +1,11 @@
+commander:
+    extends:
+        file: common.yml
+        service: commander
+    ports:
+      - "8888:8888"
+    volumes:
+      - "../commander/:/usr/local/commander/"
+    environment:
+      - DEBUG=true
+    command: python /usr/local/commander/commander.py
