@@ -5,10 +5,6 @@ from flask.ext.restplus import Api, apidoc, Resource, reqparse, fields
 app = Flask(__name__)
 api = Api(app)
 
-@api.route('/about2/')
-class About(Resource):
-    def get(self):
-        return 'An entry point to handle a Docker infrastructure.'
 
 @api.route('/build')
 class BuildService(Resource):
@@ -31,7 +27,6 @@ class ClusterService(Resource):
     def post(self):
         return 'cluster:post'
 
-
 @api.route('/cluster/<int:token>')
 class ClusterInstance(Resource):
     def get(self, token):
@@ -44,7 +39,6 @@ class ClusterInstance(Resource):
 class ComposerService(Resource):
     def post(self):
         return 'composer:post'
-
 
 @api.route('/composer/<int:token>')
 class ComposerDeployment(Resource):
