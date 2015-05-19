@@ -1,4 +1,7 @@
 commander:
   build: ./commander/
+  volumes:
+    - ../commander/:/usr/commander
   environment:
     - DEBUG=false
+  command: python /usr/commander/commander.py
