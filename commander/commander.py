@@ -1,15 +1,16 @@
 from flask import Flask
-from flask.ext.restful import Api, Resource, reqparse, fields
+from flask.ext.restplus import Api, apidoc, Resource, reqparse, fields
 
 
 app = Flask(__name__)
 api = Api(app)
 
+@api.route('/about2/')
 class About(Resource):
     def get(self):
         return 'An entry point to handle a Docker infrastructure.'
 
-
+@api.route('/build')
 class BuildService(Resource):
     def get(self):
         return 'build:get'
@@ -17,6 +18,7 @@ class BuildService(Resource):
     def post(self):
         return 'build:post'
 
+@api.route('/build/<int:token>')
 class BuildProcess(Resource):
     def get(self, token):
         return 'build/<token>:get'
@@ -24,10 +26,13 @@ class BuildProcess(Resource):
     def delete(self, token):
         return 'build/<token>:delete'
 
+@api.route('/cluster')
 class ClusterService(Resource):
     def post(self):
         return 'cluster:post'
 
+
+@api.route('/cluster/<int:token>')
 class ClusterInstance(Resource):
     def get(self, token):
         return 'cluster/<token>:get'
@@ -35,26 +40,19 @@ class ClusterInstance(Resource):
     def delete(self, token):
         return 'cluster/<token>:delete'
 
-
+@api.route('/composer')
 class ComposerService(Resource):
     def post(self):
         return 'composer:post'
 
+
+@api.route('/composer/<int:token>')
 class ComposerDeployment(Resource):
     def get(self, token):
         return 'composer/<token>:get'
 
     def delete(self, token):
         return 'composer/<token>:delete'
-
-
-api.add_resource(About, '/about')
-api.add_resource(BuildService, '/build')
-api.add_resource(BuildProcess, '/build/<int:token>')
-api.add_resource(ClusterService, '/cluster')
-api.add_resource(ClusterInstance, '/cluster/<int:token>')
-api.add_resource(ComposerService, '/composer')
-api.add_resource(ComposerDeployment, '/composer/<int:token>')
 
 
 
