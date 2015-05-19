@@ -3,7 +3,8 @@ from flask.ext.restplus import Api, apidoc, Resource, reqparse, fields
 
 
 app = Flask(__name__)
-api = Api(app)
+api = Api(app, version='0.5', title='Docker commander API',
+    description='An unified API to all Docker operations.',)
 
 
 @api.route('/build')
@@ -15,6 +16,7 @@ class BuildService(Resource):
         return 'build:post'
 
 @api.route('/build/<int:token>')
+@api.doc(params={'token': 'Token that identifies the building process.'})
 class BuildProcess(Resource):
     def get(self, token):
         return 'build/<token>:get'
@@ -28,6 +30,7 @@ class ClusterService(Resource):
         return 'cluster:post'
 
 @api.route('/cluster/<int:token>')
+@api.doc(params={'token': 'Token that identifies the docker swarm cluster.'})
 class ClusterInstance(Resource):
     def get(self, token):
         return 'cluster/<token>:get'
@@ -41,6 +44,7 @@ class ComposerService(Resource):
         return 'composer:post'
 
 @api.route('/composer/<int:token>')
+@api.doc(params={'token': 'Token that identifies the docker composition'})
 class ComposerDeployment(Resource):
     def get(self, token):
         return 'composer/<token>:get'
