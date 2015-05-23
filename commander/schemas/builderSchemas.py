@@ -12,6 +12,7 @@ build_process_list_response = {
 build_basic_status_response = {
     'token': fields.String,
     'status': fields.String,
+    'context': fields.String,
     'description': fields.String,
     'imageName' : fields.String,
     'lastChecked': fields.DateTime(dt_format='iso8601')

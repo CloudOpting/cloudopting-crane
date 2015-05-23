@@ -1,6 +1,6 @@
 from flask import Flask
 from flask.ext.restplus import Api, apidoc, Resource, reqparse, fields, marshal_with
-from schemas import builderSchemas, clusterSchemas, composerSchemas
+from schemas import builderSchemas, clusterSchemas, composerSchemas, contextSchemas
 
 app = Flask(__name__)
 api = Api(app, version='0.5', title='Docker commander API',
@@ -10,12 +10,63 @@ api = Api(app, version='0.5', title='Docker commander API',
 
 # Build API
 
-@api.route('/build')
+builder_ns = api.namespace('builder', description='Building related operations')
+
+@builder_ns.route('/contexts')
+class ContextService(Resource):
+    @api.doc(description='Retrieve list of contexts.')
+    @marshal_with(contextSchemas.context_process_list_response)
+    def get(self):
+        # retrieve list
+        result = {}
+        result['numberOfContexts'] = 1
+        result['listOfContexts'] = ['Th151s4t0k3n']
+        return result
+
+    @api.doc(description='Create new context.')
+    @marshal_with(contextSchemas.context_basic_status_response)
+    def post(self):
+        # create new context and download modules
+        result = {}
+        result['token'] = 'Th151s4t0k3n'
+        result['status'] = 'queued'
+        result['description'] = 'Added to the queue. Waiting for a worker to start the process.'
+        #result['lastChecked'] = datetime.datetime.utcnow().isoformat()
+        return result
+
+@builder_ns.route('/contexts/<token>')
+@api.doc(params={'token': 'Token that identifies the context.'})
+class Context(Resource):
+    @api.doc(description='Get information about a context.')
+    @marshal_with(contextSchemas.context_detailed_status_response)
+    def get(self, token):
+        # retrieve information
+        result = {}
+        result['token'] = 'Th151s4t0k3n'
+        result['status'] = 'preparing'
+        result['description'] = 'Downloading modules.'
+        result['log'] = ""
+        #result['lastChecked'] = datetime.datetime.utcnow().isoformat()
+        return result
+
+    @api.doc(description='Remove a context and the related data.')
+    @marshal_with(contextSchemas.context_basic_status_response)
+    def delete(self, token):
+        # retrieve information
+        result = {}
+        result['token'] = 'Th151s4t0k3n'
+        result['status'] = 'stopping'
+        result['description'] = 'Stopping the building and removing temporal data.'
+        #result['lastChecked'] = datetime.datetime.utcnow().isoformat()
+        return result
+
+
+@builder_ns.route('/images')
 class BuildService(Resource):
     @api.doc(description='Retrieve list of processes.')
     @marshal_with(builderSchemas.build_process_list_response)
     def get(self):
-        # start the building
+        # retrieve list
         result = {}
         result['numberOfProcesses'] = 1
         result['listOfProcesses'] = ['Th151s4t0k3n']
@@ -32,7 +83,7 @@ class BuildService(Resource):
         #result['lastChecked'] = datetime.datetime.utcnow().isoformat()
         return result
 
-@api.route('/build/<token>')
+@builder_ns.route('/images/<token>')
 @api.doc(params={'token': 'Token that identifies the building process.'})
 class BuildProcess(Resource):
     @api.doc(description='Get information about a build process.')
@@ -61,7 +112,9 @@ class BuildProcess(Resource):
 
 # Cluster API
 
-@api.route('/cluster')
+cluster_ns = api.namespace('cluster', description='Cluster related operations')
+
+@cluster_ns.route('')
 class ClusterService(Resource):
     @api.doc(description='Create a new swarm cluster.')
     @marshal_with(clusterSchemas.cluster_basic_status_response)
@@ -75,7 +128,7 @@ class ClusterService(Resource):
         #result['lastChecked'] = datetime.datetime.utcnow().isoformat()
         return result
 
-@api.route('/cluster/<token>')
+@cluster_ns.route('/<token>')
 @api.doc(params={'token': 'Token that identifies the docker swarm cluster.'})
 class ClusterInstance(Resource):
     @api.doc(description='Get information about a docker swarm cluster.')
@@ -111,7 +164,9 @@ class ClusterInstance(Resource):
 
 # Composer API
 
-@api.route('/composer')
+composer_ns = api.namespace('composer', description='Composer related operations')
+
+@composer_ns.route('')
 class ComposerService(Resource):
     @api.doc(description='Instance a container based service by deploying and linking the containers defined in the docker-compose.yml.')
     @marshal_with(composerSchemas.composer_basic_status_response)
@@ -125,7 +180,7 @@ class ComposerService(Resource):
         #result['lastChecked'] = datetime.datetime.utcnow().isoformat()
         return result
 
-@api.route('/composer/<token>')
+@composer_ns.route('/<token>')
 @api.doc(params={'token': 'Token that identifies the docker composition'})
 class ComposerDeployment(Resource):
     @api.doc(description='Get information about a docker container composition.')
