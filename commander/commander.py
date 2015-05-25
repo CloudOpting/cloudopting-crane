@@ -1,10 +1,20 @@
 from flask import Flask
 from flask.ext.restplus import Api, apidoc, Resource, reqparse, fields, marshal_with
-from schemas import builderSchemas, clusterSchemas, composerSchemas, contextSchemas
+from schemas import builderSchemas, clusterSchemas, composerSchemas, generalSchemas
+from werkzeug.datastructures import FileStorage
 
 app = Flask(__name__)
 api = Api(app, version='0.5', title='Docker commander API',
     description='An unified API to all Docker operations.',)
+
+# Common
+
+common_responses = {500: 'Error processing the request', 200: 'OK'}
+
+common_search_responses = common_responses.copy()
+common_search_responses[404] = 'Resource not found'
+
+error_response = api.model('Model', generalSchemas.basic_error_response)
 
 # Methods mapped in routes.
 
@@ -14,8 +24,8 @@ builder_ns = api.namespace('builder', description='Building related operations')
 
 @builder_ns.route('/contexts')
 class ContextService(Resource):
-    @api.doc(description='Retrieve list of contexts.')
-    @marshal_with(contextSchemas.context_process_list_response)
+    @api.doc(description='Retrieve list of contexts.', responses=common_responses)
+    @marshal_with(builderSchemas.context_process_list_response)
     def get(self):
         # retrieve list
         result = {}
@@ -23,8 +33,14 @@ class ContextService(Resource):
         result['listOfContexts'] = ['Th151s4t0k3n']
         return result
 
-    @api.doc(description='Create new context.')
-    @marshal_with(contextSchemas.context_basic_status_response)
+
+    parser = api.parser()
+    parser.add_argument('contextName', help='Optional name for the context', location='form')
+    parser.add_argument('puppetfile', type=FileStorage, help='Puppetfile that indicates the puppet modules needed in the context' , location='files')
+    @api.doc(description='Create new context.', parser=parser)
+    @api.response(500, 'Error processing the request',  error_response)
+    @api.response(201, 'Created',  api.model('Model', builderSchemas.context_basic_status_response))
+    @marshal_with(builderSchemas.context_basic_status_response)
     def post(self):
         # create new context and download modules
         result = {}
@@ -37,8 +53,8 @@ class ContextService(Resource):
 @builder_ns.route('/contexts/<token>')
 @api.doc(params={'token': 'Token that identifies the context.'})
 class Context(Resource):
-    @api.doc(description='Get information about a context.')
-    @marshal_with(contextSchemas.context_detailed_status_response)
+    @api.doc(description='Get information about a context.', responses=common_search_responses)
+    @marshal_with(builderSchemas.context_detailed_status_response)
     def get(self, token):
         # retrieve information
         result = {}
@@ -49,8 +65,8 @@ class Context(Resource):
         #result['lastChecked'] = datetime.datetime.utcnow().isoformat()
         return result
 
-    @api.doc(description='Remove a context and the related data.')
-    @marshal_with(contextSchemas.context_basic_status_response)
+    @api.doc(description='Remove a context and the related data.', responses=common_search_responses)
+    @marshal_with(builderSchemas.context_basic_status_response)
     def delete(self, token):
         # retrieve information
         result = {}
@@ -62,6 +78,7 @@ class Context(Resource):
 
 
 @builder_ns.route('/images')
+@api.doc(responses=common_responses)
 class BuildService(Resource):
     @api.doc(description='Retrieve list of processes.')
     @marshal_with(builderSchemas.build_process_list_response)
@@ -72,7 +89,12 @@ class BuildService(Resource):
         result['listOfProcesses'] = ['Th151s4t0k3n']
         return result
 
-    @api.doc(description='Start a build process.')
+
+    parser = api.parser()
+    parser.add_argument('contextReference', help='Reference (context token) to the context where the image will be build. If not set it will be build in a new and empty context.', location='form')
+    parser.add_argument('dockerfile', type=FileStorage, help='Base image dockerfile' , location='files')
+    parser.add_argument('puppetmanifest', type=FileStorage, help='Puppet manifest that contains the service definition for the image.' , location='files')
+    @api.doc(description='Start a build process.', parser=parser)
     @marshal_with(builderSchemas.build_basic_status_response)
     def post(self):
         # start the building
@@ -84,7 +106,7 @@ class BuildService(Resource):
         return result
 
 @builder_ns.route('/images/<token>')
-@api.doc(params={'token': 'Token that identifies the building process.'})
+@api.doc(responses=common_search_responses, params={'token': 'Token that identifies the building process.'})
 class BuildProcess(Resource):
     @api.doc(description='Get information about a build process.')
     @marshal_with(builderSchemas.build_detailed_status_response)
@@ -115,6 +137,7 @@ class BuildProcess(Resource):
 cluster_ns = api.namespace('cluster', description='Cluster related operations')
 
 @cluster_ns.route('')
+@api.doc(responses=common_responses)
 class ClusterService(Resource):
     @api.doc(description='Create a new swarm cluster.')
     @marshal_with(clusterSchemas.cluster_basic_status_response)
@@ -129,7 +152,7 @@ class ClusterService(Resource):
         return result
 
 @cluster_ns.route('/<token>')
-@api.doc(params={'token': 'Token that identifies the docker swarm cluster.'})
+@api.doc(responses=common_search_responses, params={'token': 'Token that identifies the docker swarm cluster.'})
 class ClusterInstance(Resource):
     @api.doc(description='Get information about a docker swarm cluster.')
     @marshal_with(clusterSchemas.cluster_detailed_status_response)
@@ -167,6 +190,7 @@ class ClusterInstance(Resource):
 composer_ns = api.namespace('composer', description='Composer related operations')
 
 @composer_ns.route('')
+@api.doc(responses=common_responses)
 class ComposerService(Resource):
     @api.doc(description='Instance a container based service by deploying and linking the containers defined in the docker-compose.yml.')
     @marshal_with(composerSchemas.composer_basic_status_response)
@@ -181,7 +205,7 @@ class ComposerService(Resource):
         return result
 
 @composer_ns.route('/<token>')
-@api.doc(params={'token': 'Token that identifies the docker composition'})
+@api.doc(responses=common_search_responses, params={'token': 'Token that identifies the docker composition'})
 class ComposerDeployment(Resource):
     @api.doc(description='Get information about a docker container composition.')
     @marshal_with(composerSchemas.composer_detailed_status_response)
