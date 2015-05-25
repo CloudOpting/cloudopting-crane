@@ -77,6 +77,7 @@ class BuildService(Resource):
 
 
     buildArgs = api.parser()
+    buildArgs.add_argument('imageName', help='Desired image name.', location='form')
     buildArgs.add_argument('contextReference', help='Reference (context token) to the context where the image will be build. If not set it will be build in a new and empty context.', location='form')
     buildArgs.add_argument('dockerfile', type=FileStorage, help='Base image dockerfile' , location='files')
     buildArgs.add_argument('puppetmanifest', type=FileStorage, help='Puppet manifest that contains the service definition for the image.' , location='files')
