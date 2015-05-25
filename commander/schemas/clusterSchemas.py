@@ -17,5 +17,5 @@ node_description = {'reference': fields.String, 'status': fields.String, 'resour
 
 ## TODO: document this
 cluster_detailed_status_response = cluster_basic_status_response.copy()
-cluster_detailed_status_response['machines'] = fields.List(fields.Nested(machine_description, allow_null = True))
-cluster_detailed_status_response['nodes'] = fields.List(fields.Nested(node_description, allow_null = True))
+#cluster_detailed_status_response['machines'] = fields.List(fields.Nested(machine_description, allow_null = True))
+#cluster_detailed_status_response['nodes'] = fields.List(fields.Nested(node_description, allow_null = True))
