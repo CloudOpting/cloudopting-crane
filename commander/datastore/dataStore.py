@@ -6,9 +6,15 @@ class DataStoreError(Exception):
 class DataStore:
     def __init__(self, app):
         self.app = app
-        self.cache = Cache(app, config{'CACHE_TYPE':'simple'})
+        self.cache = Cache(app, config={'CACHE_TYPE':'simple'})
 
     # generic methods
+
+    def clear(self):
+        '''
+        Clears all the information in the datastore
+        '''
+        self.cache.clear()
 
     def set(self, key, value):
         '''
@@ -21,6 +27,8 @@ class DataStore:
         Adds a item to a list
         '''
         aux = self.cache.get(listKey)
+        if aux == None:
+            aux = []
         aux.append(value)
         self.cache.set(listKey, aux)
 
@@ -30,43 +38,36 @@ class DataStore:
         '''
         return self.cache.get(key)
 
-    def delete(self, key):
+    def delete(self, key, element=None):
         '''
-        Deletes a key-value pair
+        Deletes a key-value pair or an element in a list (if element argument is given)
         '''
-        self.cache.delete(key)
+        if element==None:
+            self.cache.delete(key)
+        else:
+            aux = self.cache.get(key)
+            aux.remove(element)
+            self.cache.set(key, aux)
 
 
-    def delete(self, listKey, element):
+    def checkIfExists(self, key, element=None):
         '''
-        Deletes a element in a list
+        Checks if a key is defined or if an element exists in a list (if element is given)
         '''
-        aux = self.cache.get(listKey)
-        aux.remove(element)
-        self.cache.set(listKey, aux)
-
-    def checkIfExists(self, key):
-        '''
-        Checks if a key is defined
-        '''
-        if self.cache.get(key) == None:
-            return False
-        return True
-
-
-    def checkIfExists(self, listKey, element):
-        '''
-        Checks if a element exists in a list
-        '''
-        aux = self.cache.get(listKey)
-        return element in aux
+        if element==None:
+            if self.cache.get(key) == None:
+                return False
+            return True
+        else:
+            aux = self.cache.get(key)
+            return element in aux
 
     def raiseIfDifferent(self, a, b):
         if a != b:
             raise DataStoreError('Error: \'' + a + '\' and \'' + b + '\' are different.')
 
     def raiseIfNotExists(self, key):
-        if self.checkIfExists(key) == False
+        if self.checkIfExists(key) == False:
             raise DataStoreError('Error: \'' + key + '\' does not exists.')
 
 
