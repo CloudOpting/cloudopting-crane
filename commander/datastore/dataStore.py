@@ -14,44 +14,52 @@ class DataStore:
         '''
         Sets value to a key
         '''
-        pass
+        self.cache.set(key, value)
 
-    def add(self, key, value):
+    def add(self, listKey, value):
         '''
         Adds a item to a list
         '''
-        pass
+        aux = self.cache.get(listKey)
+        aux.append(value)
+        self.cache.set(listKey, aux)
 
     def get(self, key):
         '''
         Gets a value from it key
         '''
-        pass
+        return self.cache.get(key)
 
     def delete(self, key):
         '''
         Deletes a key-value pair
         '''
-        pass
+        self.cache.delete(key)
 
 
-    def delete(self, listKey, elementKey):
+    def delete(self, listKey, element):
         '''
         Deletes a element in a list
         '''
-        pass
+        aux = self.cache.get(listKey)
+        aux.remove(element)
+        self.cache.set(listKey, aux)
 
     def checkIfExists(self, key):
         '''
         Checks if a key is defined
         '''
-        pass
+        if self.cache.get(key) == None:
+            return False
+        return True
 
-    def checkIfExists(self, listKey, elementKey):
+
+    def checkIfExists(self, listKey, element):
         '''
         Checks if a element exists in a list
         '''
-        pass
+        aux = self.cache.get(listKey)
+        return element in aux
 
     def raiseIfDifferent(self, a, b):
         if a != b:
@@ -148,6 +156,75 @@ class DataStore:
 
     # cluster methods
 
+    def addCluster(self, clusterToken, cluster):
+        '''
+        Adds a cluster
+        '''
+        # check if the token provided is the same that in the cluster entity.
+        self.raiseIfDifferent(clusterToken, cluster['token'])
+        # add to the list of clusters
+        self.add('clusters', clusterToken)
+        # add the cluster entity
+        self.set(clusterToken, cluster)
+
+    def delCluster(self, clusterToken):
+        '''
+        Deletes a cluster
+        '''
+        # delete from list of clusters
+        self.delete('clusters', clusterToken)
+        # delete entity
+        self.delete(clusterToken)
+
+    def updateCluster(self, clusterToken, cluster):
+        '''
+        Updates a cluster with a new value
+        '''
+        # check if the token provided is the same that in the cluster entity.
+        self.raiseIfDifferent(clusterToken, cluster['token'])
+        # set cluster entity
+        self.set(clusterToken, cluster)
+
+    def getCluster(self, clusterToken):
+        '''
+        Gets the cluster entity
+        '''
+        self.get(clusterToken)
 
 
     # compositions methods
+
+    def addComposition(self, compositionToken, composition):
+        '''
+        Adds a composition
+        '''
+        # check if the token provided is the same that in the composition entity.
+        self.raiseIfDifferent(compositionToken, composition['token'])
+        # add to the list of compositions
+        self.add('compositions', compositionToken)
+        # add the composition entity
+        self.set(compositionToken, composition)
+
+    def delComposition(self, compositionToken):
+        '''
+        Deletes a composition
+        '''
+        # delete from list of compositions
+        self.delete('compositions', compositionToken)
+        # delete entity
+        self.delete(compositionToken)
+
+    def updateComposition(self, compositionToken, composition):
+        '''
+        Updates a composition with a new value
+        '''
+        # check if the token provided is the same that in the composition entity.
+        self.raiseIfDifferent(compositionToken, composition['token'])
+        # set composition entity
+        self.set(compositionToken, composition)
+
+    def getComposition(self, compositionToken):
+        '''
+        Gets the composition entity
+        '''
+        self.get(compositionToken)
