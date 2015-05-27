@@ -6,10 +6,11 @@ The module that deals with docker operations: containers building, swarm cluster
 [Description under construction]
 
 ## On the desk
+
 __Done__
 - Dockerized environment for development
 - API skell and definition (live swagger ui client)
-- Data storage support
+- Flexible data storage support (local-dict/filesystem/redis)
 
 __Working on__
 - Build puppet contexts from puppetfile
