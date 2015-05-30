@@ -17,7 +17,8 @@ __Working on__
 - Build containers from Dockerfile
 - Build containers from Dockerfile + puppet manifest
 - Docker registry support (push and pull)
-- Start services from docker-compose.yml
+- Start services from docker-compose.yml (importing modules from docker-compose application)
+- Configuration files
 
 
 ## Roadmap
