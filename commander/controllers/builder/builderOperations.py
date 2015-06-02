@@ -26,12 +26,13 @@ def newContext(puppetfile, datastore, contextName=None):
         fileUtils.savePuppetfile(token, puppetfile)
 
         # Check puppetfile
-        if puppetUtils.checkPuppetfile(token)==False:
+        aux = puppetUtils.checkPuppetfile(token)
+        if not aux==True:
             fileUtils.deleteDir(token)
-            raise errors.OperationError("Syntax error in provided puppetfile")
+            raise errors.OperationError("Syntax error in provided puppetfile: " + aux)
 
         # Launch build operation
-        if puppetUtils.buildContext(token)==False:
+        if not puppetUtils.buildContext(token)==True:
             fileUtils.deleteDir(token)
             raise errors.OperationError("Couldn't start process")
 
@@ -41,10 +42,11 @@ def newContext(puppetfile, datastore, contextName=None):
 
         return datastorecontext
 
-    except Exception, e:
-        raise errors.ControllerError("Unknown error: "+ e.message)
     except errors.ControllerError, e:
         return e.getResponse()
+    except Exception, e:
+        aux = errors.ControllerError("Unknown error: "+ e.message)
+        return aux.getResponse()
 
 
 

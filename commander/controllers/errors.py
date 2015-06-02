@@ -9,7 +9,7 @@ class ControllerError(Exception):
         self.type = type
 
     def getResponse(self):
-        return {'error': self.type, 'description': self.message}
+        return {'error': self.type, 'description': self.message}, 500
 
 class OperationError(ControllerError):
     '''

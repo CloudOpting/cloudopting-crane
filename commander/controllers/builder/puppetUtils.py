@@ -6,7 +6,7 @@ from controllers import errors
 
 def checkPuppetfile(token):
     '''
-    Checks puppefile syntax. Returns True if correct syntax or False if not.
+    Checks puppefile syntax. Returns True if correct syntax or the error if not.
     '''
     command = 'cd ' + os.path.join(settings.FS_BUILDS, token) + ' && r10k puppetfile check'
     p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -20,8 +20,7 @@ def checkPuppetfile(token):
     if retval == 0:
         return True
     else:
-        raise errors.OperationError("Puppetfile check: " + response)
-        return False
+        return response
 
 
 
@@ -31,4 +30,5 @@ def buildContext(token):
     stores the puppetfile and downloads the puppet modules.
     '''
     # TODO: call r10k to deploy the puppetfile
-    pass
+    command = 'cd ' + os.path.join(settings.FS_BUILDS, token) + ' && r10k puppetfile check'
+    p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
