@@ -1,11 +1,19 @@
-from flask import Flask
+import os
+import settings
+
+from flask import Flask, request
 from flask.ext.restplus import Api, apidoc, Resource, reqparse, fields, marshal_with
 from schemas import builderSchemas, clusterSchemas, composerSchemas, generalSchemas
 from werkzeug.datastructures import FileStorage
 
+from controllers.builder import builderOperations
+from datastore import dataStore
+from datastore.dataStore import DataStore
+
 app = Flask(__name__)
 api = Api(app, version='0.5', title='Docker commander API',
     description='An unified API to all Docker operations.',)
+datastore = DataStore(app)
 
 # Common
 
@@ -56,7 +64,8 @@ class ContextService(Resource):
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', contextInfoModel)
     def post(self):
-        return not_implemented()
+        return builderOperations.newContext(puppetfile=request.files['puppetfile'], datastore=datastore)
+
 
 
 @builder_ns.route('/contexts/<token>')
@@ -68,7 +77,7 @@ class Context(Resource):
     @api.response(404, 'Not found', errorResponseModel)
     @api.response(200, 'OK', contextDetailModel)
     def get(self, token):
-        return not_implemented()
+        return builderOperations.checkContext(datastore=datastore, token=token)
 
     @api.doc(description='Remove a context and the related data.' )
     @api.response(500, 'Error processing the request', errorResponseModel)
@@ -207,6 +216,5 @@ class ComposerDeployment(Resource):
     def delete(self, token):
         return not_implemented()
 
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8888, debug=True)
+    app.run(host=settings.WS_BIND_IP, port=settings.WS_BIND_PORT, debug=(True if os.environ.get('DEBUG')=='true' else False))
