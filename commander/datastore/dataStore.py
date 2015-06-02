@@ -106,7 +106,7 @@ class DataStore:
         '''
         Gets the context entity
         '''
-        self.get(contextToken)
+        return self.get(contextToken)
 
 
     # images methods
@@ -152,7 +152,7 @@ class DataStore:
         '''
         Gets the image entity
         '''
-        self.get(imageToken)
+        return self.get(imageToken)
 
 
     # cluster methods
@@ -190,7 +190,7 @@ class DataStore:
         '''
         Gets the cluster entity
         '''
-        self.get(clusterToken)
+        return self.get(clusterToken)
 
 
     # compositions methods
@@ -228,4 +228,4 @@ class DataStore:
         '''
         Gets the composition entity
         '''
-        self.get(compositionToken)
+        return self.get(compositionToken)
