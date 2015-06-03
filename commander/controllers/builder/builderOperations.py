@@ -32,12 +32,10 @@ def newContext(puppetfile, datastore, contextName=None):
             raise errors.OperationError("Syntax error in provided puppetfile: " + aux)
 
         # Launch build operation
-        if not puppetUtils.buildContext(token)==True:
-            fileUtils.deleteDir(token)
-            raise errors.OperationError("Couldn't start process")
+        puppetUtils.buildContext(token)
 
         # Create context in datastore
-        datastorecontext = {'token':token, 'status':'waiting', 'description':'Under creation'}
+        datastorecontext = {'token':token, 'status':'building', 'description':'Under creation'}
         datastore.addContext(token, datastorecontext)
 
         return datastorecontext
@@ -51,4 +49,60 @@ def newContext(puppetfile, datastore, contextName=None):
 
 
 def checkContext(datastore, token):
-    return datastore.getContext(token)
+    try:
+        # retrieve context information in datastore
+        context = datastore.getContext(token)
+        if context == None:
+            raise errors.NotFoundError("Token does not exist.")
+
+        # Check previous stored status
+        if context['status']=='building':
+            #raise Exception(puppetUtils.isBuildingContextRunning(token))
+            if not puppetUtils.isBuildingContextRunning(token):
+                bErrors = puppetUtils.getBuildingErrors(token)
+                if bErrors == None: # finished and no errors
+                    # update datastore
+                    context['status']='finished'
+                    context['description']='Build finished without errors'
+                    datastore.updateContext(token, context)
+                    # add log to response
+                    context['log'] = puppetUtils.getBuildingLog(token)
+                else:               # finished but with errors
+                    # update datastore
+                    context['status']='error'
+                    context['description']='Build finished unsuccefully.'
+                    datastore.updateContext(token, context)
+                    # add log to response
+                    context['log'] = puppetUtils.getBuildingErrors(token)
+            else:
+                # add log to response
+                context['log'] = puppetUtils.getBuildingLog(token)
+
+        else:
+            pass
+
+        return context
+
+    except errors.NotFoundError, e:
+        return e.getResponse()
+    except Exception, e:
+        aux = errors.ControllerError("Unknown error: "+ e.message)
+        return aux.getResponse()
+
+
+def deleteContext(datastore, token):
+    try:
+        # stop process if running
+        puppetUtils.stopBuildingContext(token)
+        # delete folder
+        fileUtils.deleteDir(token)
+        # delete from datastore
+        datastore.delContext(token)
+        # fake context just to return a response
+        context = {}
+        context['status']='deleted'
+        context['description']='Context has been removed and will not be accesible anymore.'
+        return context
+    except Exception, e:
+        aux = errors.ControllerError("Unknown error: "+ e.message)
+        return aux.getResponse()

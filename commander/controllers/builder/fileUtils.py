@@ -13,3 +13,8 @@ def savePuppetfile(token, puppetfile):
     path = os.path.join(settings.FS_BUILDS, token)
     path = os.path.join(path, settings.FS_DEF_PUPPETFILE)
     puppetfile.save(path)
+
+def createFile(path, content):
+    fo = open(path, "wb")
+    fo.write(content);
+    fo.close()
