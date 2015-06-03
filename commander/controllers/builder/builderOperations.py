@@ -57,7 +57,6 @@ def checkContext(datastore, token):
 
         # Check previous stored status
         if context['status']=='building':
-            #raise Exception(puppetUtils.isBuildingContextRunning(token))
             if not puppetUtils.isBuildingContextRunning(token):
                 bErrors = puppetUtils.getBuildingErrors(token)
                 if bErrors == None: # finished and no errors
@@ -78,14 +77,19 @@ def checkContext(datastore, token):
                 # add log to response
                 context['log'] = puppetUtils.getBuildingLog(token)
 
+        elif context['status']=='finished':
+            # add log to response
+            context['log'] = puppetUtils.getBuildingLog(token)
         else:
-            pass
+            # add log to response
+            context['log'] = puppetUtils.getBuildingErrors(token)
 
         return context
 
     except errors.NotFoundError, e:
         return e.getResponse()
     except Exception, e:
+        raise e
         aux = errors.ControllerError("Unknown error: "+ e.message)
         return aux.getResponse()
 
