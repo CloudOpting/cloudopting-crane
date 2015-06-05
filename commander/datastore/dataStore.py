@@ -111,15 +111,17 @@ class DataStore:
 
     # images methods
 
-    def addImage(self, imageToken, image, contextToken):
+    def addImage(self, contextToken, imageToken, image):
         '''
-        Adds an image to a context
+        Adds an image to a context. Raises DataStoreError if image is already associated with the context.
         '''
         # check if the token provided is the same that in the image entity.
         self.raiseIfDifferent(imageToken, image['token'])
         # get context
         context = self.getContext(contextToken)
         # add to the list of images in the context
+        if imageToken in context['images']:
+            raise DataStoreError('\'' + imageToken + '\' already exists.')
         context['images'].append(imageToken)
         self.updateContext(context['token'], context)
         # add the image entity

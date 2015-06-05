@@ -8,12 +8,12 @@ from controllers import errors
 import puppetUtils
 import fileUtils
 
-def newContext(puppetfile, datastore, contextName=None):
+def newContext(puppetfile, datastore, contextName=''):
     '''
-    Reads and checks puppetfile, creates directory and launch puppetfile processing.
+    Reads and checks puppetfile, creates the directory in the filesystem and launch puppetfile processing.
     '''
     try:
-        token = tokens.newCompositionToken()
+        token = tokens.newCompositionToken(datastore)
 
         # Create context in filesystem
         try:
@@ -35,7 +35,7 @@ def newContext(puppetfile, datastore, contextName=None):
         puppetUtils.buildContext(token)
 
         # Create context in datastore
-        datastorecontext = {'token':token, 'status':'building', 'description':'Under creation'}
+        datastorecontext = {'token':token, 'contextName':contextName, 'status':'building', 'description':'Under creation', 'images':[]}
         datastore.addContext(token, datastorecontext)
 
         return datastorecontext
@@ -87,7 +87,7 @@ def checkContext(datastore, token):
             # add log to response
             context['log'] = puppetUtils.getBuildingErrors(token)
 
-        return context
+        return context, 200
 
     except errors.NotFoundError, e:
         return e.getResponse()
@@ -99,7 +99,7 @@ def checkContext(datastore, token):
 
 def deleteContext(datastore, token):
     '''
-    Stops the building process of a context (if running) and deletes the folder in the filesystem and the entry in the datastore
+    Stops the building process of a context (if running) and deletes the folder in the filesystem and the entry in the datastore.
     '''
     try:
         # retrieve context information in datastore
@@ -119,6 +119,47 @@ def deleteContext(datastore, token):
         context['description']='Context has been removed and will not be accesible anymore.'
         return context
     except errors.NotFoundError, e:
+        return e.getResponse()
+    except Exception, e:
+        aux = errors.ControllerError("Unknown error: "+ e.message)
+        return aux.getResponse()
+
+
+def newImage(datastore, contextReference, imageName, dockerfile, puppetfile):
+    '''
+    Saves the files in the filesystem, and launch the build process
+    '''
+    try:
+        token = tokens.newImageToken(datastore, contextReference, imageName)
+
+        # Check if context exists and if it is completed
+        contextInfo, statusCode = checkContext(datastore, contextReference)
+        if statusCode == 404:
+            raise errors.OperationError("Context does not exist")
+        if not statusCode == 200:
+            raise errors.OperationError("Error while inspecting context")
+        if not contextInfo['status']=='finished':
+            raise errors.OperationError("Context is not ready")
+
+        # Create image in datastore
+        datastoreimage = {'token':token, 'context':contextReference, 'imageName':imageName, 'status':'building', 'description':'Under creation'}
+        datastore.addImage(contextReference, token, datastoreimage)
+
+        # Create image in filesystem and save files
+        try:
+            fileUtils.addImage(contextReference, imageName)
+        except os.error:
+            fileUtils.delImage(contextReference, imageName)
+            raise errors.OperationError("Couldn't create image in the filesystem")
+
+        # Launch build operation
+        ## TODO build docker image
+
+        return datastoreimage
+    except dataStore.DataStoreError, e:
+        aux = errors.ControllerError("Runtime error: "+ e.message)
+        return aux.getResponse()
+    except errors.ControllerError, e:
         return e.getResponse()
     except Exception, e:
         aux = errors.ControllerError("Unknown error: "+ e.message)

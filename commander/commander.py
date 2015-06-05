@@ -64,7 +64,11 @@ class ContextService(Resource):
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', contextInfoModel)
     def post(self):
-        return builderOperations.newContext(puppetfile=request.files['puppetfile'], datastore=datastore)
+        try:   # if contextName not provided, user an empty string
+            contextName = str(request.form['contextName'])
+        except:
+            contextName = ''
+        return builderOperations.newContext(puppetfile=request.files['puppetfile'], contextName=contextName ,datastore=datastore)
 
 
 
@@ -100,7 +104,7 @@ class BuildService(Resource):
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', imageInfoModel)
     def post(self):
-        return not_implemented()
+        return builderOperations.newImage(datastore=datastore, contextReference=str(request.form['contextReference']), imageName=str(request.form['imageName']), dockerfile=request.files['dockerfile'], puppetfile=request.files['puppetmanifest'])
 
 
 @builder_ns.route('/images/<token>')
