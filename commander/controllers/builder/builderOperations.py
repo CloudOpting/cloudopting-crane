@@ -49,6 +49,9 @@ def newContext(puppetfile, datastore, contextName=None):
 
 
 def checkContext(datastore, token):
+    '''
+    Checks if the context exists, checks if it is under construction and in case it has finished, checks if it was succefully or not.
+    '''
     try:
         # retrieve context information in datastore
         context = datastore.getContext(token)
@@ -95,6 +98,9 @@ def checkContext(datastore, token):
 
 
 def deleteContext(datastore, token):
+    '''
+    Stops the building process of a context (if running) and deletes the folder in the filesystem and the entry in the datastore
+    '''
     try:
         # retrieve context information in datastore
         context = datastore.getContext(token)
