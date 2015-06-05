@@ -96,6 +96,11 @@ def checkContext(datastore, token):
 
 def deleteContext(datastore, token):
     try:
+        # retrieve context information in datastore
+        context = datastore.getContext(token)
+        if context == None:
+            raise errors.NotFoundError("Token does not exist.")
+
         # stop process if running
         puppetUtils.stopBuildingContext(token)
         # delete folder
@@ -107,6 +112,8 @@ def deleteContext(datastore, token):
         context['status']='deleted'
         context['description']='Context has been removed and will not be accesible anymore.'
         return context
+    except errors.NotFoundError, e:
+        return e.getResponse()
     except Exception, e:
         aux = errors.ControllerError("Unknown error: "+ e.message)
         return aux.getResponse()

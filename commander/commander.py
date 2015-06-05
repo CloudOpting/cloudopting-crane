@@ -84,7 +84,7 @@ class Context(Resource):
     @api.response(404, 'Not found', errorResponseModel)
     @api.response(200, 'OK', contextInfoModel)
     def delete(self, token):
-        return not_implemented()
+        return builderOperations.deleteContext(datastore, token)
 
 
 @builder_ns.route('/images')

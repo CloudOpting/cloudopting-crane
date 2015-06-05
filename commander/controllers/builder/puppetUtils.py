@@ -97,7 +97,10 @@ def stopBuildingContext(token):
     '''
     pidpath = os.path.join(settings.FS_BUILDS, token)
     pidpath = os.path.join(pidpath, settings.FS_DEF_CONTEXT_PID)
-    file = open(pidpath, 'r')
+    try:
+        file = open(pidpath, 'r')
+    except IOError:
+        return True
     pid = int(file.read(10));
     if pid > 1:
         try:
