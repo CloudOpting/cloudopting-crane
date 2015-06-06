@@ -18,6 +18,12 @@ FS_BUILDS = FS_ROOT + 'builds/'
 FS_DEF_PUPPETFILE = 'Puppetfile'
 """Default name for puppetfile"""
 
+FS_DEF_DOCKERFILE = 'Dockerfile'
+"""Default name for dockerfile"""
+
+FS_DEF_PUPPETMANIFEST = 'init.pp'
+"""Default name for puppet manifest"""
+
 FS_DEF_CONTEXT_LOG = 'context.log'
 """Default name for the log of the build context process"""
 
@@ -26,3 +32,16 @@ FS_DEF_CONTEXT_ERR_LOG = 'context_err.log'
 
 FS_DEF_CONTEXT_PID = 'pid'
 """Default name for the file that stores PID of the build context process"""
+
+FS_DEF_DOCKER_BUILD_LOG = 'build.log'
+"""Default name for the log of the docker build process"""
+
+FS_DEF_DOCKER_BUILD_ERR_LOG = 'build_err.log'
+"""Default name for the log of the docker build process"""
+
+FS_DEF_DOCKER_BUILD_PID = 'build_pid'
+"""Default name for the file that stores PID of the docker build process"""
+
+# Docker host
+DK_DEFAULT_BUILD_HOST = "tcp://127.0.0.1:2375"
+"""Default docker host where images will be built"""

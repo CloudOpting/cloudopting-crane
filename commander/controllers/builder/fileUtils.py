@@ -2,10 +2,13 @@ import settings
 import os
 import shutil
 
-def createDir(token):
-    os.makedirs(settings.FS_BUILDS+token, 0775)
+# Context related operations
 
-def deleteDir(token):
+def createContextDir(token):
+    path = os.path.join(settings.FS_BUILDS, token)
+    os.makedirs(path, 0775)
+
+def deleteContextDir(token):
     path = os.path.join(settings.FS_BUILDS, token)
     shutil.rmtree(path, ignore_errors=True)
 
@@ -13,6 +16,36 @@ def savePuppetfile(token, puppetfile):
     path = os.path.join(settings.FS_BUILDS, token)
     path = os.path.join(path, settings.FS_DEF_PUPPETFILE)
     puppetfile.save(path)
+
+
+# Image related operations
+
+def createImageDir(contextToken, imageName):
+    path = os.path.join(settings.FS_BUILDS, contextToken)
+    if os.path.isdir(path):
+        path = os.path.join(path, imageName)
+        os.makedirs(path, 0775)
+    else:
+        raise Exception("Context directory not found")
+
+def deleteImageDir(contextToken, imageName):
+    path = os.path.join(settings.FS_BUILDS, contextToken)
+    path = os.path.join(path, imageName)
+    shutil.rmtree(path, ignore_errors=True)
+
+def saveDockerfile(contextToken, imageName, dockerfile):
+    path = os.path.join(settings.FS_BUILDS, contextToken)
+    path = os.path.join(path, imageName)
+    path = os.path.join(path, settings.FS_DEF_DOCKERFILE)
+    dockerfile.save(path)
+
+def savePuppetManifest(contextToken, imageName, puppetmanifest):
+    path = os.path.join(settings.FS_BUILDS, contextToken)
+    path = os.path.join(path, imageName)
+    path = os.path.join(path, settings.FS_DEF_PUPPETMANIFEST)
+    puppetmanifest.save(path)
+
+# Common file operations
 
 def createFile(path, content):
     fo = open(path, "wb")

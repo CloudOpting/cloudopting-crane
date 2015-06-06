@@ -104,7 +104,7 @@ class BuildService(Resource):
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', imageInfoModel)
     def post(self):
-        return builderOperations.newImage(datastore=datastore, contextReference=str(request.form['contextReference']), imageName=str(request.form['imageName']), dockerfile=request.files['dockerfile'], puppetfile=request.files['puppetmanifest'])
+        return builderOperations.newImage(datastore=datastore, contextReference=str(request.form['contextReference']), imageName=str(request.form['imageName']), dockerfile=request.files['dockerfile'], puppetmanifest=request.files['puppetmanifest'])
 
 
 @builder_ns.route('/images/<token>')
