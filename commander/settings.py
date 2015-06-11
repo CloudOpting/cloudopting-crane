@@ -21,7 +21,7 @@ FS_DEF_PUPPETFILE = 'Puppetfile'
 FS_DEF_DOCKERFILE = 'Dockerfile'
 """Default name for dockerfile"""
 
-FS_DEF_PUPPETMANIFEST = 'init.pp'
+FS_DEF_PUPPETMANIFEST = 'manifest.pp'
 """Default name for puppet manifest"""
 
 FS_DEF_CONTEXT_LOG = 'context.log'
