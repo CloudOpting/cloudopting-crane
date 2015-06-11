@@ -148,7 +148,7 @@ class DataStore:
         self.raiseIfDifferent(imageToken, image['token'])
         # set entity
         self.raiseIfNotExists(imageToken)
-        self.set(contextToken, context)
+        self.set(imageToken, image)
 
     def getImage(self, imageToken):
         '''

@@ -1,13 +1,18 @@
 from io import BytesIO
 from docker import Client
 import settings
+import os
+import subprocess
+from threading import Thread
+import fileUtils
+
 
 def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=settings.DK_DEFAULT_BUILD_HOST):
     # launch build
-    # TODO: replace commandline docker API with docker-py client
+    # TODO: replace commandline docker API with docker-py client (fix docker host socket permission and TLS)
     def buildThread():
         cwd =  os.path.join(settings.FS_BUILDS, contextToken)
-        cwd =  os.path.join(settings.FS_BUILDS, imageName)
+        cwd =  os.path.join(cwd, imageName)
         command = 'docker build -t '+ contextToken.lower() + '/'+ imageName.lower() +' . ' + '1> '+ settings.FS_DEF_DOCKER_BUILD_LOG +' 2> '+ settings.FS_DEF_DOCKER_BUILD_ERR_LOG
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
 
@@ -15,7 +20,7 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
         for line in p.stdout.readlines():
             response+=line+os.linesep
 
-        createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_BUILD_PID), str(p.pid))
+        fileUtils.createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_BUILD_PID), str(p.pid))
 
         retval = p.wait()
 

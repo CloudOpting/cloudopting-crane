@@ -116,7 +116,7 @@ class BuildProcess(Resource):
     @api.response(404, 'Not found', errorResponseModel)
     @api.response(200, 'OK', imageDetailModel)
     def get(self, token):
-        return not_implemented()
+        return builderOperations.checkImage(datastore, token)
 
     @api.doc(description='Remove a building process and the related data.')
     @api.response(500, 'Error processing the request', errorResponseModel)

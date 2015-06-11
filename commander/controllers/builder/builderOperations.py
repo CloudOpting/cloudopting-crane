@@ -179,7 +179,6 @@ def checkImage(datastore, imageToken):
         image = datastore.getImage(imageToken)
         if image == None:
             raise errors.NotFoundError("Image does not exist.")
-
         # Check previous stored status
         if image['status']=='building':
             if not dockerUtils.isDockerBuildRunning(image['context'], image['imageName']):
@@ -201,7 +200,6 @@ def checkImage(datastore, imageToken):
             else:
                 # add log to response
                 image['log'] = dockerUtils.getBuildLog(image['context'], image['imageName'])
-
         elif image['status']=='finished':
             # add log to response
             image['log'] = dockerUtils.getBuildLog(image['context'], image['imageName'])
@@ -209,11 +207,10 @@ def checkImage(datastore, imageToken):
             # add log to response
             image['log'] = dockerUtils.getBuildErrors(image['context'], image['imageName'])
 
-        return context, 200
+        return image, 200
 
     except errors.NotFoundError, e:
         return e.getResponse()
     except Exception, e:
-        raise e
         aux = errors.ControllerError("Unknown error: "+ e.message)
         return aux.getResponse()
