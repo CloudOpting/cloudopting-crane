@@ -1,11 +1,13 @@
-from io import BytesIO
-from docker import Client
-import settings
 import os
-import subprocess
+import settings
 from threading import Thread
 import fileUtils
+import subprocess
+from threading import Thread
 
+from controllers import errors
+from fileUtils import createFile
+>>>>>>> 79ddcdf939ec10ed9d091d4b08114f5cdf4e5c03
 
 def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=settings.DK_DEFAULT_BUILD_HOST):
     # launch build
