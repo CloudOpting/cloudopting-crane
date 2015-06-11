@@ -6,7 +6,7 @@ from flask.ext.restplus import Api, apidoc, Resource, reqparse, fields, marshal_
 from schemas import builderSchemas, clusterSchemas, composerSchemas, generalSchemas
 from werkzeug.datastructures import FileStorage
 
-from controllers.builder import builderOperations
+from controllers.builder import builderOperations, composeOperations
 from datastore import dataStore
 from datastore.dataStore import DataStore
 
@@ -189,7 +189,7 @@ composerDetailModel = api.model('ComposerDetail', composerSchemas.composer_detai
 
 ## Arguments models
 composerArgs = api.parser()
-composerArgs.add_argument('clusterToken', help='Reference to the cluster (token used in the \'cluster\' operations).', location='form')
+composerArgs.add_argument('contextToken', help='Reference to the context (token).', location='form')
 composerArgs.add_argument('composefile', type=FileStorage, help='Docker-compose.yml file that specifies how to compose the service.' , location='files')
 
 @composer_ns.route('')
@@ -199,8 +199,7 @@ class ComposerService(Resource):
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', composerInfoModel)
     def post(self):
-        return not_implemented()
-
+        return composeOperations.newComposition(datastore, composefile=request.files['composefile'], contextReference=str(request.form['contextToken']))
 
 @composer_ns.route('/<token>')
 @api.doc(params={'token': 'Token that identifies the docker composition'})

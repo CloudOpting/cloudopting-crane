@@ -24,6 +24,9 @@ FS_DEF_DOCKERFILE = 'Dockerfile'
 FS_DEF_PUPPETMANIFEST = 'manifest.pp'
 """Default name for puppet manifest"""
 
+FS_DEF_COMPOSEFILE = 'docker-compose.yml'
+"""Default name for docker compose yaml file"""
+
 FS_DEF_CONTEXT_LOG = 'context.log'
 """Default name for the log of the build context process"""
 
@@ -41,6 +44,12 @@ FS_DEF_DOCKER_BUILD_ERR_LOG = 'build_err.log'
 
 FS_DEF_DOCKER_BUILD_PID = 'build_pid'
 """Default name for the file that stores PID of the docker build process"""
+
+FS_DEF_DOCKER_COMPOSE_LOG = 'compose.log'
+"""Default name for the log of docker compose"""
+
+FS_DEF_DOCKER_COMPOSE_PID = 'compose_pid'
+"""Default name for the file that stores PID of the docker compose process"""
 
 # Docker host
 DK_DEFAULT_BUILD_HOST = "tcp://127.0.0.1:2375"

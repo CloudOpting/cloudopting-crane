@@ -45,6 +45,19 @@ def savePuppetManifest(contextToken, imageName, puppetmanifest):
     path = os.path.join(path, settings.FS_DEF_PUPPETMANIFEST)
     puppetmanifest.save(path)
 
+
+# Composer related operations
+
+def saveComposeFile(contextToken, composefile):
+    path = os.path.join(settings.FS_BUILDS, contextToken)
+    path = os.path.join(path, settings.FS_DEF_COMPOSEFILE)
+    composefile.save(path)
+
+def deleteComposeFile(contextToken):
+    path = os.path.join(settings.FS_BUILDS, contextToken)
+    os.remove(path)
+
+
 # Common file operations
 
 def createFile(path, content):

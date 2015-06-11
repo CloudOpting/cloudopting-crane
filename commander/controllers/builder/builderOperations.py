@@ -14,7 +14,7 @@ def newContext(puppetfile, datastore, contextName=''):
     Reads and checks puppetfile, creates the directory in the filesystem and launch puppetfile processing.
     '''
     try:
-        token = tokens.newCompositionToken(datastore)
+        token = tokens.newContextToken(datastore)
 
         # Create context in filesystem
         try:
