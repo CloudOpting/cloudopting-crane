@@ -108,6 +108,11 @@ class DataStore:
         '''
         return self.get(contextToken)
 
+    def getContexts(self):
+        '''
+        Gets the list with all the context tokens.
+        '''
+        return self.get('contexts')
 
     # images methods
 

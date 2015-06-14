@@ -27,6 +27,17 @@ def not_found():
     result = {'error':'not_found', 'description':'Resource not found'}
     return result, 404
 
+# Extra routes
+
+extra_ns = api.namespace('extra', description='Some extra functions.')
+
+@extra_ns.route('/alive')
+class Alive(Resource):
+
+    @api.doc(description='Dummy function. Returns a simple json with a message".')
+    def get(self):
+        return {'message':'I\'am alive'}
+
 
 # Build API
 
@@ -56,9 +67,9 @@ class ContextService(Resource):
 
     @api.doc(description='Retrieve list of contexts.')
     @api.response(500, 'Error processing the request', errorResponseModel)
-    @api.response(201, 'OK', contextListModel)
+    @api.response(200, 'OK', contextListModel)
     def get(self):
-        return not_implemented()
+        return builderOperations.contextList(datastore)
 
     @api.doc(description='Create new context.', parser=contextArgs)
     @api.response(500, 'Error processing the request', errorResponseModel)

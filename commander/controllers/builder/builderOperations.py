@@ -9,6 +9,21 @@ import puppetUtils
 import dockerUtils
 import fileUtils
 
+def contextList(datastore):
+    '''
+    Returns a list of contexts.
+    '''
+    try:
+        listOfContexts = datastore.getContexts()
+        return { 'contexts': [] if listOfContexts == None else listOfContexts }
+
+    except errors.ControllerError, e:
+        return e.getResponse()
+    except Exception, e:
+        aux = errors.ControllerError("Unknown error: "+ e.message)
+        return aux.getResponse()
+
+
 def newContext(puppetfile, datastore, contextName=''):
     '''
     Reads and checks puppetfile, creates the directory in the filesystem and launch puppetfile processing.
