@@ -31,12 +31,20 @@ def not_found():
 
 extra_ns = api.namespace('extra', description='Some extra functions.')
 
+@extra_ns.route('/purge')
+class Purge(Resource):
+
+    @api.doc(description='Purge all data: contexts, compositions, files, etc.')
+    def get(self):
+        return not_implemented()
+
+
 @extra_ns.route('/alive')
 class Alive(Resource):
 
-    @api.doc(description='Dummy function. Returns a simple json with a message".')
+    @api.doc(description='Dummy function. Returns a simple json with a message.')
     def get(self):
-        return {'message':'I\'am alive'}
+        return {'message':'I\'m alive'}
 
 
 # Build API
