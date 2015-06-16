@@ -36,6 +36,9 @@ FS_DEF_CONTEXT_ERR_LOG = 'context_err.log'
 FS_DEF_CONTEXT_PID = 'pid'
 """Default name for the file that stores PID of the build context process"""
 
+FS_DEF_DOCKER_IMAGES_FOLDER = 'images'
+"""Default name for the folder which contains the images inside a context"""
+
 FS_DEF_DOCKER_BUILD_LOG = 'build.log'
 """Default name for the log of the docker build process"""
 

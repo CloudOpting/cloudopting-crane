@@ -12,7 +12,9 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
     # TODO: replace commandline docker API with docker-py client (fix docker host socket permission and TLS)
     def buildThread():
         cwd =  os.path.join(settings.FS_BUILDS, contextToken)
+        cwd =  os.path.join(cwd, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
         cwd =  os.path.join(cwd, imageName)
+
         command = 'docker build -t '+ 'instance' + '/'+ imageName.lower() +' . ' + '1> '+ settings.FS_DEF_DOCKER_BUILD_LOG +' 2> '+ settings.FS_DEF_DOCKER_BUILD_ERR_LOG
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
 
@@ -32,6 +34,7 @@ def isDockerBuildRunning(contextToken, imageName):
     Checks if the docker build process is still running. Returns True if the process still runs and False if the process is not running.
     '''
     pidpath = os.path.join(settings.FS_BUILDS, contextToken)
+    pidpath = os.path.join(pidpath, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
     pidpath = os.path.join(pidpath, imageName)
     pidpath = os.path.join(pidpath, settings.FS_DEF_DOCKER_BUILD_PID)
     try:
@@ -53,6 +56,7 @@ def getBuildErrors(contextToken, imageName):
     Retrieve errors in error building log. None if no errors.
     '''
     path = os.path.join(settings.FS_BUILDS, contextToken)
+    path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
     path = os.path.join(path, imageName)
     path = os.path.join(path, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
     if os.stat(path).st_size == 0:
@@ -67,6 +71,7 @@ def getBuildLog(contextToken, imageName):
     Retrieve standard building log.
     '''
     path = os.path.join(settings.FS_BUILDS, contextToken)
+    path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
     path = os.path.join(path, imageName)
     path = os.path.join(path, settings.FS_DEF_DOCKER_BUILD_LOG)
     content = ''
@@ -79,6 +84,7 @@ def stopBuild(contextToken, imageName):
     Stops the build process. Return True if could stop and False it not.
     '''
     path = os.path.join(settings.FS_BUILDS, contextToken)
+    path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
     path = os.path.join(path, imageName)
     path = os.path.join(path, settings.FS_DEF_DOCKER_BUILD_PID)
     try:

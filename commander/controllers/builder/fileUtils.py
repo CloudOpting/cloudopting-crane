@@ -23,6 +23,8 @@ def savePuppetfile(token, puppetfile):
 def createImageDir(contextToken, imageName):
     path = os.path.join(settings.FS_BUILDS, contextToken)
     if os.path.isdir(path):
+        path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
+        os.makedirs(path, 0775)
         path = os.path.join(path, imageName)
         os.makedirs(path, 0775)
     else:
@@ -30,17 +32,20 @@ def createImageDir(contextToken, imageName):
 
 def deleteImageDir(contextToken, imageName):
     path = os.path.join(settings.FS_BUILDS, contextToken)
+    path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
     path = os.path.join(path, imageName)
     shutil.rmtree(path, ignore_errors=True)
 
 def saveDockerfile(contextToken, imageName, dockerfile):
     path = os.path.join(settings.FS_BUILDS, contextToken)
+    path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
     path = os.path.join(path, imageName)
     path = os.path.join(path, settings.FS_DEF_DOCKERFILE)
     dockerfile.save(path)
 
 def savePuppetManifest(contextToken, imageName, puppetmanifest):
     path = os.path.join(settings.FS_BUILDS, contextToken)
+    path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
     path = os.path.join(path, imageName)
     path = os.path.join(path, settings.FS_DEF_PUPPETMANIFEST)
     puppetmanifest.save(path)
