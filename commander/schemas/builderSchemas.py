@@ -34,7 +34,7 @@ context_process_list_response = {
 ## TODO: document this
 context_basic_status_response = {
     'token': fields.String,
-    'contextName': fields.String,
+    'group': fields.String,
     'status': fields.String,
     'description': fields.String,
     'lastChecked': fields.DateTime(dt_format='iso8601')

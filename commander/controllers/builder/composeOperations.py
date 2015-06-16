@@ -11,36 +11,35 @@ import fileUtils
 
 from builderOperations import checkContext
 
-def newComposition(datastore, composefile, contextReference):
+def newComposition(datastore, composefile, clusterReference=''):
     '''
-    Saves docker compose file in the context and runs it.
+    Saves docker compose file and runs it.
     '''
     try:
         token = tokens.newCompositionToken(datastore)
 
-        # Check if context exists and if it is completed
-        contextInfo, statusCode = checkContext(datastore, contextReference)
-        if statusCode == 404:
-            raise errors.OperationError("Context does not exist")
-        if not statusCode == 200:
-            raise errors.OperationError("Error while inspecting context")
-        if not contextInfo['status']=='finished':
-            raise errors.OperationError("Context is not ready")
+        # Pull images
+        ## TODO: at the moment images are local, so it is not needed.
 
         # Create composition in datastore
-        datastorecomposition = {'token':token, 'context':contextReference, 'status':'providing', 'description':'Providing data'}
+        datastorecomposition = {'token':token, 'cluster':clusterReference, 'status':'providing', 'description':'Providing data'}
         datastore.addComposition(token, datastorecomposition)
 
         # Save compose file
         try:
-            fileUtils.saveComposeFile(contextReference, composefile)
+            fileUtils.saveComposeFile(token, composefile)
         except os.error:
-            fileUtils.deleteComposeFile(contextReference)
+            fileUtils.deleteComposeFile(token)
             datastore.delComposition(token)
             raise errors.OperationError("Couldn't create composition in the filesystem")
 
         # Launch composition
-        dockerUtils.runComposition(datastore, contextReference)
+        if(clusterReference==''):
+            dockerUtils.runComposition(datastore, token)
+        else:
+            ## TODO: at the momment images are local, but in the future you will can deploy compositions on remote docker hosts..
+            ## Call here the runComposition method with the dockerClient parameter.
+            raise ControllerError("Remote docker hosts feature not supported yet.")
 
         return datastorecomposition
     except dataStore.DataStoreError, e:
@@ -49,5 +48,5 @@ def newComposition(datastore, composefile, contextReference):
     except errors.ControllerError, e:
         return e.getResponse()
     except Exception, e:
-        aux = errors.ControllerError("Unknown error: "+ e.message)
+        aux = errors.ControllerError("Unknown error: "+ str(e))
         return aux.getResponse()

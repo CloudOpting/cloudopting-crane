@@ -61,7 +61,7 @@ imageDetailModel = api.model('ImageDetail', builderSchemas.build_detailed_status
 
 ## Arguments models
 contextArgs = api.parser()
-contextArgs.add_argument('contextName', help='Optional name for the context', location='form')
+contextArgs.add_argument('group', help='Group identifier. It will be added as a reference for images. The name of the images will be <groupId>/<imageName>.', location='form')
 contextArgs.add_argument('puppetfile', type=FileStorage, help='Puppetfile that indicates the puppet modules needed in the context' , location='files')
 
 buildArgs = api.parser()
@@ -83,12 +83,10 @@ class ContextService(Resource):
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', contextInfoModel)
     def post(self):
-        try:   # if contextName not provided, user an empty string
-            contextName = str(request.form['contextName'])
+        try:   # if group not provided it will use default group.
+            return builderOperations.newContext(puppetfile=request.files['puppetfile'], group=str(request.form['group']) ,datastore=datastore)
         except:
-            contextName = ''
-        return builderOperations.newContext(puppetfile=request.files['puppetfile'], contextName=contextName ,datastore=datastore)
-
+            return builderOperations.newContext(puppetfile=request.files['puppetfile'], datastore=datastore)
 
 
 @builder_ns.route('/contexts/<token>')
@@ -208,7 +206,7 @@ composerDetailModel = api.model('ComposerDetail', composerSchemas.composer_detai
 
 ## Arguments models
 composerArgs = api.parser()
-composerArgs.add_argument('contextToken', help='Reference to the context (token).', location='form')
+composerArgs.add_argument('clusterToken', help='Reference to the cluster (token used in the \'cluster\' operations). If not provided, the deploy will be local.', location='form')
 composerArgs.add_argument('composefile', type=FileStorage, help='Docker-compose.yml file that specifies how to compose the service.' , location='files')
 
 @composer_ns.route('')
@@ -218,7 +216,10 @@ class ComposerService(Resource):
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', composerInfoModel)
     def post(self):
-        return composeOperations.newComposition(datastore, composefile=request.files['composefile'], contextReference=str(request.form['contextToken']))
+        try:   # detect if clusterToken has been provided
+            return composeOperations.newComposition(datastore, composefile=request.files['composefile'], clusterReference=str(request.form['clusterToken']))
+        except:
+            return composeOperations.newComposition(datastore, composefile=request.files['composefile'])
 
 @composer_ns.route('/<token>')
 @api.doc(params={'token': 'Token that identifies the docker composition'})

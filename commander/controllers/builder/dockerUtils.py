@@ -15,7 +15,7 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
         cwd =  os.path.join(cwd, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
         cwd =  os.path.join(cwd, imageName)
 
-        command = 'docker build -t '+ 'instance' + '/'+ imageName.lower() +' . ' + '1> '+ settings.FS_DEF_DOCKER_BUILD_LOG +' 2> '+ settings.FS_DEF_DOCKER_BUILD_ERR_LOG
+        command = 'docker build -t '+ datastore.getContext(contextToken)['group'] + '/'+ imageName.lower() +' . ' + '1> '+ settings.FS_DEF_DOCKER_BUILD_LOG +' 2> '+ settings.FS_DEF_DOCKER_BUILD_ERR_LOG
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
 
         response = ''
@@ -99,11 +99,11 @@ def stopBuild(contextToken, imageName):
         except OSError:
             return False
 
-def runComposition(datastore, contextToken, dockerClient=settings.DK_DEFAULT_BUILD_HOST):
+def runComposition(datastore, token, dockerClient=settings.DK_DEFAULT_BUILD_HOST):
     # launch compose
     # TODO: replace commandline docker API with docker-compose native calls
     def composeThread():
-        cwd =  os.path.join(settings.FS_BUILDS, contextToken)
+        cwd =  os.path.join(settings.FS_COMPOSITIONS, token)
         command = 'docker-compose up ' + '&> '+ settings.FS_DEF_DOCKER_COMPOSE_LOG
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
 

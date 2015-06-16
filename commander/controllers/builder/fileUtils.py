@@ -24,7 +24,8 @@ def createImageDir(contextToken, imageName):
     path = os.path.join(settings.FS_BUILDS, contextToken)
     if os.path.isdir(path):
         path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
-        os.makedirs(path, 0775)
+        if not os.path.exists(path):
+            os.makedirs(path, 0775)
         path = os.path.join(path, imageName)
         os.makedirs(path, 0775)
     else:
@@ -53,13 +54,16 @@ def savePuppetManifest(contextToken, imageName, puppetmanifest):
 
 # Composer related operations
 
-def saveComposeFile(contextToken, composefile):
-    path = os.path.join(settings.FS_BUILDS, contextToken)
+def saveComposeFile(token, composefile):
+    if not os.path.exists(settings.FS_COMPOSITIONS):
+        os.makedirs(settings.FS_COMPOSITIONS, 0775)
+    path = os.path.join(settings.FS_COMPOSITIONS, token)
+    os.makedirs(path, 0775)
     path = os.path.join(path, settings.FS_DEF_COMPOSEFILE)
     composefile.save(path)
 
-def deleteComposeFile(contextToken):
-    path = os.path.join(settings.FS_BUILDS, contextToken)
+def deleteComposeFile(token):
+    path = os.path.join(settings.FS_COMPOSITIONS, token)
     os.remove(path)
 
 

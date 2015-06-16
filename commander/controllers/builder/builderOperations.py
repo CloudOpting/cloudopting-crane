@@ -24,7 +24,7 @@ def contextList(datastore):
         return aux.getResponse()
 
 
-def newContext(puppetfile, datastore, contextName=''):
+def newContext(puppetfile, datastore, group='default'):
     '''
     Reads and checks puppetfile, creates the directory in the filesystem and launch puppetfile processing.
     '''
@@ -51,7 +51,7 @@ def newContext(puppetfile, datastore, contextName=''):
         puppetUtils.buildContext(token)
 
         # Create context in datastore
-        datastorecontext = {'token':token, 'contextName':contextName, 'status':'building', 'description':'Under creation', 'images':[]}
+        datastorecontext = {'token':token, 'group':group, 'status':'building', 'description':'Under creation', 'images':[]}
         datastore.addContext(token, datastorecontext)
 
         return datastorecontext
@@ -167,7 +167,7 @@ def newImage(datastore, contextReference, imageName, dockerfile, puppetmanifest)
             fileUtils.saveDockerfile(contextReference, imageName, dockerfile)
             fileUtils.savePuppetManifest(contextReference, imageName, puppetmanifest)
         except os.error:
-            fileUtils.delImage(contextReference, imageName)
+            fileUtils.deleteImageDir(contextReference, imageName)
             datastore.delImage(token)
             raise errors.OperationError("Couldn't create image in the filesystem")
 
