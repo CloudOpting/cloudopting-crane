@@ -1,25 +1,29 @@
 # cloudopting-crane
-The module that deals with docker operations: containers building, swarm clustering and compose orchestration.
+
+This module provides a REST API that makes easy to build services with [Puppet](https://puppetlabs.com/) and [Docker](https://www.docker.com/).
+
+It takes as input some files like puppetfiles, puppet manifests, dockerfiles and docker-compose files and builds a container infraestructure which can be deployed in remote machines (also using the API).
+
+It uses several docker components: host, builder, registry, [swarm](https://github.com/docker/swarm) and [compose](https://github.com/docker/compose). Also puppet tools like the puppet agent itself and [r10k](https://github.com/puppetlabs/r10k).
 
 ![Module diagram](/readmeResources/diagram.png)
 
-[Description under construction]
+
 
 ## On the desk
 
 __Done__
 - Dockerized environment for development
-- API skell and definition (live swagger ui client)
+- Build puppet contexts from puppetfile
+- Build containers from Dockerfile + puppet manifest
+- Start services from docker-compose.yml
 - Flexible data storage support (local-dict/filesystem/redis)
 
 __Working on__
-- Build puppet contexts from puppetfile
-- Build containers from Dockerfile
-- Build containers from Dockerfile + puppet manifest
 - Docker registry support (push and pull)
 - Start services from docker-compose.yml (importing modules from docker-compose application)
-- Configuration files
-
+- Deploy on remote host support
+- Swarm support
 
 ## Roadmap
 
