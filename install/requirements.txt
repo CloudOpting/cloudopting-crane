@@ -1,0 +1,5 @@
+Flask==0.10.1
+flask-restplus
+Flask-Cache
+docker-py
+docker-compose
