@@ -6,6 +6,22 @@ WS_BIND_IP = '0.0.0.0'
 WS_BIND_PORT = 8888
 """Port to bind"""
 
+# datastore settings
+
+DS_TYPE = 'simple'
+""" Determine the type of the datastore. 'simple' is for a volatile dictionary, 'filesystem' is for persisted filesystem storage. 'redis' is for a redis storage. """
+
+DS_REDIS_HOST = ''
+""" In case of 'redis' datastore, host that hosts the redis server. """
+
+DS_REDIS_PORT = 6379
+""" In case of 'redis' datastore, port where the redis server will be listening. """
+
+DS_REDIS_PASSWORD = ''
+""" In case of 'redis' datastore, password for server. """
+
+DS_REDIS_DB = 0
+""" In case of 'redis' datastore, redis DB. By default 0. """
 
 # filesystem settings
 

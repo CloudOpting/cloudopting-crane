@@ -1,4 +1,5 @@
 from flask.ext.cache import Cache
+import settings
 
 class DataStoreError(Exception):
     pass
@@ -6,7 +7,9 @@ class DataStoreError(Exception):
 class DataStore:
     def __init__(self, app):
         self.app = app
-        self.cache = Cache(app, config={'CACHE_TYPE':'simple'})
+        self.cache = Cache(app, config={'CACHE_TYPE':settings.DS_TYPE})
+
+        ## TODO: add logic to configure redis parameters in case of using redis datastore.
 
     # generic methods
 
