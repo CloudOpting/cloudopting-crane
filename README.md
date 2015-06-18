@@ -115,9 +115,9 @@ __Done__
 
 __Working on__
 - Docker registry support (push and pull)
-- Start services from docker-compose.yml (importing modules from docker-compose application)
+- Substitute docker-compose calls for native python calls.
 - Deploy on remote host support
-- Swarm support
+- Cluster support: create a swarm cluster, deploy on swarm cluster
 
 ## Roadmap
 
