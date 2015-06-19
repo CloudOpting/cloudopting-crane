@@ -6,8 +6,8 @@ from flask.ext.restplus import Api, apidoc, Resource, reqparse, fields, marshal_
 from schemas import builderSchemas, clusterSchemas, composerSchemas, generalSchemas
 from werkzeug.datastructures import FileStorage
 
-from controllers.builder import builderOperations
-from controllers.composer import composeOperations
+from controllers.builder import builderOps
+from controllers.composer import composeOps
 from datastore import dataStore
 from datastore.dataStore import DataStore
 
@@ -78,16 +78,16 @@ class ContextService(Resource):
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(200, 'OK', contextListModel)
     def get(self):
-        return builderOperations.contextList(datastore)
+        return builderOps.contextList(datastore)
 
     @api.doc(description='Create new context.', parser=contextArgs)
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', contextInfoModel)
     def post(self):
         try:   # if group not provided it will use default group.
-            return builderOperations.newContext(puppetfile=request.files['puppetfile'], group=str(request.form['group']) ,datastore=datastore)
+            return builderOps.newContext(puppetfile=request.files['puppetfile'], group=str(request.form['group']) ,datastore=datastore)
         except:
-            return builderOperations.newContext(puppetfile=request.files['puppetfile'], datastore=datastore)
+            return builderOps.newContext(puppetfile=request.files['puppetfile'], datastore=datastore)
 
 
 @builder_ns.route('/contexts/<token>')
@@ -99,14 +99,14 @@ class Context(Resource):
     @api.response(404, 'Not found', errorResponseModel)
     @api.response(200, 'OK', contextDetailModel)
     def get(self, token):
-        return builderOperations.checkContext(datastore=datastore, token=token)
+        return builderOps.checkContext(datastore=datastore, token=token)
 
     @api.doc(description='Remove a context and the related data.' )
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(404, 'Not found', errorResponseModel)
     @api.response(200, 'OK', contextInfoModel)
     def delete(self, token):
-        return builderOperations.deleteContext(datastore, token)
+        return builderOps.deleteContext(datastore, token)
 
 
 @builder_ns.route('/images')
@@ -122,7 +122,7 @@ class BuildService(Resource):
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', imageInfoModel)
     def post(self):
-        return builderOperations.newImage(datastore=datastore, contextReference=str(request.form['contextReference']), imageName=str(request.form['imageName']), dockerfile=request.files['dockerfile'], puppetmanifest=request.files['puppetmanifest'])
+        return builderOps.newImage(datastore=datastore, contextReference=str(request.form['contextReference']), imageName=str(request.form['imageName']), dockerfile=request.files['dockerfile'], puppetmanifest=request.files['puppetmanifest'])
 
 
 @builder_ns.route('/images/<token>')
@@ -134,7 +134,7 @@ class BuildProcess(Resource):
     @api.response(404, 'Not found', errorResponseModel)
     @api.response(200, 'OK', imageDetailModel)
     def get(self, token):
-        return builderOperations.checkImage(datastore, token)
+        return builderOps.checkImage(datastore, token)
 
     @api.doc(description='Remove a building process and the related data.')
     @api.response(500, 'Error processing the request', errorResponseModel)
@@ -218,9 +218,9 @@ class ComposerService(Resource):
     @api.response(201, 'Created', composerInfoModel)
     def post(self):
         try:   # detect if clusterToken has been provided
-            return composeOperations.newComposition(datastore, composefile=request.files['composefile'], clusterReference=str(request.form['clusterToken']))
+            return composeOps.newComposition(datastore, composefile=request.files['composefile'], clusterReference=str(request.form['clusterToken']))
         except:
-            return composeOperations.newComposition(datastore, composefile=request.files['composefile'])
+            return composeOps.newComposition(datastore, composefile=request.files['composefile'])
 
 @composer_ns.route('/<token>')
 @api.doc(params={'token': 'Token that identifies the docker composition'})
