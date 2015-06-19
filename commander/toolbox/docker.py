@@ -1,7 +1,6 @@
 import os
 import settings
 from threading import Thread
-import fileUtils
 import subprocess
 
 from controllers import errors

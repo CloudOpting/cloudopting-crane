@@ -8,8 +8,6 @@ from controllers import errors
 from toolbox import docker
 from toolbox import files
 
-from builderOperations import checkContext
-
 def newComposition(datastore, composefile, clusterReference=''):
     '''
     Saves docker compose file and runs it.
