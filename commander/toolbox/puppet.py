@@ -4,7 +4,7 @@ import subprocess
 from threading import Thread
 
 from controllers import errors
-from fileUtils import createFile
+from files import createFile
 
 def checkPuppetfile(token):
     '''

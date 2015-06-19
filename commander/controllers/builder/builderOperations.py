@@ -5,9 +5,9 @@ from datastore import tokens
 from datastore import dataStore
 from datastore.dataStore import DataStore
 from controllers import errors
-import puppetUtils
-import dockerUtils
-import fileUtils
+from toolbox import puppet
+from toolbox import docker
+from toolbox import files
 
 def contextList(datastore):
     '''
@@ -33,22 +33,22 @@ def newContext(puppetfile, datastore, group='default'):
 
         # Create context in filesystem
         try:
-            fileUtils.createContextDir(token)
+            files.createContextDir(token)
         except os.error:
-            fileUtils.deleteContextDir(token)
+            files.deleteContextDir(token)
             raise errors.OperationError("Couldn't create context in the filesystem")
 
         # Save puppetfile
-        fileUtils.savePuppetfile(token, puppetfile)
+        files.savePuppetfile(token, puppetfile)
 
         # Check puppetfile
-        aux = puppetUtils.checkPuppetfile(token)
+        aux = puppet.checkPuppetfile(token)
         if not aux==True:
-            fileUtils.deleteContextDir(token)
+            files.deleteContextDir(token)
             raise errors.OperationError("Syntax error in provided puppetfile: " + aux)
 
         # Launch build operation
-        puppetUtils.buildContext(token)
+        puppet.buildContext(token)
 
         # Create context in datastore
         datastorecontext = {'token':token, 'group':group, 'status':'building', 'description':'Under creation', 'images':[]}
@@ -76,32 +76,32 @@ def checkContext(datastore, token):
 
         # Check previous stored status
         if context['status']=='building':
-            if not puppetUtils.isBuildingContextRunning(token):
-                bErrors = puppetUtils.getBuildingErrors(token)
+            if not puppet.isBuildingContextRunning(token):
+                bErrors = puppet.getBuildingErrors(token)
                 if bErrors == None: # finished and no errors
                     # update datastore
                     context['status']='finished'
                     context['description']='Build finished without errors'
                     datastore.updateContext(token, context)
                     # add log to response
-                    context['log'] = puppetUtils.getBuildingLog(token)
+                    context['log'] = puppet.getBuildingLog(token)
                 else:               # finished but with errors
                     # update datastore
                     context['status']='error'
                     context['description']='Build finished unsuccefully.'
                     datastore.updateContext(token, context)
                     # add log to response
-                    context['log'] = puppetUtils.getBuildingErrors(token)
+                    context['log'] = puppet.getBuildingErrors(token)
             else:
                 # add log to response
-                context['log'] = puppetUtils.getBuildingLog(token)
+                context['log'] = puppet.getBuildingLog(token)
 
         elif context['status']=='finished':
             # add log to response
-            context['log'] = puppetUtils.getBuildingLog(token)
+            context['log'] = puppet.getBuildingLog(token)
         else:
             # add log to response
-            context['log'] = puppetUtils.getBuildingErrors(token)
+            context['log'] = puppet.getBuildingErrors(token)
 
         return context, 200
 
@@ -124,9 +124,9 @@ def deleteContext(datastore, token):
             raise errors.NotFoundError("Token does not exist.")
 
         # stop process if running
-        puppetUtils.stopBuildingContext(token)
+        puppet.stopBuildingContext(token)
         # delete folder
-        fileUtils.deleteContextDir(token)
+        files.deleteContextDir(token)
         # delete from datastore
         datastore.delContext(token)
         # fake context just to return a response
@@ -163,16 +163,16 @@ def newImage(datastore, contextReference, imageName, dockerfile, puppetmanifest)
 
         # Create image in filesystem and save Dockerfile and Puppetmanifest
         try:
-            fileUtils.createImageDir(contextReference, imageName)
-            fileUtils.saveDockerfile(contextReference, imageName, dockerfile)
-            fileUtils.savePuppetManifest(contextReference, imageName, puppetmanifest)
+            files.createImageDir(contextReference, imageName)
+            files.saveDockerfile(contextReference, imageName, dockerfile)
+            files.savePuppetManifest(contextReference, imageName, puppetmanifest)
         except os.error:
-            fileUtils.deleteImageDir(contextReference, imageName)
+            files.deleteImageDir(contextReference, imageName)
             datastore.delImage(token)
             raise errors.OperationError("Couldn't create image in the filesystem")
 
         # Launch build operation
-        dockerUtils.buildImage(datastore, contextReference, imageName, token)
+        docker.buildImage(datastore, contextReference, imageName, token)
 
         return datastoreimage
     except dataStore.DataStoreError, e:
@@ -196,31 +196,31 @@ def checkImage(datastore, imageToken):
             raise errors.NotFoundError("Image does not exist.")
         # Check previous stored status
         if image['status']=='building':
-            if not dockerUtils.isDockerBuildRunning(image['context'], image['imageName']):
-                bErrors = dockerUtils.getBuildErrors(image['context'], image['imageName'])
+            if not docker.isDockerBuildRunning(image['context'], image['imageName']):
+                bErrors = docker.getBuildErrors(image['context'], image['imageName'])
                 if bErrors == None: # finished and no errors
                     # update datastore
                     image['status']='finished'
                     image['description']='Build finished without errors'
                     datastore.updateImage(imageToken, image)
                     # add log to response
-                    image['log'] = dockerUtils.getBuildLog(image['context'], image['imageName'])
+                    image['log'] = docker.getBuildLog(image['context'], image['imageName'])
                 else:               # finished but with errors
                     # update datastore
                     image['status']='error'
                     image['description']='Build finished unsuccefully.'
                     datastore.updateImage(imageToken, image)
                     # add log to response
-                    image['log'] = dockerUtils.getBuildErrors(image['context'], image['imageName'])
+                    image['log'] = docker.getBuildErrors(image['context'], image['imageName'])
             else:
                 # add log to response
-                image['log'] = dockerUtils.getBuildLog(image['context'], image['imageName'])
+                image['log'] = docker.getBuildLog(image['context'], image['imageName'])
         elif image['status']=='finished':
             # add log to response
-            image['log'] = dockerUtils.getBuildLog(image['context'], image['imageName'])
+            image['log'] = docker.getBuildLog(image['context'], image['imageName'])
         else:
             # add log to response
-            image['log'] = dockerUtils.getBuildErrors(image['context'], image['imageName'])
+            image['log'] = docker.getBuildErrors(image['context'], image['imageName'])
 
         return image, 200
 

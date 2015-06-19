@@ -5,9 +5,8 @@ from datastore import tokens
 from datastore import dataStore
 from datastore.dataStore import DataStore
 from controllers import errors
-import puppetUtils
-import dockerUtils
-import fileUtils
+from toolbox import docker
+from toolbox import files
 
 from builderOperations import checkContext
 
@@ -27,15 +26,15 @@ def newComposition(datastore, composefile, clusterReference=''):
 
         # Save compose file
         try:
-            fileUtils.saveComposeFile(token, composefile)
+            files.saveComposeFile(token, composefile)
         except os.error:
-            fileUtils.deleteComposeFile(token)
+            files.deleteComposeFile(token)
             datastore.delComposition(token)
             raise errors.OperationError("Couldn't create composition in the filesystem")
 
         # Launch composition
         if(clusterReference==''):
-            dockerUtils.runComposition(datastore, token)
+            docker.runComposition(datastore, token)
         else:
             ## TODO: at the momment images are local, but in the future you will can deploy compositions on remote docker hosts..
             ## Call here the runComposition method with the dockerClient parameter.
