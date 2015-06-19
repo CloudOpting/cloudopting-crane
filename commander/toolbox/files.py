@@ -73,3 +73,9 @@ def createFile(path, content):
     fo = open(path, "wb")
     fo.write(content);
     fo.close()
+
+def purgeWorkdir():
+    if os.path.exists(settings.FS_BUILDS):
+        shutil.rmtree(settings.FS_BUILDS)
+    if os.path.exists(settings.FS_COMPOSITIONS):
+        shutil.rmtree(settings.FS_COMPOSITIONS)

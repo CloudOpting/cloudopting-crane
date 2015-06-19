@@ -116,3 +116,36 @@ def runComposition(datastore, token, dockerClient=settings.DK_DEFAULT_BUILD_HOST
 
     thread = Thread(target = composeThread)
     thread.start()
+
+def purge():
+    '''
+    Deletes all containers and images. Force if running. This operation is synchronous.
+    Returns True if succefull, false if unsuccefull.
+    '''
+    # Prepare commands
+    command1 = 'docker rm -f $(docker ps -q)'
+    command2 = 'docker rmi -f $(docker images -q)'
+
+    # Remove containers
+    p1 = subprocess.Popen(command1, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    response1 = ''
+    for line in p1.stdout.readlines():
+        response1+=line+os.linesep
+
+    retval1 = p1.wait()
+
+    # Remove images
+    p2 = subprocess.Popen(command2, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    response2 = ''
+    for line in p2.stdout.readlines():
+        response2+=line+os.linesep
+
+    retval2 = p2.wait()
+
+    # Check result
+    if retval1==0 and retval2==0:
+        return True
+    else:
+        return False

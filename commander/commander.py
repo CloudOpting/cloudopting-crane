@@ -8,6 +8,7 @@ from werkzeug.datastructures import FileStorage
 
 from controllers.builder import builderOps
 from controllers.composer import composeOps
+from controllers.management import managementOps
 from datastore import dataStore
 from datastore.dataStore import DataStore
 
@@ -37,7 +38,7 @@ class Purge(Resource):
 
     @api.doc(description='Purge all data: contexts, compositions, files, etc.')
     def get(self):
-        return not_implemented()
+        return managementOps.purge(datastore)
 
 
 @extra_ns.route('/alive')
