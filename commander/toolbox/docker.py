@@ -1,11 +1,10 @@
 import os
 import settings
 from threading import Thread
-import fileUtils
 import subprocess
 
 from controllers import errors
-from fileUtils import createFile
+from files import createFile
 
 def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=settings.DK_DEFAULT_BUILD_HOST):
     # launch build

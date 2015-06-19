@@ -6,7 +6,8 @@ from flask.ext.restplus import Api, apidoc, Resource, reqparse, fields, marshal_
 from schemas import builderSchemas, clusterSchemas, composerSchemas, generalSchemas
 from werkzeug.datastructures import FileStorage
 
-from controllers.builder import builderOperations, composeOperations
+from controllers.builder import builderOperations
+from controllers.composer import composeOperations
 from datastore import dataStore
 from datastore.dataStore import DataStore
 
