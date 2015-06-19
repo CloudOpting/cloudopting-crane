@@ -1,10 +1,10 @@
 import settings
 import os
 
+from controllers import errors
 from datastore import tokens
 from datastore import dataStore
 from datastore.dataStore import DataStore
-from controllers import errors
 from toolbox import puppet
 from toolbox import docker
 from toolbox import files
