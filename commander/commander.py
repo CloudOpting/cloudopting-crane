@@ -40,6 +40,12 @@ class Purge(Resource):
     def get(self):
         return managementOps.purge(datastore)
 
+@extra_ns.route('/tokens')
+class Tokens(Resource):
+
+    @api.doc(description='Get all tokens in datastore.')
+    def get(self):
+        return managementOps.getAllTokens(datastore)
 
 @extra_ns.route('/alive')
 class Alive(Resource):
@@ -142,7 +148,7 @@ class BuildProcess(Resource):
     @api.response(404, 'Not found', errorResponseModel)
     @api.response(200, 'OK', imageInfoModel)
     def delete(self, token):
-        return not_implemented()
+        return builderOps.deleteImage(datastore, token)
 
 
 # Cluster API

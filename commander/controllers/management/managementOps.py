@@ -39,3 +39,23 @@ def purge(datastore):
     except Exception, e:
         aux = errors.ControllerError("Unknown error: "+ e.message)
         return aux.getResponse()
+
+
+def getAllTokens(datastore):
+    '''
+    Get all tokens in datastore
+    '''
+    try:
+        content = {}
+        # get tokens from datastore
+        try:
+            content = datastore.getTokens()
+        except:
+            raise errors.ControllerError("Error in datastore.")
+
+        return content
+    except errors.ControllerError, e:
+        return e.getResponse()
+    except Exception, e:
+        aux = errors.ControllerError("Unknown error: "+ e.message)
+        return aux.getResponse()

@@ -41,6 +41,7 @@ class DataStore:
         '''
         return self.cache.get(key)
 
+
     def delete(self, key, element=None):
         '''
         Deletes a key-value pair or an element in a list (if element argument is given)
@@ -164,6 +165,11 @@ class DataStore:
         '''
         return self.get(imageToken)
 
+    def getImages(self):
+        '''
+        Gets all the images
+        '''
+        return self.get('images')
 
     # cluster methods
 
@@ -202,6 +208,12 @@ class DataStore:
         '''
         return self.get(clusterToken)
 
+    def getClusters(self):
+        '''
+        Gets the list of clusters
+        '''
+        return self.get('clusters')
+
 
     # compositions methods
 
@@ -239,3 +251,32 @@ class DataStore:
         Gets the composition entity
         '''
         return self.get(compositionToken)
+
+    def getCompositions(self):
+        '''
+        Gets all the compositions entity
+        '''
+        return self.get('compositions')
+
+
+
+        # Other methods
+
+    def getTokens(self):
+        '''
+        Retrieve all the tokens
+        '''
+        response = {}
+        # add contexts
+        list = self.getContexts()
+        response['contexts'] = list if list!=None else []
+        # add images
+        list = self.getImages()
+        response['images'] = list if list!=None else []
+        # add clusters
+        list = self.getClusters()
+        response['clusters'] = list if list!=None else []
+        # add compositions
+        list = self.getCompositions()
+        response['compositions'] = list if list!=None else []
+        return response
