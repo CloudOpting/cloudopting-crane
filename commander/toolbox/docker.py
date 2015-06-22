@@ -28,6 +28,54 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
     thread = Thread(target = buildThread)
     thread.start()
 
+
+def deleteImage(datastore, imageToken):
+    try:
+        # get tag of the docker image
+        image = datastore.getImage(imageToken)
+        context = datastore.getContext(image['context'])
+        dockerImageTag = context['group']+'/'+image['imageName'].lower()
+
+        # TODO: replace commandline docker API with docker-py client (fix docker host socket permission and TLS)
+        cwd =  os.path.join(settings.FS_BUILDS, image['context'])
+        cwd =  os.path.join(cwd, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
+        cwd =  os.path.join(cwd, image['imageName'])
+
+        command = 'docker rmi -f '+ dockerImageTag
+        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
+
+        response = ''
+        for line in p.stdout.readlines():
+            response+=line+os.linesep
+
+        retval = p.wait()
+
+        return True
+    except Exception, e:
+        raise e
+        return False
+
+
+
+def deleteUntaggedImages():
+    try:
+
+        command = 'docker rmi -f  $(docker images | grep "^<none>" | awk "{print $3}")'
+        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
+
+        response = ''
+        for line in p.stdout.readlines():
+            response+=line+os.linesep
+
+        retval = p.wait()
+
+        return True
+    except Exception, e:
+        raise e
+        return False
+
+
+
 def isDockerBuildRunning(contextToken, imageName):
     '''
     Checks if the docker build process is still running. Returns True if the process still runs and False if the process is not running.
@@ -87,7 +135,7 @@ def stopBuild(contextToken, imageName):
     path = os.path.join(path, imageName)
     path = os.path.join(path, settings.FS_DEF_DOCKER_BUILD_PID)
     try:
-        file = open(pidpath, 'r')
+        file = open(path, 'r')
     except IOError:
         return True
     pid = int(file.read(10));

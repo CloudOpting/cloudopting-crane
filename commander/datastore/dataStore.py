@@ -143,7 +143,7 @@ class DataStore:
         # get image
         image = self.getImage(imageToken)
         # get context
-        context = self.getContext(image['contextToken'])
+        context = self.getContext(image['context'])
         # remove reference to image in context
         context['images'].remove(imageToken)
         # remove image entity

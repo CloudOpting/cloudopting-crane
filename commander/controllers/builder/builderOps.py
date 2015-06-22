@@ -190,10 +190,11 @@ def checkImage(datastore, imageToken):
     Checks if the image exists, checks if it is under construction and in case it has finished, checks if it was succefully or not.
     '''
     try:
-        # get context
+        # get image
         image = datastore.getImage(imageToken)
         if image == None:
             raise errors.NotFoundError("Image does not exist.")
+
         # Check previous stored status
         if image['status']=='building':
             if not docker.isDockerBuildRunning(image['context'], image['imageName']):
@@ -225,6 +226,42 @@ def checkImage(datastore, imageToken):
         return image, 200
 
     except errors.NotFoundError, e:
+        return e.getResponse()
+    except Exception, e:
+        aux = errors.ControllerError("Unknown error: "+ e.message)
+        return aux.getResponse()
+
+def deleteImage(datastore, imageToken):
+    '''
+    Deletes image and stops the build process.
+    '''
+    try:
+        # get image
+        image = datastore.getImage(imageToken)
+        if image == None:
+            raise errors.NotFoundError("Image does not exist.")
+
+        # check if building and stop in case
+        docker.stopBuild(image['context'], image['imageName'])
+
+        # delete docker image
+        if docker.deleteImage(datastore, imageToken) == False:
+            raise errors.ControllerError("Can't delete docker image.")
+
+        # remove from filesystem
+        files.deleteImageDir(image['context'], image['imageName'])
+
+        # remove from datastore
+        datastore.delImage(imageToken)
+
+        image['status'] = 'deleted'
+        image['description'] = ''
+
+        return image, 200
+
+    except errors.NotFoundError, e:
+        return e.getResponse()
+    except errors.ControllerError, e:
         return e.getResponse()
     except Exception, e:
         aux = errors.ControllerError("Unknown error: "+ e.message)
