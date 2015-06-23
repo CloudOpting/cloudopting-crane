@@ -55,6 +55,15 @@ class Alive(Resource):
         return {'message':'I\'m alive'}
 
 
+@extra_ns.route('/check')
+class Check(Resource):
+
+    @api.doc(description='Check several parameters in Crane status.')
+    def get(self):
+        from toolbox import docker
+        dockerStatus = docker.checkDocker()
+        return {'docker': 'correct' if dockerStatus==True else dockerStatus }
+
 # Build API
 
 builder_ns = api.namespace('builder', description='Building related operations')
