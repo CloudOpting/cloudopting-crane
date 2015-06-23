@@ -27,8 +27,7 @@ build_detailed_status_response['log'] = fields.String
 
 ## TODO: document this
 context_process_list_response = {
-    'numberOfContexts': fields.Integer(default=0),
-    'listOfContexts': fields.List(fields.String)
+    'contexts': fields.List(fields.String)
 }
 
 ## TODO: document this
