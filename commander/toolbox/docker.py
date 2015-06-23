@@ -3,8 +3,83 @@ import settings
 from threading import Thread
 import subprocess
 
+
 from controllers import errors
 from files import createFile
+
+# Importing docker library
+def import_non_local(name, custom_name=None):
+    '''
+    Tweak to import 'docker' module from docker-py inside de local 'docker' module.
+    '''
+    import imp, sys
+
+    custom_name = custom_name or name
+
+    f, pathname, desc = imp.find_module(name, sys.path[1:])
+    module = imp.load_module(custom_name, f, pathname, desc)
+    if f != None:
+        f.close()
+
+    return module
+
+dockerpy = import_non_local('docker', 'dockerpy')
+# END: Importing docker library
+
+
+
+def checkDocker(dockerClient=settings.DK_DEFAULT_BUILD_HOST):
+    '''
+    Checks the communication with Docker daemon. Returns True if ok, fail description if APIError.
+    '''
+    try:
+        cli = dockerpy.Client(base_url=dockerClient, version='auto')
+        cli.version()
+        return True
+    except Exception, e:
+        return str(e)
+
+def dockerVersion(dockerClient=settings.DK_DEFAULT_BUILD_HOST):
+    '''
+    Returns information about the Docker daemon version.
+    '''
+    cli = dockerpy.Client(base_url=dockerClient, version='auto')
+    return cli.version()
+
+
+def purge():
+    '''
+    Deletes all containers and images. Force if running. This operation is synchronous.
+    Returns True if succefull, false if unsuccefull.
+    '''
+    # Prepare commands
+    command1 = 'docker rm -f $(docker ps -q)'
+    command2 = 'docker rmi -f $(docker images -q)'
+
+    # Remove containers
+    p1 = subprocess.Popen(command1, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    response1 = ''
+    for line in p1.stdout.readlines():
+        response1+=line+os.linesep
+
+    retval1 = p1.wait()
+
+    # Remove images
+    p2 = subprocess.Popen(command2, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    response2 = ''
+    for line in p2.stdout.readlines():
+        response2+=line+os.linesep
+
+    retval2 = p2.wait()
+
+    # Check result
+    if retval1==0 and retval2==0:
+        return True
+    else:
+        return False
+
 
 def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=settings.DK_DEFAULT_BUILD_HOST):
     # launch build
@@ -164,36 +239,3 @@ def runComposition(datastore, token, dockerClient=settings.DK_DEFAULT_BUILD_HOST
 
     thread = Thread(target = composeThread)
     thread.start()
-
-def purge():
-    '''
-    Deletes all containers and images. Force if running. This operation is synchronous.
-    Returns True if succefull, false if unsuccefull.
-    '''
-    # Prepare commands
-    command1 = 'docker rm -f $(docker ps -q)'
-    command2 = 'docker rmi -f $(docker images -q)'
-
-    # Remove containers
-    p1 = subprocess.Popen(command1, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
-    response1 = ''
-    for line in p1.stdout.readlines():
-        response1+=line+os.linesep
-
-    retval1 = p1.wait()
-
-    # Remove images
-    p2 = subprocess.Popen(command2, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
-    response2 = ''
-    for line in p2.stdout.readlines():
-        response2+=line+os.linesep
-
-    retval2 = p2.wait()
-
-    # Check result
-    if retval1==0 and retval2==0:
-        return True
-    else:
-        return False
