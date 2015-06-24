@@ -158,7 +158,7 @@ def newImage(datastore, contextReference, imageName, dockerfile, puppetmanifest)
             raise errors.OperationError("Context is not ready")
 
         # Create image in datastore
-        datastoreimage = {'token':token, 'context':contextReference, 'imageName':imageName, 'status':'building', 'description':'Under creation'}
+        datastoreimage = {'token':token, 'context':contextReference, 'imageName':imageName, 'status':'building', 'description':'Under creation', 'tag':datastore.getContext(contextReference)['group']+'/'+imageName.lower()}
         datastore.addImage(contextReference, token, datastoreimage)
 
         # Create image in filesystem and save Dockerfile and Puppetmanifest

@@ -15,6 +15,7 @@ build_basic_status_response = {
     'context': fields.String,
     'description': fields.String,
     'imageName' : fields.String,
+    'tag' : fields.String,
     'lastChecked': fields.DateTime(dt_format='iso8601')
 }
 

@@ -64,15 +64,19 @@ FS_DEF_DOCKER_BUILD_LOG = 'build.log'
 FS_DEF_DOCKER_BUILD_ERR_LOG = 'build_err.log'
 """Default name for the log of the docker build process"""
 
-FS_DEF_DOCKER_BUILD_PID = 'build_pid'
-"""Default name for the file that stores PID of the docker build process"""
+FS_DEF_DOCKER_BUILD_PID = 'build.pid'
+"""Default name for the file that stores PID of the docker build process (and tag + push)"""
 
 FS_DEF_DOCKER_COMPOSE_LOG = 'compose.log'
 """Default name for the log of docker compose"""
 
-FS_DEF_DOCKER_COMPOSE_PID = 'compose_pid'
+FS_DEF_DOCKER_COMPOSE_PID = 'compose.pid'
 """Default name for the file that stores PID of the docker compose process"""
 
 # Docker host
 DK_DEFAULT_BUILD_HOST = "unix:///var/run/docker.sock"
 """Default docker host where images will be built"""
+
+# Docker registry
+DK_RG_ENDPOINT = "localhost:5000"
+"""Docker registry end-point"""

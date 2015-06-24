@@ -5,7 +5,7 @@ import subprocess
 
 
 from controllers import errors
-from files import createFile
+from toolbox import files
 
 # Importing docker library
 def import_non_local(name, custom_name=None):
@@ -81,24 +81,52 @@ def purge():
         return False
 
 
-def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=settings.DK_DEFAULT_BUILD_HOST):
+def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=settings.DK_DEFAULT_BUILD_HOST, saveToRegistry=True):
+    '''
+    Builds an image and saves it in the registry. Asynchronous operation.
+    '''
     # launch build
-    # TODO: replace commandline docker API with docker-py client (fix docker host socket permission and TLS)
-    def buildThread():
-        cwd =  os.path.join(settings.FS_BUILDS, contextToken)
-        cwd =  os.path.join(cwd, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
-        cwd =  os.path.join(cwd, imageName)
-
-        command = 'docker build -t '+ datastore.getContext(contextToken)['group'] + '/'+ imageName.lower() +' . ' + '1> '+ settings.FS_DEF_DOCKER_BUILD_LOG +' 2> '+ settings.FS_DEF_DOCKER_BUILD_ERR_LOG
+    # TODO: replace commandline docker API with docker-py client
+    def executeCommand(command, cwd):
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
 
         response = ''
         for line in p.stdout.readlines():
             response+=line+os.linesep
 
-        fileUtils.createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_BUILD_PID), str(p.pid))
+        files.createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_BUILD_PID), str(p.pid))
 
-        retval = p.wait()
+        return p.wait()
+
+    def buildThread():
+        err = None
+
+        cwd =  os.path.join(settings.FS_BUILDS, contextToken)
+        cwd =  os.path.join(cwd, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
+        cwd =  os.path.join(cwd, imageName)
+
+        # Build
+        if err is None:
+            command = 'docker build -t '+ datastore.getImage(imageToken)['tag'] +' . ' + '1> '+ settings.FS_DEF_DOCKER_BUILD_LOG +' 2> '+ settings.FS_DEF_DOCKER_BUILD_ERR_LOG
+            if executeCommand(command, cwd)!=0:
+                err = "Error in building process."
+
+        # Tag
+        if err is None:
+            command = 'docker tag ' + datastore.getImage(imageToken)['tag'] + ' ' + settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
+            if executeCommand(command, cwd)!=0:
+                err = "Error while tagging image."
+
+        # Push
+        if err is None:
+            command = 'docker push ' + settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
+            if executeCommand(command, cwd)!=0:
+                err = "Error while pushing to registry."
+
+        # Error case
+        if err is not None:
+            deleteImage(datastore, imageToken)
+            files.createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), err)
 
     thread = Thread(target = buildThread)
     thread.start()
@@ -233,7 +261,7 @@ def runComposition(datastore, token, dockerClient=settings.DK_DEFAULT_BUILD_HOST
         for line in p.stdout.readlines():
             response+=line+os.linesep
 
-        fileUtils.createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_COMPOSE_PID), str(p.pid))
+        files.createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_COMPOSE_PID), str(p.pid))
 
         retval = p.wait()
 
