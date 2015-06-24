@@ -121,6 +121,7 @@ __Working on__
 
 ## Roadmap
 
+- General refactoring
 - Distributed building
 - Docker-swarm complete support
   - add nodes to the cluster dynamically
