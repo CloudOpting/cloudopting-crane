@@ -64,6 +64,9 @@ FS_DEF_DOCKER_BUILD_LOG = 'build.log'
 FS_DEF_DOCKER_BUILD_ERR_LOG = 'build_err.log'
 """Default name for the log of the docker build process"""
 
+FS_DEF_DOCKER_INFO = 'build_info.txt'
+"""Default name for file which stores information about how the build process finished."""
+
 FS_DEF_DOCKER_BUILD_PID = 'build.pid'
 """Default name for the file that stores PID of the docker build process (and tag + push)"""
 

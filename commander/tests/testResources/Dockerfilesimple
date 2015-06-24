@@ -1,0 +1,8 @@
+FROM ubuntu:12.04
+MAINTAINER Jose Fuentes <jfuentes@wtelecom.es>
+
+ADD manifest.pp /tmp/manifest.pp
+
+RUN cp /tmp/manifest.pp /tmp/manifest2.pp
+
+
