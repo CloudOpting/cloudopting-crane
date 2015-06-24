@@ -111,17 +111,18 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
             if executeCommand(command, cwd)!=0:
                 err = "Error in building process."
 
-        # Tag
-        if err is None:
-            command = 'docker tag ' + datastore.getImage(imageToken)['tag'] + ' ' + settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
-            if executeCommand(command, cwd)!=0:
-                err = "Error while tagging image."
+        if settings.DK_RG_SWITCH:
+            # Tag
+            if err is None:
+                command = 'docker tag ' + datastore.getImage(imageToken)['tag'] + ' ' + settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
+                if executeCommand(command, cwd)!=0:
+                    err = "Error while tagging image."
 
-        # Push
-        if err is None:
-            command = 'docker push ' + settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
-            if executeCommand(command, cwd)!=0:
-                err = "Error while pushing to registry."
+            # Push
+            if err is None:
+                command = 'docker push ' + settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
+                if executeCommand(command, cwd)!=0:
+                    err = "Error while pushing to registry."
 
         # Error case
         if err is not None:

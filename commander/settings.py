@@ -78,5 +78,8 @@ DK_DEFAULT_BUILD_HOST = "unix:///var/run/docker.sock"
 """Default docker host where images will be built"""
 
 # Docker registry
+DK_RG_SWITCH = True
+"""True: enables 'save to registry'. False: disables 'save to registry'"""
+
 DK_RG_ENDPOINT = "localhost:5000"
 """Docker registry end-point"""
