@@ -52,6 +52,8 @@ It uses several docker components: host, builder, registry, [swarm](https://gith
 
   `pip install -r install/requirements.txt`
 
+- [Optional] Install registry
+    - TO-DO
 
 - Run commander REST API :
 
@@ -77,6 +79,10 @@ It uses several docker components: host, builder, registry, [swarm](https://gith
   - Add the user who will execute the client to group: `gpasswd -a crane docker`
   - Apply changes in group: `newgrp docker`
   - Restart docker daemon: `service docker restart`
+
+- [Optional] __Private registry__:
+  - TODO: set default registry
+  - TODO: configura certificates
 
 #### System
 
@@ -118,6 +124,10 @@ __Working on__
 - Substitute docker-compose calls for native python calls.
 - Deploy on remote host support
 - Cluster support: create a swarm cluster, deploy on swarm cluster
+
+__Issues__
+- Docker-registry: Trying to adopt the latest docker registry. At the moment there are problem with the certificates when registry is in different host (uses HTTPS in that case) than the image which I am trying to push. (Following this https://docs.docker.com/registry/deploying/)
+![registry status](/readmeResources/registry.png)
 
 ## Roadmap
 
