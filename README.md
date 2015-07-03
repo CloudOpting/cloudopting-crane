@@ -39,6 +39,7 @@ It uses several docker components: host, builder, registry, [swarm](https://gith
 - Install pip (helps to install docker-compose and python needed libraries):
 
   `curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"`
+  
   `python get-pip.py`
 
 - Clone repository where you want:
