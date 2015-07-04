@@ -60,6 +60,10 @@ It uses several docker components: host, builder, registry, [swarm](https://gith
   `cd commander`
 
   `python commander.py`
+  
+ NOTE: check that you have pip upgraded and also the `six` package:
+   `pip install --upgrade pip`
+   `pip install --upgrade six`
 
 ## Alternative intallation methods (useful for development and testing)
 
