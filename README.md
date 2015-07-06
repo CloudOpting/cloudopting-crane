@@ -32,9 +32,7 @@ It uses several docker components: host, builder, registry, [swarm](https://gith
 
 - Install docker
 
-  In centos 7: `yum install docker`
-
-  In centos 6.5: [see this](https://docs.docker.com/installation/centos/)
+  [Follow the official instructions](https://docs.docker.com/installation/centos/)
 
 - Install pip (helps to install docker-compose and python needed libraries):
 
