@@ -102,12 +102,14 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
         err = None
 
         cwd =  os.path.join(settings.FS_BUILDS, contextToken)
-        cwd =  os.path.join(cwd, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
-        cwd =  os.path.join(cwd, imageName)
+
+        dockerfilepath = ""
+        dockerfilepath =  os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
+        dockerfilepath =  os.path.join(dockerfilepath, imageName)
 
         # Build
         if err is None:
-            command = 'docker build -t '+ datastore.getImage(imageToken)['tag'] +' . ' + '1> '+ settings.FS_DEF_DOCKER_BUILD_LOG +' 2> '+ settings.FS_DEF_DOCKER_BUILD_ERR_LOG
+            command = 'docker build -f '+ dockerfilepath+ '/Dockerfile' +' -t '+ datastore.getImage(imageToken)['tag'] +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG) 
             if executeCommand(command, cwd)!=0:
                 err = "Error in building process."
 
