@@ -85,18 +85,21 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
     # launch build
     # TODO: replace commandline docker API with docker-py client (fix docker host socket permission and TLS)
     def buildThread():
-        cwd =  os.path.join(settings.FS_BUILDS, contextToken)
-        cwd =  os.path.join(cwd, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
-        cwd =  os.path.join(cwd, imageName)
 
-        command = 'docker build -t '+ datastore.getContext(contextToken)['group'] + '/'+ imageName.lower() +' . ' + '1> '+ settings.FS_DEF_DOCKER_BUILD_LOG +' 2> '+ settings.FS_DEF_DOCKER_BUILD_ERR_LOG
+        cwd =  os.path.join(settings.FS_BUILDS, contextToken)
+
+        dockerfilepath = ""
+        dockerfilepath =  os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
+        dockerfilepath =  os.path.join(dockerfilepath, imageName)
+
+        command = 'docker build -f '+ dockerfilepath+ '/Dockerfile' +' -t '+ 'default/'+datastore.getImage(imageToken)['imageName'] +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
 
         response = ''
         for line in p.stdout.readlines():
             response+=line+os.linesep
 
-        fileUtils.createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_BUILD_PID), str(p.pid))
+        createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_BUILD_PID), str(p.pid))
 
         retval = p.wait()
 
@@ -233,7 +236,7 @@ def runComposition(datastore, token, dockerClient=settings.DK_DEFAULT_BUILD_HOST
         for line in p.stdout.readlines():
             response+=line+os.linesep
 
-        fileUtils.createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_COMPOSE_PID), str(p.pid))
+        createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_COMPOSE_PID), str(p.pid))
 
         retval = p.wait()
 
