@@ -32,13 +32,13 @@ It uses several docker components: host, builder, registry, [swarm](https://gith
 
 - Install docker
 
-  In centos 7: `yum install docker`
-
-  In centos 6.5: [see this](https://docs.docker.com/installation/centos/)
+  [Follow the official instructions](https://docs.docker.com/installation/centos/)
 
 - Install pip (helps to install docker-compose and python needed libraries):
 
-  `yum install python-pip`
+  `curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"`
+  
+  `python get-pip.py`
 
 - Clone repository where you want:
 
@@ -58,6 +58,12 @@ It uses several docker components: host, builder, registry, [swarm](https://gith
   `cd commander`
 
   `python commander.py`
+  
+ NOTE: check that you have pip upgraded and also the `six` package:
+ 
+   `pip install --upgrade pip`
+   
+   `pip install --upgrade six`
 
 ## Alternative intallation methods (useful for development and testing)
 
