@@ -7,7 +7,18 @@ class DataStoreError(Exception):
 class DataStore:
     def __init__(self, app):
         self.app = app
-        self.cache = Cache(app, config={'CACHE_TYPE':settings.DS_TYPE})
+
+        # configuration
+        config={'CACHE_TYPE':settings.DS_TYPE}
+        if settings.DS_TYPE == 'filesystem':
+            config['CACHE_DIR'] = settings.DS_FILESYSTEM_DIR
+        elif settings.DS_TYPE == 'redis':
+            config['CACHE_REDIS_HOST'] = settings.DS_REDIS_HOST
+            config['CACHE_REDIS_PORT'] = settings.DS_REDIS_PORT
+            config['CACHE_REDIS_PASSWORD'] = settings.DS_REDIS_PASSWORD
+            config['CACHE_REDIS_DB'] = settings.DS_REDIS_DB
+
+        self.cache = Cache(app, config=config)
 
         ## TODO: add logic to configure redis parameters in case of using redis datastore.
 
