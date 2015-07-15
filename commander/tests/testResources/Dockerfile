@@ -6,8 +6,7 @@ RUN apt-get install -y puppet
 
 VOLUME containerLogs /tmp/logs
 
-ADD manifest.pp /tmp/manifest.pp
+ADD modules /tmp/modules
+ADD images/csi_apache/manifest.pp /tmp/manifest.pp
 
-RUN puppet apply /tmp/manifest.pp
-
-
+RUN puppet apply --modulepath=/tmp/modules /tmp/manifest.pp
