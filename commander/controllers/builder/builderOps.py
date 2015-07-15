@@ -84,24 +84,29 @@ def checkContext(datastore, token):
                     context['description']='Build finished without errors'
                     datastore.updateContext(token, context)
                     # add log to response
-                    context['log'] = puppet.getBuildingLog(token)
+                    #context['log'] = puppet.getBuildingLog(token)
+                    pass
                 else:               # finished but with errors
                     # update datastore
                     context['status']='error'
                     context['description']='Build finished unsuccefully.'
                     datastore.updateContext(token, context)
                     # add log to response
-                    context['log'] = puppet.getBuildingErrors(token)
+                    #context['log'] = puppet.getBuildingErrors(token)
+                    pass
             else:
                 # add log to response
-                context['log'] = puppet.getBuildingLog(token)
+                #context['log'] = puppet.getBuildingLog(token)
+                pass
 
         elif context['status']=='finished':
             # add log to response
-            context['log'] = puppet.getBuildingLog(token)
+            #context['log'] = puppet.getBuildingLog(token)
+            pass
         else:
             # add log to response
-            context['log'] = puppet.getBuildingErrors(token)
+            #context['log'] = puppet.getBuildingErrors(token)
+            pass
 
         return context, 200
 
@@ -205,23 +210,28 @@ def checkImage(datastore, imageToken):
                     image['description']='Build finished without errors'
                     datastore.updateImage(imageToken, image)
                     # add log to response
-                    image['log'] = docker.getBuildLog(image['context'], image['imageName'])
+                    #image['log'] = docker.getBuildLog(image['context'], image['imageName'])
+                    pass
                 else:               # finished but with errors
                     # update datastore
                     image['status']='error'
                     image['description']='Build finished unsuccefully.'
                     datastore.updateImage(imageToken, image)
                     # add log to response
-                    image['log'] = docker.getBuildErrors(image['context'], image['imageName'])
+                    #image['log'] = docker.getBuildErrors(image['context'], image['imageName'])
+                    pass
             else:
                 # add log to response
-                image['log'] = docker.getBuildLog(image['context'], image['imageName'])
+                #image['log'] = docker.getBuildLog(image['context'], image['imageName'])
+                pass
         elif image['status']=='finished':
             # add log to response
-            image['log'] = docker.getBuildLog(image['context'], image['imageName'])
+            #image['log'] = docker.getBuildLog(image['context'], image['imageName'])
+            pass
         else:
             # add log to response
-            image['log'] = docker.getBuildErrors(image['context'], image['imageName'])
+            #image['log'] = docker.getBuildErrors(image['context'], image['imageName'])
+            pass
 
         return image, 200
 
