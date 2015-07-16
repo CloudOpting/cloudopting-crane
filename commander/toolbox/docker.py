@@ -88,9 +88,9 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
 
         cwd =  os.path.join(settings.FS_BUILDS, contextToken)
 
-        dockerfilepath = ""
-        dockerfilepath =  os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
-        dockerfilepath =  os.path.join(dockerfilepath, imageName)
+        dockerfilepath = cwd
+        dockerfilepath = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
+        dockerfilepath = os.path.join(dockerfilepath, imageName)
 
         command = 'docker build -f '+ dockerfilepath+ '/Dockerfile' +' -t '+ 'default/'+datastore.getImage(imageToken)['imageName'] +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
@@ -99,7 +99,7 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
         for line in p.stdout.readlines():
             response+=line+os.linesep
 
-        createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_BUILD_PID), str(p.pid))
+        createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_PID), str(p.pid))
 
         retval = p.wait()
 
