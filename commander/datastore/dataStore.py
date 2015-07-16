@@ -143,6 +143,7 @@ class DataStore:
         if imageToken in context['images']:
             raise DataStoreError('\'' + imageToken + '\' already exists.')
         context['images'].append(imageToken)
+        self.add('images', imageToken)
         self.updateContext(context['token'], context)
         # add the image entity
         self.set(imageToken, image)
@@ -157,6 +158,7 @@ class DataStore:
         context = self.getContext(image['context'])
         # remove reference to image in context
         context['images'].remove(imageToken)
+        self.delete('images', imageToken)
         # remove image entity
         self.delete(imageToken)
 

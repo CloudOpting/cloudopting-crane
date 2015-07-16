@@ -1,5 +1,5 @@
 Flask==0.10.1
 flask-restplus
-Flask-Cache
+-e git+https://github.com/j-fuentes/flask-cache@R_0.12-jfc#egg=Flask-Cache
 docker-py
 docker-compose
