@@ -124,6 +124,16 @@ class Context(Resource):
     def delete(self, token):
         return builderOps.deleteContext(datastore, token)
 
+@builder_ns.route('/contexts/<token>/detail')
+@api.doc(params={'token': 'Token that identifies the context.'})
+class ContextDetails(Resource):
+
+    @api.doc(description='Get detailed information about a context.' )
+    @api.response(500, 'Error processing the request', errorResponseModel)
+    @api.response(404, 'Not found', errorResponseModel)
+    @api.response(200, 'OK', contextDetailModel)
+    def get(self, token):
+        return builderOps.checkContext(datastore=datastore, token=token, detail=True)
 
 @builder_ns.route('/images')
 class BuildService(Resource):
@@ -159,6 +169,16 @@ class BuildProcess(Resource):
     def delete(self, token):
         return builderOps.deleteImage(datastore, token)
 
+@builder_ns.route('/images/<token>/detail')
+@api.doc(params={'token': 'Token that identifies the building process.'})
+class BuildProcessDetail(Resource):
+
+    @api.doc(description='Get detailed information about a build process.')
+    @api.response(500, 'Error processing the request', errorResponseModel)
+    @api.response(404, 'Not found', errorResponseModel)
+    @api.response(200, 'OK', imageDetailModel)
+    def get(self, token):
+        return builderOps.checkImage(datastore, token, detail=True)
 
 # Cluster API
 
