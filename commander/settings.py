@@ -8,8 +8,11 @@ WS_BIND_PORT = 8888
 
 # datastore settings
 
-DS_TYPE = 'simple'
-""" Determine the type of the datastore. 'simple' is for a volatile dictionary, 'filesystem' is for persisted filesystem storage. 'redis' is for a redis storage. """
+DS_TYPE = 'filesystem'
+""" Determine the type of the datastore. 'simple' is for a volatile dictionary, 'filesystem' is for persistent filesystem storage. 'redis' is for a redis storage. """
+
+DS_FILESYSTEM_DIR = '/var/crane/datastore'
+""" In case of 'filesystem' datastore, directory that store datastore.  """
 
 DS_REDIS_HOST = ''
 """ In case of 'redis' datastore, host that hosts the redis server. """
