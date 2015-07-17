@@ -20,8 +20,6 @@ class DataStore:
 
         self.cache = Cache(app, config=config)
 
-        ## TODO: add logic to configure redis parameters in case of using redis datastore.
-
     # generic methods
 
     def clear(self):
