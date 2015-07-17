@@ -64,7 +64,7 @@ def newContext(puppetfile, datastore, group='default'):
 
 
 
-def checkContext(datastore, token):
+def checkContext(datastore, token, detail=False):
     '''
     Checks if the context exists, checks if it is under construction and in case it has finished, checks if it was succefully or not.
     '''
@@ -83,25 +83,23 @@ def checkContext(datastore, token):
                     context['status']='finished'
                     context['description']='Build finished without errors'
                     datastore.updateContext(token, context)
-                    # add log to response
-                    context['log'] = puppet.getBuildingLog(token)
                 else:               # finished but with errors
                     # update datastore
                     context['status']='error'
                     context['description']='Build finished unsuccefully.'
                     datastore.updateContext(token, context)
-                    # add log to response
-                    context['log'] = puppet.getBuildingErrors(token)
             else:
-                # add log to response
-                context['log'] = puppet.getBuildingLog(token)
-
+                pass
         elif context['status']=='finished':
-            # add log to response
-            context['log'] = puppet.getBuildingLog(token)
+            pass
         else:
-            # add log to response
-            context['log'] = puppet.getBuildingErrors(token)
+            pass
+
+        if detail:
+            log = puppet.getBuildingLog(token)
+            errLog = puppet.getBuildingErrors(token)
+            context['log'] = '' if log==None else log
+            context['error_log'] = '' if errLog==None else errLog
 
         return context, 200
 
@@ -185,7 +183,7 @@ def newImage(datastore, contextReference, imageName, dockerfile, puppetmanifest)
         return aux.getResponse()
 
 
-def checkImage(datastore, imageToken):
+def checkImage(datastore, imageToken, detail=False):
     '''
     Checks if the image exists, checks if it is under construction and in case it has finished, checks if it was succefully or not.
     '''
@@ -204,24 +202,23 @@ def checkImage(datastore, imageToken):
                     image['status']='finished'
                     image['description']='Build finished without errors'
                     datastore.updateImage(imageToken, image)
-                    # add log to response
-                    image['log'] = docker.getBuildLog(image['context'], image['imageName'])
                 else:               # finished but with errors
                     # update datastore
                     image['status']='error'
                     image['description']='Build finished unsuccefully.'
                     datastore.updateImage(imageToken, image)
-                    # add log to response
-                    image['log'] = docker.getBuildErrors(image['context'], image['imageName'])
             else:
-                # add log to response
-                image['log'] = docker.getBuildLog(image['context'], image['imageName'])
+                pass
         elif image['status']=='finished':
-            # add log to response
-            image['log'] = docker.getBuildLog(image['context'], image['imageName'])
+            pass
         else:
-            # add log to response
-            image['log'] = docker.getBuildErrors(image['context'], image['imageName'])
+            pass
+
+        if detail:
+            log = docker.getBuildLog(image['context'], image['imageName'])
+            errLog = docker.getBuildErrors(image['context'], image['imageName'])
+            image['log'] = '' if log==None else log
+            image['error_log'] = '' if errLog==None else errLog
 
         return image, 200
 
