@@ -96,7 +96,7 @@ It uses several docker components: host, builder, registry, [swarm](https://gith
 
 - __Bind port__: in `settings.py`, the `WS_BIND_PORT` parameter change the port where the REST API will be listening.
 
-- __DEBUG mode__: If the environment variable `DEBUG` is defined as `True` the process will run in debug mode and it will return debug information in the requests when something fails. It is not recomended for production use.
+- __DEBUG mode__: If the environment variable `DEBUG` is defined as `true` (`export DEBUG=true`) the process will run in debug mode and it will return debug information in the requests when something fails. It is not recomended for production use.
 
 - __Context storage__: The commander process uses an abstract datastore in order to maintain the context information. By default this is configured as a internal and volatile dictionary. It is possible to select also a filesystem based storage or a redis server ('DS_TYPE' in `settings.py`).
 
