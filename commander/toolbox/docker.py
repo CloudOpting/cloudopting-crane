@@ -5,7 +5,7 @@ import subprocess
 
 
 from controllers import errors
-from toolbox import files
+from files import createFile
 
 # Importing docker library
 def import_non_local(name, custom_name=None):
@@ -46,6 +46,12 @@ def dockerVersion(dockerClient=settings.DK_DEFAULT_BUILD_HOST):
     cli = dockerpy.Client(base_url=dockerClient, version='auto')
     return cli.version()
 
+def dockerInfo(dockerClient):
+    '''
+    Returns general information about docker daemon.
+    '''
+    cli = dockerpy.Client(base_url=dockerClient, version='auto')
+    return cli.info()
 
 def purge():
     '''
@@ -81,55 +87,27 @@ def purge():
         return False
 
 
-def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=settings.DK_DEFAULT_BUILD_HOST, saveToRegistry=True):
-    '''
-    Builds an image and saves it in the registry. Asynchronous operation.
-    '''
+def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=settings.DK_DEFAULT_BUILD_HOST):
     # launch build
-    # TODO: replace commandline docker API with docker-py client
-    def executeCommand(command, cwd):
+    # TODO: replace commandline docker API with docker-py client (fix docker host socket permission and TLS)
+    def buildThread():
+
+        cwd =  os.path.join(settings.FS_BUILDS, contextToken)
+
+        dockerfilepath = cwd
+        dockerfilepath = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
+        dockerfilepath = os.path.join(dockerfilepath, imageName)
+
+        command = 'docker build -f '+ dockerfilepath+ '/Dockerfile' +' -t '+ 'default/'+datastore.getImage(imageToken)['imageName'] +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
 
         response = ''
         for line in p.stdout.readlines():
             response+=line+os.linesep
 
-        files.createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_BUILD_PID), str(p.pid))
+        createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_PID), str(p.pid))
 
-        return p.wait()
-
-    def buildThread():
-        err = None
-
-        cwd =  os.path.join(settings.FS_BUILDS, contextToken)
-
-        dockerfilepath = ""
-        dockerfilepath =  os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
-        dockerfilepath =  os.path.join(dockerfilepath, imageName)
-
-        # Build
-        if err is None:
-            command = 'docker build -f '+ dockerfilepath+ '/Dockerfile' +' -t '+ datastore.getImage(imageToken)['tag'] +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG) 
-            if executeCommand(command, cwd)!=0:
-                err = "Error in building process."
-
-        if settings.DK_RG_SWITCH:
-            # Tag
-            if err is None:
-                command = 'docker tag ' + datastore.getImage(imageToken)['tag'] + ' ' + settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
-                if executeCommand(command, cwd)!=0:
-                    err = "Error while tagging image."
-
-            # Push
-            if err is None:
-                command = 'docker push ' + settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
-                if executeCommand(command, cwd)!=0:
-                    err = "Error while pushing to registry."
-
-        # Error case
-        if err is not None:
-            deleteImage(datastore, imageToken)
-            files.createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), err)
+        retval = p.wait()
 
     thread = Thread(target = buildThread)
     thread.start()
@@ -264,7 +242,7 @@ def runComposition(datastore, token, dockerClient=settings.DK_DEFAULT_BUILD_HOST
         for line in p.stdout.readlines():
             response+=line+os.linesep
 
-        files.createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_COMPOSE_PID), str(p.pid))
+        createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_COMPOSE_PID), str(p.pid))
 
         retval = p.wait()
 

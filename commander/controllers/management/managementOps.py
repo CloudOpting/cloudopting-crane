@@ -59,3 +59,14 @@ def getAllTokens(datastore):
     except Exception, e:
         aux = errors.ControllerError("Unknown error: "+ e.message)
         return aux.getResponse()
+
+
+def getDockerInfo(dockerClient):
+    '''
+    Retrieve docker system information
+    '''
+    try:
+        return docker.dockerInfo(dockerClient)
+    except Exception, e:
+        aux = errors.ControllerError("Unknown error: "+ e.message)
+        return aux.getResponse()

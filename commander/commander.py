@@ -57,12 +57,24 @@ class Alive(Resource):
 
 @extra_ns.route('/check')
 class Check(Resource):
-
     @api.doc(description='Check several parameters in Crane status.')
     def get(self):
         from toolbox import docker
         dockerStatus = docker.checkDocker()
         return {'docker': 'correct' if dockerStatus==True else dockerStatus }
+
+
+dockerInfoArgs = api.parser()
+dockerInfoArgs.add_argument('endpoint', help='Docker daemon endpoint', location='form')
+@extra_ns.route('/dockerInfo')
+class DockerInfo(Resource):
+    @api.doc(description='Retrieve information about the docker daemon provided by "endpoint".', parser=dockerInfoArgs)
+    def post(self):
+        try:
+            return managementOps.getDockerInfo(request.form['endpoint'])
+        except Exception, e:
+            return e
+
 
 # Build API
 
