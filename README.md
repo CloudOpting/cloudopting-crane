@@ -52,8 +52,11 @@ It uses several docker components: host, builder, registry, [swarm](https://gith
 
   `pip install -r install/requirements.txt`
 
-- [Optional] Install registry
-    - TO-DO
+- __Install and configure registry__
+    - Go to the folder `registry`.
+    - Run `genCerts.sh`. Fill the _Common Name_ field with a FQDN like `registry.cloudopting.dev`. At the end you will find a folder called `certs` with the files `domain.key` and `domain.crt`.
+    - Configure the docker daemon you will use as builder to trust on the registry: Copy `domain.crt` to `/etc/docker/certs.d/<registryFQDN>:<registryPort>/ca.crt` and restart docker.
+    - NOTE: The previous step must be done also for the docker daemon where you will deploy.
 
 - Run commander REST API :
 
