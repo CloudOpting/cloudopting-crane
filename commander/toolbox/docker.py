@@ -90,26 +90,64 @@ def purge():
 def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=settings.DK_DEFAULT_BUILD_HOST):
     # launch build
     # TODO: replace commandline docker API with docker-py client (fix docker host socket permission and TLS)
-    def buildThread():
-
-        cwd =  os.path.join(settings.FS_BUILDS, contextToken)
-
-        dockerfilepath = cwd
-        dockerfilepath = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
-        dockerfilepath = os.path.join(dockerfilepath, imageName)
-
-        command = 'docker build -f '+ dockerfilepath+ '/Dockerfile' +' -t '+ 'default/'+datastore.getImage(imageToken)['imageName'] +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
+    def __executeCommand__(command, cwd, pidfile):
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
 
         response = ''
         for line in p.stdout.readlines():
             response+=line+os.linesep
 
-        createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_PID), str(p.pid))
+        createFile(pidfile, str(p.pid))
 
-        retval = p.wait()
+        return p.wait()
 
-    thread = Thread(target = buildThread)
+    def __buildThread__():
+        err = None
+        try:
+            cwd =  os.path.join(settings.FS_BUILDS, contextToken)
+
+            dockerfilepath = cwd
+            dockerfilepath = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
+            dockerfilepath = os.path.join(dockerfilepath, imageName)
+
+            pidfile = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_PID)
+
+            # build
+            if err is None:
+
+                command = 'docker build -f '+ dockerfilepath+ '/Dockerfile' +' -t '+ 'default/'+datastore.getImage(imageToken)['imageName'] +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
+
+                if __executeCommand__(command, cwd, pidfile)!=0:
+                    err = "Error while building"
+                else:
+                    createFile(os.path.join(dockerfilepath, "build_command"), command)
+
+            if settings.DK_RG_SWITCH:
+                # tag
+                if err is None:
+                    command = 'docker tag ' + datastore.getImage(imageToken)['tag']+' '+settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
+                    if __executeCommand__(command, cwd, pidfile)!=0:
+                        err = "Error tagging image"
+                    else:
+                        createFile(os.path.join(dockerfilepath, "tag_command"), command)
+
+                # push
+                if err is None:
+                    command = 'docker push ' + settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
+                    if __executeCommand__(command, cwd, pidfile)!=0:
+                        err = "Error while pushing to registry"
+                    else:
+                        createFile(os.path.join(dockerfilepath, "push_command"), command)
+
+            # Error case
+            if err is not None:
+                deleteImage(datastore, imageToken)
+                createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), err)
+
+        except Exception, e:
+            createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), "Unexpected error in build thread.")
+
+    thread = Thread(target = __buildThread__)
     thread.start()
 
 
