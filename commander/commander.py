@@ -99,6 +99,13 @@ buildArgs.add_argument('contextReference', help='Reference (context token) to th
 buildArgs.add_argument('dockerfile', type=FileStorage, help='Base image dockerfile' , location='files')
 buildArgs.add_argument('puppetmanifest', type=FileStorage, help='Puppet manifest that contains the service definition for the image.' , location='files')
 
+buildAioArgs = api.parser()
+buildAioArgs.add_argument('group', help='Group identifier. It will be added as a reference for images. The name of the images will be <groupId>/<imageName>.', location='form')
+buildAioArgs.add_argument('puppetfile', type=FileStorage, help='Puppetfile that indicates the puppet modules needed in the context' , location='files')
+buildAioArgs.add_argument('imageName', help='Desired image name.', location='form')
+buildAioArgs.add_argument('dockerfile', type=FileStorage, help='Base image dockerfile' , location='files')
+buildAioArgs.add_argument('puppetmanifest', type=FileStorage, help='Puppet manifest that contains the service definition for the image.' , location='files')
+
 @builder_ns.route('/contexts')
 class ContextService(Resource):
 
@@ -191,6 +198,22 @@ class BuildProcessDetail(Resource):
     @api.response(200, 'OK', imageDetailModel)
     def get(self, token):
         return builderOps.checkImage(datastore, token, detail=True)
+
+@builder_ns.route('/aio')
+class AllInOneBuild(Resource):
+
+    @api.doc(description='Build context and images in a unique operation.', parser=buildAioArgs)
+    @api.response(500, 'Error processing the request', errorResponseModel)
+    @api.response(201, 'Created', contextInfoModel)
+    def post(self):
+        return builderOps.aioBuild(datastore,
+                                   puppetfile=request.files['puppetfile'],
+                                   imageName=str(request.form['imageName']),
+                                   dockerfile=request.files['dockerfile'],
+                                   puppetmanifest=request.files['puppetmanifest'],
+                                   group='default', synchronous = True
+                                  )
+        newImage(datastore=datastore, contextReference=str(request.form['contextReference']), imageName=str(request.form['imageName']), dockerfile=request.files['dockerfile'], puppetmanifest=request.files['puppetmanifest'])
 
 # Cluster API
 

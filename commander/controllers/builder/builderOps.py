@@ -8,6 +8,7 @@ from datastore.dataStore import DataStore
 from toolbox import puppet
 from toolbox import docker
 from toolbox import files
+from threading import Thread
 
 def contextList(datastore):
     '''
@@ -263,3 +264,58 @@ def deleteImage(datastore, imageToken):
     except Exception, e:
         aux = errors.ControllerError("Unknown error: "+ e.message)
         return aux.getResponse()
+
+def aioBuild(datastore, puppetfile, imageName, dockerfile, puppetmanifest, group='default', synchronous=False):
+    import time
+    def __aioThread__(datastore, contextToken, imageName, dockerfile, puppetmanifest):
+        # check context
+        context = None
+        while True:
+            time.sleep(5)
+            context = checkContext(datastore=datastore, token=contextToken)[0]
+
+            if context['status'] is not 'building':
+                break
+
+        if context['status'] is not 'finished': # error case
+            return
+
+        # build image
+        image = newImage(datastore=datastore,
+                 contextReference=contextToken,
+                 imageName=imageName,
+                 dockerfile=dockerfile,
+                 puppetmanifest=puppetmanifest
+                )
+        print image
+        # check image
+        while True:
+            time.sleep(5)
+            response = checkImage(datastore=datastore, imageToken=image['token'])
+            image = response[0]
+            if image['status'] is not 'building':
+                break
+
+        return context
+
+    context = newContext(puppetfile=puppetfile, datastore=datastore, group=group)
+
+    if context['status'] is 'building':
+        if synchronous:
+            return __aioThread__(datastore,
+                          context['token'],
+                          imageName,
+                          dockerfile,
+                          puppetmanifest
+                         )
+        else: # asynchronous
+            thread = Thread(target = __aioThread__,
+                            args=[datastore,
+                                  context['token'],
+                                  imageName,
+                                  dockerfile,
+                                  puppetmanifest
+                                 ]
+                           )
+            thread.start()
+    return context
