@@ -34,6 +34,9 @@ FS_ROOT = '/var/crane/'
 FS_BUILDS = FS_ROOT + 'builds/'
 """Path where the contexts and builds will be created. Must ends in '/'."""
 
+FS_CLUSTERS = FS_ROOT + 'clusters/'
+"""Path where the clusters and machine data (certificates, etc) will be stored. Must ends in '/'."""
+
 FS_COMPOSITIONS = FS_ROOT + 'compositions/'
 """Path where the compositions will be created. Must ends in '/'."""
 
