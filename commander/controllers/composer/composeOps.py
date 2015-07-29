@@ -15,8 +15,15 @@ def newComposition(datastore, composefile, clusterReference=''):
     try:
         token = tokens.newCompositionToken(datastore)
 
-        # Pull images
-        ## TODO: at the moment images are local, so it is not needed.
+        # retrieve cluster information from datastore
+        cluster = datastore.getCluster(clusterReference)
+        if cluster == None:
+            raise errors.NotFoundError("Cluster does not exist.")
+
+        # Check docker
+        dockercheck = docker.checkDocker(dockerClient=token['endpoint'])
+        if dockercheck is not True:
+            raise errors.ControllerError("Error in cluster. Docker error: " + dockercheck)
 
         # Create composition in datastore
         datastorecomposition = {'token':token, 'cluster':clusterReference, 'status':'providing', 'description':'Providing data'}
@@ -34,9 +41,7 @@ def newComposition(datastore, composefile, clusterReference=''):
         if(clusterReference==''):
             docker.runComposition(datastore, token)
         else:
-            ## TODO: at the momment images are local, but in the future you will can deploy compositions on remote docker hosts..
-            ## Call here the runComposition method with the dockerClient parameter.
-            raise ControllerError("Remote docker hosts feature not supported yet.")
+            docker.runComposition(datastore, token, dockerClient=cluster['endpoint'])
 
         return datastorecomposition
     except dataStore.DataStoreError, e:

@@ -73,7 +73,7 @@ def checkContext(datastore, token, detail=False):
         # retrieve context information in datastore
         context = datastore.getContext(token)
         if context == None:
-            raise errors.NotFoundError("Token does not exist.")
+            raise errors.NotFoundError("Context does not exist.")
 
         # Check previous stored status
         if context['status']=='building':
