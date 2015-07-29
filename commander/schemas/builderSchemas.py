@@ -15,8 +15,7 @@ build_basic_status_response = {
     'context': fields.String,
     'description': fields.String,
     'imageName' : fields.String,
-    'tag' : fields.String,
-    'lastChecked': fields.DateTime(dt_format='iso8601')
+    'tag' : fields.String
 }
 
 
@@ -36,8 +35,7 @@ context_basic_status_response = {
     'token': fields.String,
     'group': fields.String,
     'status': fields.String,
-    'description': fields.String,
-    'lastChecked': fields.DateTime(dt_format='iso8601')
+    'description': fields.String
 }
 
 

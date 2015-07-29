@@ -8,8 +8,10 @@ cluster_basic_status_response = {
     'token': fields.String,
     'status': fields.String,
     'description': fields.String,
-    'numberOfmachines': fields.Integer,
-    'lastChecked': fields.DateTime(dt_format='iso8601')
+    'numberOfMachines': fields.Integer,
+    'type': fields.String,
+    'endpoint': fields.String,
+    'detail': fields.String
 }
 
 machine_description = {'reference': fields.String, 'status': fields.String }

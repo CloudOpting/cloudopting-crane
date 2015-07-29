@@ -8,8 +8,7 @@ composer_basic_status_response = {
     'token': fields.String,
     'status': fields.String,
     'description': fields.String,
-    'clusterId': fields.String,
-    'lastChecked': fields.DateTime(dt_format='iso8601')
+    'clusterId': fields.String
 }
 
 container_description = {'reference': fields.String, 'status': fields.String, 'networkInformation': fields.String }
