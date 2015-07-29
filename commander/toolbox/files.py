@@ -51,6 +51,15 @@ def savePuppetManifest(contextToken, imageName, puppetmanifest):
     path = os.path.join(path, settings.FS_DEF_PUPPETMANIFEST)
     puppetmanifest.save(path)
 
+# Cluster related operations
+
+def createClusterDir(token):
+    path = os.path.join(settings.FS_CLUSTERS, token)
+    os.makedirs(path, 0775)
+
+def deleteClusterDir(token):
+    path = os.path.join(settings.FS_CLUSTERS, token)
+    shutil.rmtree(path, ignore_errors=True)
 
 # Composer related operations
 
@@ -77,5 +86,7 @@ def createFile(path, content):
 def purgeWorkdir():
     if os.path.exists(settings.FS_BUILDS):
         shutil.rmtree(settings.FS_BUILDS)
+    if os.path.exists(settings.FS_CLUSTERS):
+        shutil.rmtree(settings.FS_CLUSTERS)
     if os.path.exists(settings.FS_COMPOSITIONS):
         shutil.rmtree(settings.FS_COMPOSITIONS)
