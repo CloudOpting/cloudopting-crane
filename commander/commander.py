@@ -7,6 +7,7 @@ from schemas import builderSchemas, clusterSchemas, composerSchemas, generalSche
 from werkzeug.datastructures import FileStorage
 
 from controllers.builder import builderOps
+from controllers.cluster import clusterOps
 from controllers.composer import composeOps
 from controllers.management import managementOps
 from datastore import dataStore
@@ -152,8 +153,8 @@ class ContextDetails(Resource):
     @api.response(404, 'Not found', errorResponseModel)
     @api.response(200, 'OK', contextDetailModel)
     def get(self, token):
-        return builderOps.checkContext(datastore=datastore, token=token, detail=True)
 
+        return builderOps.checkContext(datastore=datastore, token=token, detail=True)
 @builder_ns.route('/images')
 class BuildService(Resource):
 
@@ -232,10 +233,35 @@ machineArgs.add_argument('passphrase', help='In case of privateKey-passphrase cr
 machineArgs.add_argument('user', help='In case of user-password credentials: user.', location='form')
 machineArgs.add_argument('password', help='In case of user-password credentials: password.', location='form')
 
-@cluster_ns.route('')
+dockerHostArgs = api.parser()
+dockerHostArgs.add_argument('endpoint', help='Endpoint where docker daemon is listening', location='form')
+dockerHostArgs.add_argument('apiVersion', help='Docker API version used by the daemon. If blank it will be detected automatically .', location='form')
+
+@cluster_ns.route('/provisionedSingleMachine')
+class ProvisionedSingleMachineService(Resource):
+
+    @api.doc(description='Set a ready-to-use machine that exposes a docker engine api as a one-machine cluster (is not a real cluster, but uses the same interface) .', parser=dockerHostArgs)
+    @api.response(500, 'Error processing the request', errorResponseModel)
+    @api.response(201, 'Created', clusterInfoModel)
+    def post(self):
+        try:   # if apiVersion not provided it will use default.
+            return clusterOps.newContext(datastore, request.form['endpoint'], request.form['apiVersion'])
+        except:
+            return clusterOps.newSingleProvisionedMachineCluster(datastore, request.form['endpoint'])
+
+@cluster_ns.route('/provisioned')
+class ProvisionedMachineService(Resource):
+
+    @api.doc(description='Create a new cluster with a ready-to-use machine that exposes a docker engine api.', parser=dockerHostArgs)
+    @api.response(500, 'Error processing the request', errorResponseModel)
+    @api.response(201, 'Created', clusterInfoModel)
+    def post(self):
+        return not_implemented()
+
+@cluster_ns.route('/ssh')
 class ClusterService(Resource):
 
-    @api.doc(description='Create a new swarm cluster.', parser=machineArgs)
+    @api.doc(description='Create a new cluster using ssh access to machine.', parser=machineArgs)
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', clusterInfoModel)
     def post(self):
@@ -258,7 +284,7 @@ class ClusterInstance(Resource):
     @api.response(404, 'Not found', errorResponseModel)
     @api.response(200, 'OK', clusterDetailModel)
     def get(self, token):
-        return not_implemented()
+        return clusterOps.checkCluster(datastore, token)
 
     @api.doc(description='Destroy a cluster and the related data.')
     @api.response(500, 'Error processing the request', errorResponseModel)
@@ -267,6 +293,15 @@ class ClusterInstance(Resource):
     def delete(self, token):
         return not_implemented()
 
+@cluster_ns.route('/<token>/detail')
+@api.doc(params={'token': 'Token that identifies the docker swarm cluster.'})
+class ClusterInstanceDetail(Resource):
+    @api.doc(description='Get detailed information about a docker swarm cluster.')
+    @api.response(500, 'Error processing the request', errorResponseModel)
+    @api.response(404, 'Not found', errorResponseModel)
+    @api.response(200, 'OK', clusterDetailModel)
+    def get(self, token):
+        return clusterOps.checkCluster(datastore, token, detail=True)
 
 # Composer API
 
