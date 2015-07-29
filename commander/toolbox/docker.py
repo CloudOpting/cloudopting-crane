@@ -1,4 +1,5 @@
 import os
+import ssl
 import settings
 from threading import Thread
 import subprocess
@@ -6,6 +7,8 @@ import subprocess
 
 from controllers import errors
 from files import createFile
+import compose
+import compose.config
 
 # Importing docker library
 def import_non_local(name, custom_name=None):
@@ -46,11 +49,11 @@ def dockerVersion(dockerClient=settings.DK_DEFAULT_BUILD_HOST):
     cli = dockerpy.Client(base_url=dockerClient, version='auto')
     return cli.version()
 
-def dockerInfo(dockerClient):
+def dockerInfo(dockerClient, version='auto'):
     '''
     Returns general information about docker daemon.
     '''
-    cli = dockerpy.Client(base_url=dockerClient, version='auto')
+    cli = dockerpy.Client(base_url=dockerClient, version=version)
     return cli.info()
 
 def purge():
@@ -127,7 +130,7 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
                 if err is None:
                     command = 'docker tag ' + datastore.getImage(imageToken)['tag']+' '+settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
                     if __executeCommand__(command, cwd, pidfile)!=0:
-                        err = "Error tagging image"
+                        err = "Error tagging image. Maybe an image with the same name for this group already exists."
                     else:
                         createFile(os.path.join(dockerfilepath, "tag_command"), command)
 
@@ -272,6 +275,10 @@ def runComposition(datastore, token, dockerClient=settings.DK_DEFAULT_BUILD_HOST
     # launch compose
     # TODO: replace commandline docker API with docker-compose native calls
     def composeThread():
+        cproject = ComposeProject(name=token, base_dir=os.path.join(settings.FS_COMPOSITIONS, token))
+        # pull images
+        cproject.pull()
+        # run
         cwd =  os.path.join(settings.FS_COMPOSITIONS, token)
         command = 'docker-compose up ' + '&> '+ settings.FS_DEF_DOCKER_COMPOSE_LOG
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
@@ -286,3 +293,43 @@ def runComposition(datastore, token, dockerClient=settings.DK_DEFAULT_BUILD_HOST
 
     thread = Thread(target = composeThread)
     thread.start()
+
+def docker_client():
+    """
+    Returns a docker-py client configured using environment variables
+    according to the same logic as the official Docker client.
+    """
+    cert_path = os.environ.get('DOCKER_CERT_PATH', '')
+    if cert_path == '':
+        cert_path = os.path.join(os.environ.get('HOME', ''), '.docker')
+
+    base_url = os.environ.get('DOCKER_HOST')
+    tls_config = None
+
+    if os.environ.get('DOCKER_TLS_VERIFY', '') != '':
+        parts = base_url.split('://', 1)
+        base_url = '%s://%s' % ('https', parts[1])
+
+        client_cert = (os.path.join(cert_path, 'cert.pem'), os.path.join(cert_path, 'key.pem'))
+        ca_cert = os.path.join(cert_path, 'ca.pem')
+
+        tls_config = dockerpy.tls.TLSConfig(
+            ssl_version=ssl.PROTOCOL_TLSv1,
+            verify=True,
+            assert_hostname=False,
+            client_cert=client_cert,
+            ca_cert=ca_cert,
+        )
+
+    timeout = int(os.environ.get('DOCKER_CLIENT_TIMEOUT', 60))
+    return dockerpy.Client(base_url=base_url, tls=tls_config, version='auto', timeout=timeout)
+
+class ComposeProject():
+    def __init__(self, name, base_dir, filename='docker-compose.yml', dockerClient=docker_client(), default_registry=None):
+        self.dockerClient = dockerClient
+        self.service_dicts = compose.config.load(compose.config.find(base_dir, filename))
+        self.project = compose.Project.from_dicts(name, service_dicts, self.dockerClient)
+        self.default_registry = default_registry
+
+        def pull(self):
+            self.project.pull(default_registry=default_registry)
