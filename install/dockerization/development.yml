@@ -1,8 +1,0 @@
-commander:
-    extends:
-        file: common.yml
-        service: commander
-    ports:
-      - "8888:8888"
-    environment:
-      - DEBUG=true
