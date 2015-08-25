@@ -1,0 +1,4 @@
+engine:
+  build: .
+  privileged: true
+  hostname: coengine

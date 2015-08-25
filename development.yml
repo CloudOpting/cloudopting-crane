@@ -1,0 +1,27 @@
+commander:
+  extends:
+    file: ./commander/compose.yml
+    service: commander
+  environment:
+    - DEBUG=true
+    - REDIS=true
+  ports:
+    - "8888:8888"
+  links:
+    - redis
+    - registry:coregistry
+    - engine:buildengine
+registry:
+  extends:
+    file: ./registry/compose.yml
+    service: registry
+  ports:
+      - 5000:5000
+engine:
+  extends:
+    file: ./engine/compose.yml
+    service: engine
+  links:
+    - registry:coregistry
+redis:
+  image: redis:3
