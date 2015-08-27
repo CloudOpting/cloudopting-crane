@@ -1,4 +1,7 @@
 engine:
   build: .
   privileged: true
+  volumes:
+    - /var/lib/docker
+    - /lib/modules:/lib/modules
   hostname: coengine
