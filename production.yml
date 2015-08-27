@@ -16,6 +16,10 @@ registry:
     service: registry
   ports:
       - 5000:5000
+  volumes:
+    - /var/lib/registry
+    - /certs
+    - /auth
 engine:
   extends:
     file: ./engine/compose.yml

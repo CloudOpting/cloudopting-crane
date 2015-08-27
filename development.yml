@@ -10,13 +10,17 @@ commander:
   links:
     - redis
     - registry:coregistry
-    - engine:buildengine
+    - engine:coengine
 registry:
   extends:
     file: ./registry/compose.yml
     service: registry
   ports:
       - 5000:5000
+  volumes:
+    - registry-data/data:/var/lib/registry
+    - registry-data/certs:/certs
+    - registry-data/auth:/auth
 engine:
   extends:
     file: ./engine/compose.yml

@@ -7,7 +7,3 @@ registry:
     REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
     REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
     REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
-  volumes:
-    - /path/data:/var/lib/registry
-    - /path/certs:/certs
-    - /path/auth:/auth
