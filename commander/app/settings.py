@@ -83,7 +83,7 @@ FS_DEF_DOCKER_COMPOSE_PID = 'compose.pid'
 """Default name for the file that stores PID of the docker compose process"""
 
 # Docker host
-DK_DEFAULT_BUILD_HOST = "unix:///var/run/docker.sock"
+DK_DEFAULT_BUILD_HOST = "tcp://coengine:4243"
 """Default docker host where images will be built"""
 
 # Docker registry

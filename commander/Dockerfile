@@ -7,20 +7,20 @@ RUN apt-get update -qq
 COPY app /usr/src/commander/
 
 # Install git
-RUN apt-get install -y git
+RUN apt-get install -yqq git
 
 # Install requirements
-RUN apt-get install -y python-pip
+RUN apt-get install -yqq python-pip
 RUN pip install -r /usr/src/commander/requirements.txt
 
 # Install puppet and r10k
-RUN apt-get install -y puppet
-RUN apt-get install -y ruby
-RUN gem install r10k
+RUN apt-get install -yqq puppet
+RUN apt-get install -yqq ruby
+RUN gem install r10k --quiet
 
 # Add engine certificates
-COPY ./certs/client-cert.pem /usr/src/commander/certs/client-cert.pem
-COPY ./certs/client-key.pem /usr/src/commander/certs/client-key.pem
+COPY ./certs/client-cert.pem /usr/src/commander/certs/cert.pem
+COPY ./certs/client-key.pem /usr/src/commander/certs/key.pem
 COPY ./certs/ca.pem /usr/src/commander/certs/ca.pem
 
 # Add registry certificate
