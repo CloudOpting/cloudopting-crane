@@ -13,6 +13,9 @@ RUN apt-get install -yqq git
 RUN apt-get install -yqq python-pip
 RUN pip install -r /usr/src/commander/requirements.txt
 
+# Install docker client (required by docker-py)
+COPY ./docker-client-exec /usr/bin/docker
+
 # Install puppet and r10k
 RUN apt-get install -yqq puppet
 RUN apt-get install -yqq ruby
