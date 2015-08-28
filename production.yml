@@ -2,6 +2,7 @@ commander:
   extends:
     file: ./commander/compose.yml
     service: commander
+  image: cloudoptingcrane/commander
   environment:
     - REDIS=true
   ports:
@@ -14,6 +15,7 @@ registry:
   extends:
     file: ./registry/compose.yml
     service: registry
+  image: cloudoptingcrane/registry
   ports:
       - 5000:5000
   volumes:
@@ -24,6 +26,7 @@ engine:
   extends:
     file: ./engine/compose.yml
     service: engine
+  image: cloudoptingcrane/engine
   links:
     - registry:coregistry
 redis:
