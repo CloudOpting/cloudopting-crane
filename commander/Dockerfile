@@ -23,6 +23,9 @@ COPY ./certs/client-cert.pem /usr/src/commander/certs/client-cert.pem
 COPY ./certs/client-key.pem /usr/src/commander/certs/client-key.pem
 COPY ./certs/ca.pem /usr/src/commander/certs/ca.pem
 
+# Add registry certificate
+COPY ./certs/registry-ca.crt /usr/src/commander/certs/registry-ca.crt
+
 # Cleaning
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

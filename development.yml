@@ -1,18 +1,18 @@
-commander:
-  extends:
-    file: ./commander/compose.yml
-    service: commander
-  environment:
-    - DEBUG=true
-    - REDIS=true
-  ports:
-    - "8888:8888"
-  volumes:
-    - ./commander/commander-data/var/crane:/var/crane/
-  links:
-    - redis
-    - registry:coregistry
-    - engine:coengine
+# commander:
+#   extends:
+#     file: ./commander/compose.yml
+#     service: commander
+#   environment:
+#     - DEBUG=true
+#     - REDIS=true
+#   ports:
+#     - "8888:8888"
+#   volumes:
+#     - ./commander/commander-data/var/crane:/var/crane/
+#   links:
+#     - redis
+#     - registry:coregistry
+#     - engine:coengine
 registry:
   extends:
     file: ./registry/compose.yml
@@ -20,14 +20,14 @@ registry:
   ports:
       - 5000:5000
   volumes:
-    - ./registry/registry-data/data:/var/lib/registry
-    - ./registry/registry-data/certs:/certs
-    - ./registry/registry-data/auth:/auth
+    - ./registry/registry-data:/var/lib/registry
+    - ./registry/certs:/certs
+#    - ./registry/auth:/auth
 engine:
   extends:
     file: ./engine/compose.yml
     service: engine
   links:
     - registry:coregistry
-redis:
-  image: redis:3
+#redis:
+#  image: redis:3

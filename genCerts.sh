@@ -123,6 +123,22 @@ mkdir -p ${REGISTRY_CERTS_DIR}
 openssl req -subj "/CN=$REGISTRY_HOSTNAME" -newkey rsa:4096 -nodes -sha256 -keyout ${REGISTRY_CERTS_DIR}/domain.key -x509 -days 365 -out ${REGISTRY_CERTS_DIR}/domain.crt
 printf "${NC}"
 
+## Copy domain certificates to commander
+mkdir -p ${COMMANDER_CERTS_DIR}
+printf "${INFO}Copying domain certificate to commander context...${NC}\n\n"
+printf "${OP}"
+cp ${REGISTRY_CERTS_DIR}/domain.crt ${COMMANDER_CERTS_DIR}/registry-ca.crt
+printf "${NC}"
+printf "\n${SUCC}Copied ${ELEM}domain.crt${SUCC} to ${ELEM}${COMMANDER_CERTS_DIR}/registry-ca.crt${SUCC}.${NC}\n\n\n"
+
+
+## Copy domain certificates to engine
+printf "${INFO}Copying domain certificate to engine context...${NC}\n\n"
+printf "${OP}"
+cp ${REGISTRY_CERTS_DIR}/domain.crt ${ENGINE_CERTS_DIR}/registry-ca.crt
+printf "${NC}"
+printf "\n${SUCC}Copied ${ELEM}domain.crt${SUCC} to ${ELEM}${ENGINE_CERTS_DIR}/registry-ca.crt${SUCC}.${NC}\n\n\n"
+
 ## How to make docker daemon trust docker registry
 printf "${BINFO}-----------------------------------------------------------------------------------------------------------------------${NC}\n"
 printf "${BINFO}  These notes help you to configure manually a docker engine to trust the docker registry that use the generated certs.${NC}\n"

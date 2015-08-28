@@ -19,6 +19,9 @@ COPY ./certs/ca.pem /root/.docker/ca.pem
 COPY ./certs/server-cert.pem /root/.docker/cert.pem
 COPY ./certs/server-key.pem /root/.docker/key.pem
 
+# Add registry certificate
+COPY ./certs/registry-ca.crt /etc/docker/certs.d/coregistry:5000/ca.crt
+
 # Cleaning
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
