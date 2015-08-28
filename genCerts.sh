@@ -5,10 +5,11 @@ export ENGINE_HOSTNAME=coengine
 export CLIENT_HOSTNAME=commander
 export CA_PASSWORD=p4ssw0rd
 export ENGINE_CERTS_DIR=engine/certs
+export COMMANDER_CERTS_DIR=commander/certs
 
 export REGISTRY_HOSTNAME=coregistry
 export REGISTRY_AUTH_DIR=registry/auth
-export REGISTRY_CERTS_DIR=registry/auth
+export REGISTRY_CERTS_DIR=registry/certs
 export REGISTRY_DEF_USER=reguser
 export REGISTRY_DEF_USER_PASS=s3cr3tp4ssw0rd
 
@@ -63,6 +64,17 @@ rm -v ${ENGINE_CERTS_DIR}/client.csr
 printf "${NC}"
 printf "\n${SUCC}Got ${ELEM}client-cert.pem${SUCC} and ${ELEM}client-key.pem${SUCC} .${NC}\n\n\n"
 
+## Copying client certificates to commander context.
+mkdir -p ${COMMANDER_CERTS_DIR}
+printf "${INFO}Copying client certificates to commander context...${NC}\n\n"
+printf "${OP}"
+cp ${ENGINE_CERTS_DIR}/client-cert.pem ${COMMANDER_CERTS_DIR}/client-cert.pem
+cp ${ENGINE_CERTS_DIR}/client-key.pem ${COMMANDER_CERTS_DIR}/client-key.pem
+cp ${ENGINE_CERTS_DIR}/ca.pem ${COMMANDER_CERTS_DIR}/ca.pem
+printf "${NC}"
+printf "\n${SUCC}Copied ${ELEM}client-cert.pem${SUCC}, ${ELEM}client-key.pem${SUCC} and ${ELEM}ca.pem${SUCC} to ${ELEM}${COMMANDER_CERTS_DIR}${SUCC}.${NC}\n\n\n"
+
+
 ## How to set client certificates
 printf "${BINFO}-----------------------------------------------------------------------------------------------------------------------${NC}\n"
 printf "${BINFO}  These notes help you to configure manually the docker engine and docker client with the generated certificates.${NC}\n"
@@ -97,6 +109,8 @@ printf "${BINFO}----------------------------------------------------------------
 
 
 # REGISTRY CERTIFICATES
+mkdir -p ${REGISTRY_AUTH_DIR}
+mkdir -p ${REGISTRY_CERTS_DIR}
 ## Create htpasswd with user for basic autentication
 printf "${OP}"
 mkdir -p ${REGISTRY_AUTH_DIR}

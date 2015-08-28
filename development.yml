@@ -7,6 +7,8 @@ commander:
     - REDIS=true
   ports:
     - "8888:8888"
+  volumes:
+    - ./commander/commander-data/var/crane:/var/crane/
   links:
     - redis
     - registry:coregistry
@@ -18,9 +20,9 @@ registry:
   ports:
       - 5000:5000
   volumes:
-    - registry-data/data:/var/lib/registry
-    - registry-data/certs:/certs
-    - registry-data/auth:/auth
+    - ./registry/registry-data/data:/var/lib/registry
+    - ./registry/registry-data/certs:/certs
+    - ./registry/registry-data/auth:/auth
 engine:
   extends:
     file: ./engine/compose.yml
