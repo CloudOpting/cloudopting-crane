@@ -76,15 +76,27 @@ FS_DEF_DOCKER_INFO = 'build_info.txt'
 FS_DEF_DOCKER_BUILD_PID = 'build.pid'
 """Default name for the file that stores PID of the docker build process (and tag + push)"""
 
-FS_DEF_DOCKER_COMPOSE_LOG = 'compose.log'
+FS_DEF_DOCKER_COMPOSE__PULL_LOG = 'compose_pull.log'
 """Default name for the log of docker compose"""
 
-FS_DEF_DOCKER_COMPOSE_PID = 'compose.pid'
-"""Default name for the file that stores PID of the docker compose process"""
+FS_DEF_DOCKER_COMPOSE_PULL_CODE = 'compose_pull.code'
+"""This file is created when the pull process starts and contains nothing until the pull process stops. After pull: 0 means succefull pull, 1 error."""
 
 # Docker host
 DK_DEFAULT_BUILD_HOST = "tcp://coengine:4243"
 """Default docker host where images will be built"""
+
+DK_DEFAULT_BUILD_HOST_CERTS = "/usr/src/commander/certs"
+"""Path where the certificates for the build host are stored. Leave as 'None' if not using TLS."""
+
+DK_DEFAULT_TEST_HOST = "tcp://coengine:4243"
+"""Default docker host for testing and auxiliar operations"""
+
+DK_DEFAULT_TEST_HOST_CERTS = "/usr/src/commander/certs"
+"""Path where the certificates for the testing host are stored. Leave as 'None' if not using TLS."""
+
+DK_CLIENT_TIMEOUT = 60
+"""Docker client timeout"""
 
 # Docker registry
 DK_RG_SWITCH = True

@@ -9,12 +9,13 @@ from controllers import errors
 from files import createFile
 import compose
 import compose.config
+from compose import project
 
 # Importing docker library
 def import_non_local(name, custom_name=None):
-    '''
+    """
     Tweak to import 'docker' module from docker-py inside de local 'docker' module.
-    '''
+    """
     import imp, sys
 
     custom_name = custom_name or name
@@ -29,70 +30,107 @@ def import_non_local(name, custom_name=None):
 dockerpy = import_non_local('docker', 'dockerpy')
 # END: Importing docker library
 
+def dockerClient(base_url=settings.DK_DEFAULT_TEST_HOST, cert_path=settings.DK_DEFAULT_TEST_HOST_CERTS):
+    """
+    Returns a docker-py client configured with URL and certs path. Set cert_path to None to disable TLS.
+    """
+    tls_config = None
+
+    if cert_path != None:
+        parts = base_url.split('://', 1)
+        base_url = '%s://%s' % ('https', parts[1])
+
+        client_cert = (os.path.join(cert_path, 'cert.pem'), os.path.join(cert_path, 'key.pem'))
+        ca_cert = os.path.join(cert_path, 'ca.pem')
+
+        tls_config = dockerpy.tls.TLSConfig(
+            ssl_version=ssl.PROTOCOL_TLSv1,
+            verify=True,
+            assert_hostname=False,
+            client_cert=client_cert,
+            ca_cert=ca_cert,
+        )
+
+    timeout = settings.DK_CLIENT_TIMEOUT
+    return dockerpy.Client(base_url=base_url, tls=tls_config, version='auto', timeout=timeout)
+
+# Caching default dockerClient
+defaultDockerClient = dockerClient()
+
+def optionsFromClient(dk):
+    """
+    Extract command line options from docker-py client object
+    """
+    tls_flag = False
+    # extract and convert host base_url from docker-py client
+    host_url=dk.base_url
+    # if host_url starts with https -> replace with tcp
+    parts = host_url.split('://', 1)
+    if parts[0] == 'https':
+        host_url = '%s://%s' % ('tcp', parts[1])
+        tls_flag = True
+
+    if tls_flag:
+        # extract cert path from docker-py client object
+        certs=dk.cert   # [0] is 'cert.pem', [1] is 'key.pem'
+        cacert=os.path.join(os.path.split(certs[0])[0], 'ca.pem')
+
+        daemon_opts = "--host='"+host_url+"' --tlsverify=true --tlskey="+certs[1]+" --tlscert="+certs[0]+" --tlscacert="+cacert+" "
+    else:
+        daemon_opts = ""
+
+    return daemon_opts
 
 
-def checkDocker(dockerClient=settings.DK_DEFAULT_BUILD_HOST):
-    '''
+def checkDocker(dk=defaultDockerClient):
+    """
     Checks the communication with Docker daemon. Returns True if ok, fail description if APIError.
-    '''
+    """
     try:
-        cli = dockerpy.Client(base_url=dockerClient, version='auto')
-        cli.version()
+        dk.version()
         return True
     except Exception, e:
         return str(e)
 
-def dockerVersion(dockerClient=settings.DK_DEFAULT_BUILD_HOST):
-    '''
+
+def dockerVersion(dk=defaultDockerClient):
+    """
     Returns information about the Docker daemon version.
-    '''
-    cli = dockerpy.Client(base_url=dockerClient, version='auto')
-    return cli.version()
+    """
+    return dk.version()
 
-def dockerInfo(dockerClient, version='auto'):
-    '''
+
+def dockerInfo(dk=defaultDockerClient):
+    """
     Returns general information about docker daemon.
-    '''
-    cli = dockerpy.Client(base_url=dockerClient, version=version)
-    return cli.info()
+    """
+    dk.info()
 
-def purge():
-    '''
+
+def purge(dk=defaultDockerClient):
+    """
     Deletes all containers and images. Force if running. This operation is synchronous.
     Returns True if succefull, false if unsuccefull.
-    '''
-    # Prepare commands
-    command1 = 'docker rm -f $(docker ps -q)'
-    command2 = 'docker rmi -f $(docker images -q)'
+    """
 
-    # Remove containers
-    p1 = subprocess.Popen(command1, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    try:
+        containers = dk.containers(all=True, quiet=True)
+        for container in containers:
+            dk.remove_container(container=container, v=True, force=True)
 
-    response1 = ''
-    for line in p1.stdout.readlines():
-        response1+=line+os.linesep
+        images = dk.images(quiet=True)
+        for image in images:
+            dk.remove_image(image=image, force=True)
 
-    retval1 = p1.wait()
-
-    # Remove images
-    p2 = subprocess.Popen(command2, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
-    response2 = ''
-    for line in p2.stdout.readlines():
-        response2+=line+os.linesep
-
-    retval2 = p2.wait()
-
-    # Check result
-    if retval1==0 and retval2==0:
         return True
-    else:
+
+    except:
         return False
 
 
-def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=settings.DK_DEFAULT_BUILD_HOST):
+def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerClient):
     # launch build
-    # TODO: replace commandline docker API with docker-py client (fix docker host socket permission and TLS)
+    # TODO: In the future, replace commandline docker API with docker-py client. The docker-py api for build do not support context path different from Dockerfile path.
     def __executeCommand__(command, cwd, pidfile):
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
 
@@ -107,6 +145,8 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
     def __buildThread__():
         err = None
         try:
+            daemon_opts = optionsFromClient(dk)
+
             cwd =  os.path.join(settings.FS_BUILDS, contextToken)
 
             dockerfilepath = cwd
@@ -118,7 +158,7 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
             # build
             if err is None:
 
-                command = 'docker build -f '+ dockerfilepath+ '/Dockerfile' +' -t '+ 'default/'+datastore.getImage(imageToken)['imageName'] +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
+                command = 'docker '+daemon_opts+' build -f '+ dockerfilepath+ '/Dockerfile' +' -t '+ 'default/'+datastore.getImage(imageToken)['imageName'] +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
 
                 if __executeCommand__(command, cwd, pidfile)!=0:
                     err = "Error while building"
@@ -128,7 +168,7 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
             if settings.DK_RG_SWITCH:
                 # tag
                 if err is None:
-                    command = 'docker tag ' + datastore.getImage(imageToken)['tag']+' '+settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
+                    command = 'docker '+daemon_opts+' tag ' + datastore.getImage(imageToken)['tag']+' '+settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
                     if __executeCommand__(command, cwd, pidfile)!=0:
                         err = "Error tagging image. Maybe an image with the same name for this group already exists."
                     else:
@@ -136,7 +176,7 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
 
                 # push
                 if err is None:
-                    command = 'docker push ' + settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
+                    command = 'docker '+daemon_opts+' push ' + settings.DK_RG_ENDPOINT+'/'+datastore.getImage(imageToken)['tag']
                     if __executeCommand__(command, cwd, pidfile)!=0:
                         err = "Error while pushing to registry"
                     else:
@@ -154,8 +194,9 @@ def buildImage(datastore, contextToken, imageName, imageToken, dockerClient=sett
     thread.start()
 
 
-def deleteImage(datastore, imageToken):
+def deleteImage(datastore, imageToken, dk=defaultDockerClient):
     try:
+        daemon_opts = optionsFromClient(dk)
         # get tag of the docker image
         image = datastore.getImage(imageToken)
         context = datastore.getContext(image['context'])
@@ -166,7 +207,7 @@ def deleteImage(datastore, imageToken):
         cwd =  os.path.join(cwd, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
         cwd =  os.path.join(cwd, image['imageName'])
 
-        command = 'docker rmi -f '+ dockerImageTag
+        command = 'docker '+daemon_opts+' rmi -f '+ dockerImageTag
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
 
         response = ''
@@ -181,11 +222,10 @@ def deleteImage(datastore, imageToken):
         return False
 
 
-
-def deleteUntaggedImages():
+def deleteUntaggedImages(dk=defaultDockerClient):
     try:
-
-        command = 'docker rmi -f  $(docker images | grep "^<none>" | awk "{print $3}")'
+        daemon_opts = optionsFromClient(dk)
+        command = 'docker '+daemon_opts+' rmi -f  $(docker images | grep "^<none>" | awk "{print $3}")'
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
 
         response = ''
@@ -202,9 +242,9 @@ def deleteUntaggedImages():
 
 
 def isDockerBuildRunning(contextToken, imageName):
-    '''
+    """
     Checks if the docker build process is still running. Returns True if the process still runs and False if the process is not running.
-    '''
+    """
     pidpath = os.path.join(settings.FS_BUILDS, contextToken)
     pidpath = os.path.join(pidpath, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
     pidpath = os.path.join(pidpath, imageName)
@@ -224,9 +264,9 @@ def isDockerBuildRunning(contextToken, imageName):
 
 
 def getBuildErrors(contextToken, imageName):
-    '''
+    """
     Retrieve errors in error building log. None if no errors.
-    '''
+    """
     path = os.path.join(settings.FS_BUILDS, contextToken)
     path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
     path = os.path.join(path, imageName)
@@ -239,9 +279,9 @@ def getBuildErrors(contextToken, imageName):
     return content
 
 def getBuildLog(contextToken, imageName):
-    '''
+    """
     Retrieve standard building log.
-    '''
+    """
     path = os.path.join(settings.FS_BUILDS, contextToken)
     path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
     path = os.path.join(path, imageName)
@@ -252,9 +292,9 @@ def getBuildLog(contextToken, imageName):
     return content
 
 def stopBuild(contextToken, imageName):
-    '''
+    """
     Stops the build process. Return True if could stop and False it not.
-    '''
+    """
     path = os.path.join(settings.FS_BUILDS, contextToken)
     path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
     path = os.path.join(path, imageName)
@@ -271,65 +311,57 @@ def stopBuild(contextToken, imageName):
         except OSError:
             return False
 
-def runComposition(datastore, token, dockerClient=settings.DK_DEFAULT_BUILD_HOST):
+def runComposition(datastore, token, dk=defaultDockerClient):
     # launch compose
-    # TODO: replace commandline docker API with docker-compose native calls
+    # TODO: control pulling errors
     def composeThread():
         cproject = ComposeProject(name=token, base_dir=os.path.join(settings.FS_COMPOSITIONS, token))
         # pull images
         cproject.pull()
-        # run
-        cwd =  os.path.join(settings.FS_COMPOSITIONS, token)
-        command = 'docker-compose up ' + '&> '+ settings.FS_DEF_DOCKER_COMPOSE_LOG
-        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
-
-        response = ''
-        for line in p.stdout.readlines():
-            response+=line+os.linesep
-
-        createFile(os.path.join(cwd, settings.FS_DEF_DOCKER_COMPOSE_PID), str(p.pid))
-
-        retval = p.wait()
+        # run composition
+        cproject.up()
 
     thread = Thread(target = composeThread)
     thread.start()
 
-def docker_client():
-    """
-    Returns a docker-py client configured using environment variables
-    according to the same logic as the official Docker client.
-    """
-    cert_path = os.environ.get('DOCKER_CERT_PATH', '')
-    if cert_path == '':
-        cert_path = os.path.join(os.environ.get('HOME', ''), '.docker')
-
-    base_url = os.environ.get('DOCKER_HOST')
-    tls_config = None
-
-    if os.environ.get('DOCKER_TLS_VERIFY', '') != '':
-        parts = base_url.split('://', 1)
-        base_url = '%s://%s' % ('https', parts[1])
-
-        client_cert = (os.path.join(cert_path, 'cert.pem'), os.path.join(cert_path, 'key.pem'))
-        ca_cert = os.path.join(cert_path, 'ca.pem')
-
-        tls_config = dockerpy.tls.TLSConfig(
-            ssl_version=ssl.PROTOCOL_TLSv1,
-            verify=True,
-            assert_hostname=False,
-            client_cert=client_cert,
-            ca_cert=ca_cert,
-        )
-
-    timeout = int(os.environ.get('DOCKER_CLIENT_TIMEOUT', 60))
-    return dockerpy.Client(base_url=base_url, tls=tls_config, version='auto', timeout=timeout)
 
 class ComposeProject():
-    def __init__(self, name, base_dir, filename='docker-compose.yml', dockerClient=docker_client(), default_registry=None):
+    def __init__(self, name, base_dir, filename='docker-compose.yml', dockerClient=defaultDockerClient, default_registry=None):
         self.dockerClient = dockerClient
         self.service_dicts = compose.config.load(compose.config.find(base_dir, filename))
-        self.project = compose.Project.from_dicts(name, service_dicts, self.dockerClient)
+        self.project = project.Project.from_dicts(name, self.service_dicts, self.dockerClient)
         self.default_registry = default_registry
 
-        def pull(self):
-            self.project.pull(default_registry=default_registry)
+    def pull(self):
+        try:
+            # Open file that will store the pull log
+            pull_log=open(settings.FS_DEF_DOCKER_COMPOSE_PULL_LOG, 'w')
+
+            # Create file that marks the status of the pulling (exit code)
+            pull_code = open(settings.FS_DEF_DOCKER_COMPOSE_PULL_CODE, 'w')
+            pull_code.write("")
+            pull_code.close()
+
+            # Call project pull. It will fill the log file
+            self.project.pull(default_registry=default_registry, out_stream=pull_log)
+
+            ## TODO: add logic here to check if images has been pulled or not.
+
+            # Set exit code
+            pull_code = open(settings.FS_DEF_DOCKER_COMPOSE_PULL_CODE, 'w')
+            pull_code.write("0")
+            pull_code.close()
+
+        except:
+            # Set exit code
+            pull_code = open(settings.FS_DEF_DOCKER_COMPOSE_PULL_CODE, 'w')
+            pull_code.write("1")
+            pull_code.close()
+
+        finally:
+            pull_log.close()
+            pull_code.close()
+
+
+    def up(self):
+        self.project.up()
