@@ -9,10 +9,13 @@ commander:
      - "8888:8888"
    volumes:
      - ./commander/commander-data/var/crane:/var/crane/
+     #only for development
+     - ./commander/app:/usr/src/commander
    links:
      - redis
      - registry:coregistry
      - engine:coengine
+   # only while developing
    command: tail -f /dev/null
 registry:
   extends:
@@ -23,6 +26,7 @@ registry:
   volumes:
     - ./registry/registry-data:/var/lib/registry
     - ./registry/certs:/certs
+# Disabled registry authentication
 #    - ./registry/auth:/auth
 engine:
   extends:
