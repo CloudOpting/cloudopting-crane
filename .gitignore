@@ -61,3 +61,5 @@ engine/certs/
 registry/auth/
 registry/certs/
 registry/registry-data/
+commander/app/certs/
+commander/app/src/

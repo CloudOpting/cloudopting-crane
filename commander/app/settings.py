@@ -102,5 +102,5 @@ DK_CLIENT_TIMEOUT = 60
 DK_RG_SWITCH = True
 """True: enables 'save to registry'. False: disables 'save to registry'"""
 
-DK_RG_ENDPOINT = "localhost:5000"
+DK_RG_ENDPOINT = "coregistry:5000"
 """Docker registry end-point"""
