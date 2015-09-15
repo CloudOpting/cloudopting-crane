@@ -1,0 +1,11 @@
+webconsumer:
+  image: tests/webconsumer
+  links: db
+  command:
+webproducer:
+  image: tests/webproducer
+  links: db
+  command:
+db:
+  image: tests/redis
+  command:
