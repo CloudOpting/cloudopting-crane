@@ -16,7 +16,7 @@ COPY app /usr/src/commander/
 
 # Install requirements
 RUN apt-get install -yqq python-pip
-RUN pip install -r requirements.txt --force-reinstall --upgrade -I
+RUN pip install -r /usr/src/commander/requirements.txt --force-reinstall --upgrade -I
 
 # Install docker client (required by docker-py)
 COPY ./docker-client-exec /usr/bin/docker
