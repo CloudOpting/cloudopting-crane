@@ -1,0 +1,38 @@
+commander:
+   extends:
+     file: ./commander/compose.yml
+     service: commander
+   environment:
+     - DEBUG=true
+     - REDIS=true
+   ports:
+     - "8888:8888"
+   volumes:
+     - ./commander/commander-data/var/crane:/var/crane/
+     #only for development
+     - ./commander/app:/usr/src/commander
+   links:
+     - redis
+     - registry:coregistry
+     - engine:coengine
+   # only while developing
+   command: tail -f /dev/null
+registry:
+  extends:
+    file: ./registry/compose.yml
+    service: registry
+  ports:
+      - 5000:5000
+  volumes:
+    - ./registry/registry-data:/var/lib/registry
+    - ./registry/certs:/certs
+# Disabled registry authentication
+#    - ./registry/auth:/auth
+engine:
+  extends:
+    file: ./engine/compose.yml
+    service: engine
+  links:
+    - registry:coregistry
+redis:
+  image: redis:3
