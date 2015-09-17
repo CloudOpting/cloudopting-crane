@@ -18,6 +18,12 @@ build_basic_status_response = {
     'tag' : fields.String
 }
 
+## TODO: document this
+buildbase_basic_status_response = {
+    'name': fields.String,
+    'status': fields.String,
+    'description': fields.String
+}
 
 ## TODO: document this
 build_detailed_status_response = build_basic_status_response.copy()

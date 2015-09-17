@@ -17,6 +17,19 @@ def savePuppetfile(token, puppetfile):
     path = os.path.join(path, settings.FS_DEF_PUPPETFILE)
     puppetfile.save(path)
 
+# Base images related operations
+def createBaseDir(name):
+    path = os.path.join(settings.FS_BASES, name)
+    os.makedirs(path, 0775)
+
+def deleteBaseDir(name):
+    path = os.path.join(settings.FS_BASES, name)
+    shutil.rmtree(path, ignore_errors=True)
+
+def saveBaseDockerfile(name, dockerfile):
+    path = os.path.join(settings.FS_BASES, name)
+    path = os.path.join(path, settings.FS_DEF_DOCKERFILE)
+    dockerfile.save(path)
 
 # Image related operations
 

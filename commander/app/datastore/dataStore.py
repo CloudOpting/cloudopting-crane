@@ -84,6 +84,49 @@ class DataStore:
             raise DataStoreError('Error: \'' + key + '\' does not exists.')
 
 
+    # base images methods
+
+    def addBase(self, name, base):
+        '''
+        Adds a base
+        '''
+        # check if the name provided is the same that in the base entity.
+        self.raiseIfDifferent(name, base['name'])
+        # add name to the list of bases
+        self.add('bases', name)
+        # add the base entity
+        self.set(name, base)
+
+    def getBases(self):
+        '''
+        Gets the list with all the bases.
+        '''
+        return self.get('bases')
+
+    def getBase(self, name):
+        '''
+        Gets a base
+        '''
+        return self.get(name)
+
+    def delBase(self, name):
+        '''
+        Deletes a base
+        '''
+        # delete from list of tokens
+        self.delete('bases', name)
+        # delete entity
+        self.delete(name)
+
+    def updateBase(self, name, base):
+        '''
+        Updates a base with a new value
+        '''
+        # check if the name provided is the same that in the context entity.
+        self.raiseIfDifferent(name, base['name'])
+        # set base entity
+        self.set(name, base)
+
     # contexts methods
 
     def addContext(self, contextToken, context):

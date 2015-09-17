@@ -139,6 +139,135 @@ def deleteContext(datastore, token):
         aux = errors.ControllerError("Unknown error: "+ e.message)
         return aux.getResponse()
 
+def newBase(datastore, name, dockerfile):
+    '''
+    Build a new base image.
+    '''
+    try:
+        # Create base in filesystem
+        try:
+            files.createBaseDir(name)
+        except os.error:
+            files.deleteBaseDir(name)
+            try:        # Replace if already exists
+                files.createBaseDir(name)
+            except:
+                raise errors.OperationError("Couldn't create base in the filesystem.")
+
+        # Save Dockerfile
+        files.saveBaseDockerfile(name, dockerfile)
+
+        # Launch build operation
+        docker.buildBase(datastore, name)
+
+        # Create base in datastore
+        datastorebase = {'name':name, 'status':'building', 'description':'Under creation'}
+        datastore.addBase(name, datastorebase)
+
+        return datastorebase
+
+    except errors.ControllerError, e:
+        return e.getResponse()
+    except Exception, e:
+        aux = errors.ControllerError("Unknown error: "+ e.message)
+        return aux.getResponse()
+
+
+
+def listBases(datastore):
+    '''
+    List the available base images
+    '''
+    try:
+        listOfBases = datastore.getBases()
+        return { 'bases': [] if listOfBases == None else listOfBases }
+
+    except errors.ControllerError, e:
+        return e.getResponse()
+    except Exception, e:
+        aux = errors.ControllerError("Unknown error: "+ e.message)
+        return aux.getResponse()
+
+def checkBase(datastore, name):
+    '''
+    Check the status of a base image
+    '''
+    try:
+        # get base
+        base = datastore.getBase(name)
+        if base == None:
+            raise errors.NotFoundError("Base does not exist.")
+
+        # Check previous stored status
+        if base['status']=='building':
+            if not docker.isBaseBuildRunning(name):
+                bErrors = docker.getBaseBuildErrors(name)
+                if bErrors == None: # finished and no errors
+                    # update datastore
+                    base['status']='finished'
+                    base['description']='Build finished without errors'
+                    datastore.updateBase(name, base)
+                else:               # finished but with errors
+                    # update datastore
+                    base['status']='error'
+                    base['description']='Build finished unsuccefully.'
+                    datastore.updateBase(name, base)
+            else:
+                pass
+        elif base['status']=='finished':
+            pass
+        else:
+            pass
+
+        if detail:
+            log = docker.getBaseBuildLog(name)
+            errLog = docker.getBaseBuildErrors(name)
+            base['log'] = '' if log==None else log
+            base['error_log'] = '' if errLog==None else errLog
+
+        return base, 200
+
+    except errors.NotFoundError, e:
+        return e.getResponse()
+    except Exception, e:
+        aux = errors.ControllerError("Unknown error: "+ e.message)
+        return aux.getResponse()
+
+def deleteBase(datastore, name):
+    '''
+    Delete a base image
+    '''
+    try:
+        # get base
+        base = datastore.getBase(name)
+        if base == None:
+            raise errors.NotFoundError("Base does not exist.")
+
+        # check if building and stop in case
+        docker.stopBaseBuild(name)
+
+        # delete docker image
+        if docker.deleteBaseImage(datastore, name) == False:
+            raise errors.ControllerError("Can't delete docker base image.")
+
+        # remove from filesystem
+        files.deleteBaseDir(name)
+
+        # remove from datastore
+        datastore.delBase(name)
+
+        base['status'] = 'deleted'
+        base['description'] = ''
+
+        return base, 200
+
+    except errors.NotFoundError, e:
+        return e.getResponse()
+    except errors.ControllerError, e:
+        return e.getResponse()
+    except Exception, e:
+        aux = errors.ControllerError("Unknown error: "+ e.message)
+        return aux.getResponse()
 
 def newImage(datastore, contextReference, imageName, dockerfile, puppetmanifest):
     '''

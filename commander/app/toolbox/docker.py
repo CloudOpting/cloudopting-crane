@@ -145,7 +145,6 @@ def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerC
     def __buildThread__():
         err = None
         try:
-            daemon_opts = optionsFromClient(dk)
 
             cwd =  os.path.join(settings.FS_BUILDS, contextToken)
 
@@ -155,10 +154,12 @@ def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerC
 
             pidfile = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_PID)
 
+            daemon_opts = optionsFromClient(dk)
+
             # build
             if err is None:
 
-                command = 'docker '+daemon_opts+' build -f '+ dockerfilepath+ '/Dockerfile' +' -t '+ 'default/'+datastore.getImage(imageToken)['imageName'] +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
+                command = 'docker '+daemon_opts+' build -f '+ dockerfilepath+ '/'+ settings.FS_DEF_DOCKERFILE +' -t '+ 'default/'+datastore.getImage(imageToken)['imageName'] +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
 
                 if __executeCommand__(command, cwd, pidfile)!=0:
                     err = "Error while building"
@@ -324,6 +325,89 @@ def runComposition(datastore, token, dk=defaultDockerClient):
     thread = Thread(target = composeThread)
     thread.start()
 
+
+def buildBase(datastore, name, dk=defaultDockerClient):
+    # launch build
+    # TODO: In the future, replace commandline docker API with docker-py client. The docker-py api for build do not support context path different from Dockerfile path.
+    def __executeCommand__(command, cwd, pidfile):
+        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
+
+        response = ''
+        for line in p.stdout.readlines():
+            response+=line+os.linesep
+
+        createFile(pidfile, str(p.pid))
+
+        return p.wait()
+
+    def __buildThread__():
+        err = None
+        try:
+            cwd = os.path.join(settings.FS_BASES, name)
+
+            dockerfilepath = cwd
+
+            pidfile = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_PID)
+
+            daemon_opts = optionsFromClient(dk)
+            tag = settings.DK_DEFAULT_BASE_PROVIDER + '/' + name
+
+            # build
+            if err is None:
+                command = 'docker '+daemon_opts+' build -f '+ dockerfilepath+ '/'+ settings.FS_DEF_DOCKERFILE +' -t '+ tag +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
+
+                if __executeCommand__(command, cwd, pidfile)!=0:
+                    err = "Error while building"
+                else:
+                    createFile(os.path.join(dockerfilepath, "build_command"), command)
+
+            if settings.DK_RG_SWITCH:
+                # tag
+                if err is None:
+                    command = 'docker '+daemon_opts+' tag ' + tag +' '+ settings.DK_RG_ENDPOINT +'/'+ tag
+                    if __executeCommand__(command, cwd, pidfile)!=0:
+                        err = "Error tagging image. Maybe an image with the same name for this group already exists."
+                    else:
+                        createFile(os.path.join(dockerfilepath, "tag_command"), command)
+
+                # push
+                if err is None:
+                    command = 'docker '+daemon_opts+' push ' + settings.DK_RG_ENDPOINT +'/'+ tag
+                    if __executeCommand__(command, cwd, pidfile)!=0:
+                        err = "Error while pushing to registry"
+                    else:
+                        createFile(os.path.join(dockerfilepath, "push_command"), command)
+
+            # Error case
+            if err is not None:
+                deleteImage(datastore, imageToken)
+                createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), err)
+
+        except Exception, e:
+            createFile(os.path.join('/tmp/', settings.FS_DEF_DOCKER_BUILD_ERR_LOG), "Unexpected error in build thread.")
+
+    thread = Thread(target = __buildThread__)
+    thread.start()
+
+def deleteBaseImage(datastore, name):
+    # TODO
+    pass
+
+def stopBaseImage(datastore, name):
+    # TODO
+    pass
+
+def isBaseBuildRunning(datastore, name):
+    # TODO
+    pass
+
+def getBaseBuildLog(datastore, name):
+    # TODO
+    pass
+
+def getBaseBuildLog(datastore, name):
+    # TODO
+    pass
 
 class ComposeProject():
     def __init__(self, name, base_dir, filename='docker-compose.yml', dockerClient=defaultDockerClient, default_registry=None):

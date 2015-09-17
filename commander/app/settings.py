@@ -29,16 +29,19 @@ DS_REDIS_DB = 0
 # filesystem settings
 
 FS_ROOT = '/var/crane/'
-"""Root path for the application. Must ends in '/'"""
+"""Root path for the application. Must end in '/'"""
 
 FS_BUILDS = FS_ROOT + 'builds/'
-"""Path where the contexts and builds will be created. Must ends in '/'."""
+"""Path where the contexts and builds will be created. Must end in '/'."""
 
 FS_CLUSTERS = FS_ROOT + 'clusters/'
-"""Path where the clusters and machine data (certificates, etc) will be stored. Must ends in '/'."""
+"""Path where the clusters and machine data (certificates, etc) will be stored. Must end in '/'."""
 
 FS_COMPOSITIONS = FS_ROOT + 'compositions/'
-"""Path where the compositions will be created. Must ends in '/'."""
+"""Path where the compositions will be created. Must end in '/'."""
+
+FS_BASES = FS_ROOT + 'bases/'
+"""Path where the base images source will be stored. Must end in '/'."""
 
 FS_DEF_PUPPETFILE = 'Puppetfile'
 """Default name for puppetfile"""
@@ -104,3 +107,6 @@ DK_RG_SWITCH = True
 
 DK_RG_ENDPOINT = "coregistry:5000"
 """Docker registry end-point"""
+
+DK_DEFAULT_BASE_PROVIDER = "cloudopting"
+"""Default provider for base images"""

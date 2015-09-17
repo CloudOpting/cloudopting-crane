@@ -100,6 +100,10 @@ buildArgs.add_argument('contextReference', help='Reference (context token) to th
 buildArgs.add_argument('dockerfile', type=FileStorage, help='Base image dockerfile' , location='files')
 buildArgs.add_argument('puppetmanifest', type=FileStorage, help='Puppet manifest that contains the service definition for the image.' , location='files')
 
+buildBaseArgs = api.parser()
+buildBaseArgs.add_argument('imageName', help='Desired image name.', location='form')
+buildBaseArgs.add_argument('dockerfile', type=FileStorage, help='Base image dockerfile' , location='files')
+
 buildAioArgs = api.parser()
 buildAioArgs.add_argument('group', help='Group identifier. It will be added as a reference for images. The name of the images will be <groupId>/<imageName>.', location='form')
 buildAioArgs.add_argument('puppetfile', type=FileStorage, help='Puppetfile that indicates the puppet modules needed in the context' , location='files')
@@ -155,6 +159,42 @@ class ContextDetails(Resource):
     def get(self, token):
 
         return builderOps.checkContext(datastore=datastore, token=token, detail=True)
+
+@builder_ns.route('/images/bases')
+class BuildBaseService(Resource):
+
+    @api.doc(description='Retrieve list of processes.')
+    @api.response(500, 'Error processing the request', errorResponseModel)
+    @api.response(201, 'OK', imageListModel)
+    def get(self):
+        return builderOps.listBases(datastore)
+
+    @api.doc(description='Create a new base image from a Dockerfile.', parser=buildBaseArgs)
+    @api.response(500, 'Error processing the request', errorResponseModel)
+    @api.response(201, 'Created', imageInfoModel)
+    def post(self):
+        return builderOps.newBase(datastore=datastore, name=str(request.form['imageName']), dockerfile=request.files['dockerfile'])
+
+@builder_ns.route('/images/bases/<name>')
+@api.doc(params={'name': 'Name of the base image.'})
+class Base(Resource):
+
+    @api.doc(description='Get information about a build process.')
+    @api.response(500, 'Error processing the request', errorResponseModel)
+    @api.response(404, 'Not found', errorResponseModel)
+    @api.response(200, 'OK', imageDetailModel)
+    def get(self, name):
+        return not_implemented()
+
+    @api.doc(description='Remove a building process and the related data.')
+    @api.response(500, 'Error processing the request', errorResponseModel)
+    @api.response(404, 'Not found', errorResponseModel)
+    @api.response(200, 'OK', imageInfoModel)
+    def delete(self, name):
+        #return builderOps.deleteBase(datastore, name)
+        return not_implemented()
+
+
 @builder_ns.route('/images')
 class BuildService(Resource):
 
