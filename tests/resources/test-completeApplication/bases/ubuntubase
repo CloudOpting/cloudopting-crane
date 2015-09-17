@@ -5,7 +5,6 @@ MAINTAINER Jose Fuentes <jfuentes@wtelecom.es>
 RUN apt-get -y update && apt-get -y install ruby
 RUN apt-get install -y puppet
 
-RUN puppet apply --modulepath=/tmp/modules /tmp/manifest.pp
 
 ### Inheritors must:
 #
@@ -13,3 +12,5 @@ RUN puppet apply --modulepath=/tmp/modules /tmp/manifest.pp
 # ADD modules /tmp/modules
 # # Add manifest to apply
 # ADD images/example/manifest.pp /tmp/manifest.pp
+# # Apply manifest
+# RUN puppet apply --modulepath=/tmp/modules /tmp/manifest.pp
