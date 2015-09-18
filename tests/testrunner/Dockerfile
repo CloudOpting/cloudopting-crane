@@ -5,7 +5,7 @@ ADD ./requirements.txt /var/tests/requirements.txt
 RUN pip install -r /var/tests/requirements.txt --force-reinstall --upgrade -I
 
 # Add tests
-ADD ./tests.py /var/tests/tests.py
+ADD ./src /var/tests/
 
 # Run tests
 WORKDIR /var/tests
