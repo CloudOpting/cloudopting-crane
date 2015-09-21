@@ -36,10 +36,12 @@ testrunner:
   build: tests/testrunner
   links:
     - commander
-    - engine
-    - registry
+    - engine:coengine
+    - registry:coregistry
     - emulatedhost
   volumes:
     - ./tests/resources:/var/tests_resources
+    - ./tests/testrunner/src:/var/tests/
+  command: tail -f /dev/null
 emulatedhost:
   build: tests/emulatedhost

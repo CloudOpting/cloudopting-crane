@@ -6,6 +6,7 @@ export CLIENT_HOSTNAME=commander
 export CA_PASSWORD=p4ssw0rd
 export ENGINE_CERTS_DIR=engine/certs
 export COMMANDER_CERTS_DIR=commander/certs
+export TESTRUNNER_CERTS_DIR=tests/testrunner/src/certs
 
 export REGISTRY_HOSTNAME=coregistry
 export REGISTRY_AUTH_DIR=registry/auth
@@ -159,3 +160,8 @@ printf "\t${UINFO}- Copy ${ELEM}${REGISTRY_CERTS_DIR}/domain.crt${UINFO} to ${EL
 printf "\t${UINFO}- Restart docker engine.${NC}\n"
 
 printf "${BINFO}-----------------------------------------------------------------------------------------------------------------------${NC}\n\n"
+
+# Test environment
+
+## Copy all the certificates in engine to testrunner
+cp -r ${COMMANDER_CERTS_DIR} ${TESTRUNNER_CERTS_DIR}
