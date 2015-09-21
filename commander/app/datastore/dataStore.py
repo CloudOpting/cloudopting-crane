@@ -124,6 +124,8 @@ class DataStore:
         '''
         # check if the name provided is the same that in the context entity.
         self.raiseIfDifferent(name, base['name'])
+        if self.getBase(name) is None:
+            raise DataStoreError("Element do not exist")
         # set base entity
         self.set(name, base)
 

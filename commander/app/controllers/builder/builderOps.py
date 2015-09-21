@@ -188,7 +188,7 @@ def listBases(datastore):
         aux = errors.ControllerError("Unknown error: "+ e.message)
         return aux.getResponse()
 
-def checkBase(datastore, name):
+def checkBase(datastore, name, detail=False):
     '''
     Check the status of a base image
     '''

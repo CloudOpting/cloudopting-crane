@@ -389,25 +389,56 @@ def buildBase(datastore, name, dk=defaultDockerClient):
     thread = Thread(target = __buildThread__)
     thread.start()
 
-def deleteBaseImage(datastore, name):
+def deleteBaseImage(name):
     # TODO
     pass
 
-def stopBaseImage(datastore, name):
+def stopBaseImage(name):
     # TODO
     pass
 
-def isBaseBuildRunning(datastore, name):
-    # TODO
-    pass
+def isBaseBuildRunning(name):
+    """
+    Checks if the docker build process is still running. Returns True if the process still runs and False if the process is not running.
+    """
+    pidpath = os.path.join(settings.FS_BASES, name)
+    pidpath = os.path.join(pidpath, settings.FS_DEF_DOCKER_BUILD_PID)
+    try:
+        file = open(pidpath, 'r')
+    except IOError:
+        return True
+    pid = int(file.read(10));
+    if pid > 1:
+        try:
+            os.kill(pid, 0)
+            return True
+        except OSError:
+            pass
+    return False
 
-def getBaseBuildLog(datastore, name):
-    # TODO
-    pass
+def getBaseBuildLog(name):
+    """
+    Retrieve standard building log.
+    """
+    path = os.path.join(settings.FS_BASES, name)
+    path = os.path.join(path, settings.FS_DEF_DOCKER_BUILD_LOG)
+    content = ''
+    with open(path, 'r') as content_file:
+        content = content_file.read()
+    return content
 
-def getBaseBuildLog(datastore, name):
-    # TODO
-    pass
+def getBaseBuildErrors(name):
+    """
+    Retrieve errors in error building log. None if no errors.
+    """
+    path = os.path.join(settings.FS_BASES, name)
+    path = os.path.join(path, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
+    if os.stat(path).st_size == 0:
+        return None
+    content = ''
+    with open(path, 'r') as content_file:
+        content = content_file.read()
+    return content
 
 class ComposeProject():
     def __init__(self, name, base_dir, filename='docker-compose.yml', dockerClient=defaultDockerClient, default_registry=None):

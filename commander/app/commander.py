@@ -184,7 +184,7 @@ class Base(Resource):
     @api.response(404, 'Not found', errorResponseModel)
     @api.response(200, 'OK', imageDetailModel)
     def get(self, name):
-        return not_implemented()
+        return builderOps.checkBase(datastore, name)
 
     @api.doc(description='Remove a building process and the related data.')
     @api.response(500, 'Error processing the request', errorResponseModel)
