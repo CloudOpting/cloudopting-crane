@@ -148,11 +148,7 @@ def newBase(datastore, name, dockerfile):
         try:
             files.createBaseDir(name)
         except os.error:
-            files.deleteBaseDir(name)
-            try:        # Replace if already exists
-                files.createBaseDir(name)
-            except:
-                raise errors.OperationError("Couldn't create base in the filesystem.")
+            raise errors.OperationError("Couldn't create base in the filesystem. It may already exists.")
 
         # Save Dockerfile
         files.saveBaseDockerfile(name, dockerfile)
