@@ -8,7 +8,7 @@ commander:
    ports:
      - "8888:8888"
    volumes:
-     - ./commander/commander-data/var/crane:/var/crane/
+     - ./commander/commander-data-tests/var/crane:/var/crane/
      - ./commander/app:/usr/src/commander
    links:
      - redis
