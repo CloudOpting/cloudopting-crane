@@ -62,5 +62,8 @@ registry/auth/
 registry/certs/
 tests/testrunner/src/certs
 registry/registry-data/
+registry/registry-data-tests
 commander/app/certs/
 commander/app/src/
+commander/commander-data/
+commander/commander-data-tests/

@@ -37,7 +37,7 @@ extra_ns = api.namespace('extra', description='Some extra functions.')
 @extra_ns.route('/purge')
 class Purge(Resource):
 
-    @api.doc(description='Purge all data: contexts, compositions, files, etc. Note: if registry is deployed in the same docker engine, it will be also destroyed.')
+    @api.doc(description='Purge all data: contexts, compositions, files, etc.')
     def get(self):
         return managementOps.purge(datastore)
 

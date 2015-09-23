@@ -22,7 +22,7 @@ registry:
   ports:
       - 5000:5000
   volumes:
-    - ./registry/registry-data:/var/lib/registry
+    - ./registry/registry-data-tests:/var/lib/registry
     - ./registry/certs:/certs
 engine:
   extends:
