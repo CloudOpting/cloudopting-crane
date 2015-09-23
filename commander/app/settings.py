@@ -79,6 +79,9 @@ FS_DEF_DOCKER_INFO = 'build_info.txt'
 FS_DEF_DOCKER_BUILD_PID = 'build.pid'
 """Default name for the file that stores PID of the docker build process (and tag + push)"""
 
+FS_DEF_DOCKER_BUILD_FLAG = 'flag'
+"""Default name for the file created when the build operation finish"""
+
 FS_DEF_DOCKER_COMPOSE__PULL_LOG = 'compose_pull.log'
 """Default name for the log of docker compose"""
 

@@ -144,16 +144,16 @@ def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerC
 
     def __buildThread__():
         err = None
+
+        cwd =  os.path.join(settings.FS_BUILDS, contextToken)
+
+        dockerfilepath = cwd
+        dockerfilepath = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
+        dockerfilepath = os.path.join(dockerfilepath, imageName)
+
+        pidfile = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_PID)
+
         try:
-
-            cwd =  os.path.join(settings.FS_BUILDS, contextToken)
-
-            dockerfilepath = cwd
-            dockerfilepath = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
-            dockerfilepath = os.path.join(dockerfilepath, imageName)
-
-            pidfile = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_PID)
-
             daemon_opts = optionsFromClient(dk)
 
             # build
@@ -187,9 +187,14 @@ def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerC
             if err is not None:
                 deleteImage(datastore, imageToken)
                 createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), err)
+                createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '1')
+            else:
+                createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '0')
+
 
         except Exception, e:
             createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), "Unexpected error in build thread.")
+            createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '1')
 
     thread = Thread(target = __buildThread__)
     thread.start()
@@ -246,22 +251,16 @@ def isDockerBuildRunning(contextToken, imageName):
     """
     Checks if the docker build process is still running. Returns True if the process still runs and False if the process is not running.
     """
-    pidpath = os.path.join(settings.FS_BUILDS, contextToken)
-    pidpath = os.path.join(pidpath, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
-    pidpath = os.path.join(pidpath, imageName)
-    pidpath = os.path.join(pidpath, settings.FS_DEF_DOCKER_BUILD_PID)
+    flag = os.path.join(settings.FS_BUILDS, contextToken)
+    flag = os.path.join(flag, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
+    flag = os.path.join(flag, imageName)
+    flag = os.path.join(flag, settings.FS_DEF_DOCKER_BUILD_FLAG)
     try:
-        file = open(pidpath, 'r')
+        file = open(flag, 'r')
+        file.close()
+        return False
     except IOError:
         return True
-    pid = int(file.read(10));
-    if pid > 1:
-        try:
-            os.kill(pid, 0)
-            return True
-        except OSError:
-            pass
-    return False
 
 
 def getBuildErrors(contextToken, imageName):
@@ -342,13 +341,13 @@ def buildBase(datastore, name, dk=defaultDockerClient):
 
     def __buildThread__():
         err = None
+        cwd = os.path.join(settings.FS_BASES, name)
+
+        dockerfilepath = cwd
+
+        pidfile = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_PID)
+
         try:
-            cwd = os.path.join(settings.FS_BASES, name)
-
-            dockerfilepath = cwd
-
-            pidfile = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_PID)
-
             daemon_opts = optionsFromClient(dk)
             tag = settings.DK_DEFAULT_BASE_PROVIDER + '/' + name
 
@@ -382,9 +381,14 @@ def buildBase(datastore, name, dk=defaultDockerClient):
             if err is not None:
                 deleteImage(datastore, imageToken)
                 createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), err)
+                createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '1')
+            else:
+                createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '0')
 
         except Exception, e:
             createFile(os.path.join('/tmp/', settings.FS_DEF_DOCKER_BUILD_ERR_LOG), "Unexpected error in build thread.")
+            createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '1')
+
 
     thread = Thread(target = __buildThread__)
     thread.start()
@@ -401,20 +405,14 @@ def isBaseBuildRunning(name):
     """
     Checks if the docker build process is still running. Returns True if the process still runs and False if the process is not running.
     """
-    pidpath = os.path.join(settings.FS_BASES, name)
-    pidpath = os.path.join(pidpath, settings.FS_DEF_DOCKER_BUILD_PID)
+    flag = os.path.join(settings.FS_BASES, name)
+    flag = os.path.join(flag, settings.FS_DEF_DOCKER_BUILD_FLAG)
     try:
-        file = open(pidpath, 'r')
+        file = open(flag, 'r')
+        file.close()
+        return False
     except IOError:
         return True
-    pid = int(file.read(10));
-    if pid > 1:
-        try:
-            os.kill(pid, 0)
-            return True
-        except OSError:
-            pass
-    return False
 
 def getBaseBuildLog(name):
     """
