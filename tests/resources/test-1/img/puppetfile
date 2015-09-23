@@ -9,7 +9,7 @@ mod 'puppetlabs-stdlib',
 mod 'puppetlabs-concat',
   :git => "https://github.com/puppetlabs/puppetlabs-concat"
 
-mod 'puppet-python'
+mod 'puppet-python',
   :git => "https://github.com/counsyl/puppet-python"
 
 mod 'puppetlabs-vcsrepo',

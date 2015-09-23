@@ -3,7 +3,6 @@
 import pytest
 import os
 import requests as req
-import time
 import settings as s
 import operations as op
 
@@ -55,18 +54,10 @@ class TestsCompleteCycle:
         op.assertStatusCode(res, 200, errText)
         op.assertStatus(res, 'building', errText)
 
-        while True: # wait image built process to finish
-            res = op.getBase(imageName)
-            op.assertStatusCode(res, 200, "Error while asking base status")
-
-            if res.json()['status'] == 'building':
-                time.sleep(5)
-                continue
-
-            op.assertStatus(res, 'finished', \
-                "Error in base image built proccess")
-
-            break
+        res = op.waitWhileStatus(op.getBase, imageName, \
+            text="Error while asking base status")
+        op.assertStatus(res, 'finished', \
+            "Error in base image built proccess")
 
 
         # check base
@@ -74,9 +65,20 @@ class TestsCompleteCycle:
         op.assertStatusCode(res, 200, 'Base image not saved to registry')
 
         # build context
+        group='example'
+        res = op.postContext(group, os.path.join(resources, 'img/puppetfile'))
+
+        op.assertStatusCode(res, 200, text='Error creating context')
+        op.assertStatus(res, 'building', text='Error creating context')
+
+        contextToken = res.json()['token']
+
+        res = op.waitWhileStatus(op.getContext, contextToken, \
+            text="Error while asking context status")
+        op.assertStatus(res, 'finished', \
+            "Error in context built proccess")
 
 
-        # check context
         # build image 1
         # check image 1
         # build image 2
@@ -88,9 +90,16 @@ class TestsCompleteCycle:
         # run composition
         # check functionality
         # stop composition
+        # TODO: not implemented yet
         # check stopped
+        # TODO: not implemented yet
         # remove from cluster
+        # TODO: not implemented yet
         # check removed
+        # TODO: not implemented yet
         # remove from crane
+        # TODO: not implemented yet
         # check removed from registry
+        # TODO: not implemented yet
         # check removed from engine cache
+        # TODO: not implemented yet
