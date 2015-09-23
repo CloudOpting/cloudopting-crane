@@ -1,4 +1,5 @@
 commander:
+  restart: always
   extends:
     file: ./commander/compose.yml
     service: commander
@@ -14,6 +15,7 @@ commander:
     - registry:coregistry
     - engine:buildengine
 registry:
+  restart: always
   extends:
     file: ./registry/compose.yml
     service: registry
@@ -25,6 +27,7 @@ registry:
     - /certs
     - /auth
 engine:
+  restart: always
   extends:
     file: ./engine/compose.yml
     service: engine
@@ -32,4 +35,5 @@ engine:
   links:
     - registry:coregistry
 redis:
+  restart: always
   image: redis:3

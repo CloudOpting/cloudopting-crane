@@ -1,5 +1,4 @@
 registry:
-  restart: always
   image: registry:2
   environment:
     REGISTRY_HTTP_TLS_CERTIFICATE: /certs/domain.crt
