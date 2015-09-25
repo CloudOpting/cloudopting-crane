@@ -111,5 +111,7 @@ DK_RG_SWITCH = True
 DK_RG_ENDPOINT = "coregistry:5000"
 """Docker registry end-point"""
 
+DK_RG_CA = "/usr/src/commander/certs/registry-ca.crt"
+
 DK_DEFAULT_BASE_PROVIDER = "cloudopting"
 """Default provider for base images"""

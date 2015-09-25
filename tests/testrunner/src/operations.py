@@ -40,41 +40,43 @@ def getContext(contextToken):
     return req.get(s.COMMANDER_URL+'/builder/contexts/'+contextToken)
 
 
-def postImage(contextToken, imageName, dockerfilePath=None, \
+def postImage(contextToken, imageName, base=None, dockerfilePath=None, \
         puppetmanifestPath=None):
     dockerfile = open(dockerfilePath,'rb') if dockerfilePath!=None else None
-    puppetfile = open(puppetfilePath,'rb') if puppetfilePath!=None else None
+    puppetmanifest = open(puppetmanifestPath,'rb') if puppetmanifestPath!=None else None
     files= {}
+    data = {'contextReference': contextToken, 'imageName': imageName}
     if dockerfile!=None:
         files['dockerfile']=dockerfile
-    if puppetfile!=None:
-        files['puppetfile']=puppetfile
+    if puppetmanifest!=None:
+        files['puppetmanifest']=puppetmanifest
+    if base!=None:
+        data['base']=str(base)
 
-    res = req.post(s.COMMANDER_URL+'/builder/images', \
-            data = {'contextReference': contextToken, 'imageName': imageName}, \
-            files = files)
+
+    res = req.post(s.COMMANDER_URL+'/builder/images', data=data, files=files)
 
     if dockerfile!=None:
         dockerfile.close()
-    if puppetfile!=None:
-        puppetfile.close()
+    if puppetmanifest!=None:
+        puppetmanifest.close()
     return res
 
 def getImage(imageToken):
     return req.get(s.COMMANDER_URL+'/builder/images/'+imageToken)
 
 def postCluster(endpoint, apiVersion=None, clientCertPath=None, \
-        clientKeyPath=None, clientCaPath=None):
+        clientKeyPath=None, caPath=None):
     clientCert = open(clientCertPath,'rb') if clientCertPath!=None else None
     clientKey = open(clientKeyPath,'rb') if clientKeyPath!=None else None
-    clientCa = open(clientCaPath,'rb') if clientCaPath!=None else None
+    ca = open(caPath,'rb') if caPath!=None else None
     files= {}
     if clientCert!=None:
         files['clientCert']=clientCert
     if clientKey!=None:
         files['clientKey']=clientKey
-    if clientCa!=None:
-        files['clientCa']=clientCa
+    if ca!=None:
+        files['ca']=ca
 
     res = req.post(s.COMMANDER_URL+'/cluster/provisionedSingleMachine', \
             data = {'contextReference': contextToken, 'imageName': imageName}, \
@@ -84,8 +86,8 @@ def postCluster(endpoint, apiVersion=None, clientCertPath=None, \
         clientCert.close()
     if clientKey!=None:
         clientKey.close()
-    if clientCa!=None:
-        clientCa.close()
+    if ca!=None:
+        ca.close()
     return res
 
 
@@ -103,7 +105,8 @@ def postComposition(clusterToken, composefilePath):
     return res
 
 
-def waitWhileStatus(getStatusFunc, token, status='building', period=5, text='NOT GOOD'):
+def waitWhileStatus(getStatusFunc, token, status='building', period=5, \
+        text='NOT GOOD'):
     while True: # wait process to finish
         res = getStatusFunc(token)
         assertStatusCode(res, 200, text)
@@ -116,14 +119,39 @@ def waitWhileStatus(getStatusFunc, token, status='building', period=5, text='NOT
 
     return res
 
+def buildImageAndAssert(group, name, contextToken, base=None, \
+        dockerfilePath=None, puppetmanifestPath=None):
+    # check if image already exists in the registry
+    completeName=group+'/'+name
+    res = getRegistryImage(completeName)
+    assertStatusCode(res, 404, \
+     "Cannot assure '"+completeName+"' image is not already on the registry.")
+
+    # launch build
+    res = postImage(contextToken, name, base, dockerfilePath, puppetmanifestPath)
+    text = "Error posting image '"+name+"'"
+    assertStatusCode(res, 200, text)
+    assertStatus(res, 'building', text=text)
+
+    # wait until finish
+    text = "Error building image '"+completeName+"'"
+    res = waitWhileStatus(getImage, res.json()['token'], text)
+    assertStatusCode(res, 200, text)
+    assertStatus(res, 'finished', text=text)
+
+    return res
+
 
 def assertStatusCode(res, statusCode, text='NOT GOOD'):
     assert res.status_code == statusCode, \
         res.request.method+": "+res.request.path_url+": "+ \
         text + ": HTTP status code returned is "+ str(res.status_code) + \
-        ",different from " + str(statusCode)
+        ",different from " + str(statusCode)+".\nRes content: "+res.content+ \
+        "\nRequest: "+str(res.request.body)
 
 def assertStatus(res, desiredStatus, text='NOT GOOD'):
     assert res.json()['status'] == desiredStatus, \
         res.request.method+": "+res.request.path_url+": "+ \
-        text + ": 'status' returned is different from '"+ desiredStatus +"'"
+        text + ": 'status' returned is different from '"+ desiredStatus +"'\n"\
+        +".\nResp content: "+res.content+ "\nRequest content: "+\
+        str(res.request.body)

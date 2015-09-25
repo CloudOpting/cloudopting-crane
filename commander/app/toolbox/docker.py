@@ -3,7 +3,7 @@ import ssl
 import settings
 from threading import Thread
 import subprocess
-
+import requests as req
 
 from controllers import errors
 from files import createFile
@@ -159,7 +159,7 @@ def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerC
             # build
             if err is None:
 
-                command = 'docker '+daemon_opts+' build -f '+ dockerfilepath+ '/'+ settings.FS_DEF_DOCKERFILE +' -t '+ 'default/'+datastore.getImage(imageToken)['imageName'] +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
+                command = 'docker '+daemon_opts+' build -f '+ dockerfilepath+ '/'+ settings.FS_DEF_DOCKERFILE +' -t '+ datastore.getImage(imageToken)['tag'] +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
 
                 if __executeCommand__(command, cwd, pidfile)!=0:
                     err = "Error while building"
@@ -173,7 +173,8 @@ def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerC
                     if __executeCommand__(command, cwd, pidfile)!=0:
                         err = "Error tagging image. Maybe an image with the same name for this group already exists."
                     else:
-                        createFile(os.path.join(dockerfilepath, "tag_command"), command)
+                        pass
+                    createFile(os.path.join(dockerfilepath, "tag_command"), command)
 
                 # push
                 if err is None:
@@ -478,3 +479,16 @@ class ComposeProject():
 
     def up(self):
         self.project.up()
+
+def imageInRegistry(name):
+    """
+    Returns True if the image exists on registry, False if not.
+    """
+    res = req.get('https;//'+s.DK_RG_ENDPOINT+'/v2/'+name+'/tags/list', \
+            verify=s.DK_RG_CA)
+    if res.status_code == 200:
+        return True
+    elif res.status_code == 404:
+        return False
+    else:
+        raise Exception("Response not expected. Maybe something is bad with registry.")

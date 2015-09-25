@@ -36,36 +36,36 @@ class TestsCompleteCycle:
     def test_webapp(self):
         """Simple webapp in remote pre-provisioned docker host"""
 
-        # Directory where resources are stored
+        ## Directory where resources are stored
         resources = os.path.join(s.TEST_RES, 'test-1')
-
-        # Name of the image
-        imageName = 'ubuntubase'
-
-        # make sure that image do not exist in registry
-        res = op.getRegistryImage(s.DEF_BASE_PROVIDER+'/'+imageName)
-        #op.assertStatusCode(res, 404, \
-        #    "Cannot assure base image is not already on the registry.")
+        group = 'test1'
 
         # build base
-        res = op.postBase(imageName, \
-                os.path.join(resources, 'bases/'+imageName))
-        errText = "Error in build base request"
-        op.assertStatusCode(res, 200, errText)
-        op.assertStatus(res, 'building', errText)
+        ## Name of the base image
+        baseName = 'ubuntubase'
 
-        res = op.waitWhileStatus(op.getBase, imageName, \
-            text="Error while asking base status")
-        op.assertStatus(res, 'finished', \
-            "Error in base image built proccess")
+        ## make sure that image do not exist in registry
+        # res = op.getRegistryImage(s.DEF_BASE_PROVIDER+'/'+baseName)
+        # op.assertStatusCode(res, 404, \
+        #     "Cannot assure base image is not already on the registry.")
+        #
+        # res = op.postBase(baseName, \
+        #         os.path.join(resources, 'bases/'+baseName))
+        # errText = "Error in build base request"
+        # op.assertStatusCode(res, 200, errText)
+        # op.assertStatus(res, 'building', errText)
+        #
+        # res = op.waitWhileStatus(op.getBase, baseName, \
+        #     text="Error while asking base status")
+        # op.assertStatus(res, 'finished', \
+        #     "Error in base image built proccess")
 
 
         # check base
-        res = op.getRegistryImage(s.DEF_BASE_PROVIDER+'/'+imageName)
-        op.assertStatusCode(res, 200, 'Base image not saved to registry')
+        #res = op.getRegistryImage(s.DEF_BASE_PROVIDER+'/'+baseName)
+        #op.assertStatusCode(res, 200, 'Base image not saved to registry')
 
         # build context
-        group='example'
         res = op.postContext(group, os.path.join(resources, 'img/puppetfile'))
 
         op.assertStatusCode(res, 200, text='Error creating context')
@@ -78,17 +78,43 @@ class TestsCompleteCycle:
         op.assertStatus(res, 'finished', \
             "Error in context built proccess")
 
+        # build redis
+        op.buildImageAndAssert(group, 'redis', contextToken, \
+            dockerfilePath=os.path.join(resources, 'img/redis/Dockerfile'))
 
-        # build image 1
-        # check image 1
-        # build image 2
-        # check image 2
-        # build image 3
-        # check image 3
+        # build webconsumer
+        op.buildImageAndAssert(group, 'webconsumer', contextToken, \
+            dockerfilePath=os.path.join(resources, \
+                    'img/webconsumer/Dockerfile'), \
+            puppetmanifestPath=os.path.join(resources, \
+                    'img/webconsumer/manifest.pp' ))
+
+        # build webproducer
+        op.buildImageAndAssert(group, 'webproducer', contextToken, \
+            base=baseName,
+            puppetmanifestPath=os.path.join(resources, \
+                    'img/webproducer/manifest.pp' ))
+
         # create cluster
-        # check cluster
+        res = postCluster(HOST_ENDPOINT, \
+            clientCertPath=s.HOST_CERT, clientKeyPath=s.HOST_KEY, \
+            caPath=s.HOST_CA)
+        text='Error submitting cluster'
+        clusterToken = res.json()['token']
+        op.assertStatusCode(res, 200, text)
+        op.assertStatus(res, 'ready', text)
+
         # run composition
+        res = postComposition(clusterToken, \
+                os.path.join(resources, 'run/compose.yml'))
+        text='Error deploying composition'
+        op.assertStatusCode(res, 200, text)
+        op.assertStatus(res, 'ready', text)
+
+
         # check functionality
+        ## TODO: call both servers to check if the service works
+
         # stop composition
         # TODO: not implemented yet
         # check stopped

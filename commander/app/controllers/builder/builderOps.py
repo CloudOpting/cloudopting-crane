@@ -265,7 +265,7 @@ def deleteBase(datastore, name):
         aux = errors.ControllerError("Unknown error: "+ e.message)
         return aux.getResponse()
 
-def newImage(datastore, contextReference, imageName, dockerfile, puppetmanifest):
+def newImage(datastore, contextReference, imageName, puppetmanifest=None, base=None, dockerfile=None):
     '''
     Saves the files in the filesystem, and launch the build process
     '''
@@ -288,8 +288,16 @@ def newImage(datastore, contextReference, imageName, dockerfile, puppetmanifest)
         # Create image in filesystem and save Dockerfile and Puppetmanifest
         try:
             files.createImageDir(contextReference, imageName)
-            files.saveDockerfile(contextReference, imageName, dockerfile)
-            files.savePuppetManifest(contextReference, imageName, puppetmanifest)
+            if puppetmanifest!=None:
+                files.savePuppetManifest(contextReference, imageName, puppetmanifest)
+            if dockerfile!=None:
+                files.saveDockerfile(contextReference, imageName, dockerfile)
+            if base!=None:
+                baseImageName=settings.DK_DEFAULT_BASE_PROVIDER+'/'+base
+                if docker.imageInRegistry(baseImageName) == False:
+                    raise errors.OperationError("Base image '"+baseImageName+"' does not exist in private registry")
+                files.createBaseDockerfile(contextReference, imageName, settings.DK_RG_ENDPOINT+'/'+baseImageName)
+
         except os.error:
             files.deleteImageDir(contextReference, imageName)
             datastore.delImage(token)

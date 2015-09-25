@@ -15,6 +15,7 @@ commander:
      - registry:coregistry
      - engine:coengine
      - emulatedhost
+#   command: tail -f /dev/null
 registry:
   extends:
     file: ./registry/compose.yml

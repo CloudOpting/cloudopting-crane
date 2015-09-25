@@ -97,7 +97,8 @@ contextArgs.add_argument('puppetfile', type=FileStorage, help='Puppetfile that i
 buildArgs = api.parser()
 buildArgs.add_argument('imageName', help='Desired image name.', location='form')
 buildArgs.add_argument('contextReference', help='Reference (context token) to the context where the image will be build. If not set it will be build in a new and empty context.', location='form')
-buildArgs.add_argument('dockerfile', type=FileStorage, help='Base image dockerfile' , location='files')
+buildArgs.add_argument('base', help='Base name. Can be used instead of Dockerfile. Requires a puppetmanifest.', location='form')
+buildArgs.add_argument('dockerfile', type=FileStorage, help='Image dockerfile. Can apply the puppetmanifest or be an standalone dockerfile.' , location='files')
 buildArgs.add_argument('puppetmanifest', type=FileStorage, help='Puppet manifest that contains the service definition for the image.' , location='files')
 
 buildBaseArgs = api.parser()
@@ -208,7 +209,20 @@ class BuildService(Resource):
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', imageInfoModel)
     def post(self):
-        return builderOps.newImage(datastore=datastore, contextReference=str(request.form['contextReference']), imageName=str(request.form['imageName']), dockerfile=request.files['dockerfile'], puppetmanifest=request.files['puppetmanifest'])
+        contextReference=str(request.form['contextReference'])
+        imageName=str(request.form['imageName'])
+        manifest,base,dockerfile=None,None,None
+        try:
+            manifest=request.files['puppetmanifest']
+            base=str(request.form['base'])
+        except:
+            dockerfile=request.files['dockerfile']
+        # At this point we must have one of the following cases:
+        #   - manifest + base
+        #   - manifest + dockerfile
+        #   - dockerfile
+        return builderOps.newImage(datastore, contextReference, imageName, \
+                manifest, base, dockerfile)
 
 
 @builder_ns.route('/images/<token>')
@@ -285,7 +299,7 @@ class ProvisionedSingleMachineService(Resource):
     @api.response(201, 'Created', clusterInfoModel)
     def post(self):
         try:   # if apiVersion not provided it will use default.
-            return clusterOps.newContext(datastore, request.form['endpoint'], request.form['apiVersion'])
+            return clusterOps.newSingleProvisionedMachineCluster(datastore, request.form['endpoint'], request.form['apiVersion'])
         except:
             return clusterOps.newSingleProvisionedMachineCluster(datastore, request.form['endpoint'])
 
