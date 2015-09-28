@@ -5,9 +5,7 @@ ADD ./src /var/tests/
 
 # Install requirements
 ADD ./src/requirements.txt /var/tests/requirements.txt
-RUN pip install -r /var/tests/requirements.txt --force-reinstall --upgrade -I
-
-
-# Run tests
 WORKDIR /var/tests
+RUN pip install -r ./requirements.txt --force-reinstall --upgrade -I
+# Run tests
 CMD py.test --verbose tests.py

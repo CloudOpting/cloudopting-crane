@@ -42,7 +42,7 @@ testrunner:
     - emulatedhost
   volumes:
     - ./tests/resources:/var/tests_resources
-    - ./tests/testrunner/src:/var/tests/
-  command: tail -f /dev/null
+#    - ./tests/testrunner/src:/var/tests/
+#  command: tail -f /dev/null
 emulatedhost:
   build: tests/emulatedhost
