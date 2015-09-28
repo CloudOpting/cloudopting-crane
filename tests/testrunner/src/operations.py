@@ -53,7 +53,6 @@ def postImage(contextToken, imageName, base=None, dockerfilePath=None, \
     if base!=None:
         data['base']=str(base)
 
-
     res = req.post(s.COMMANDER_URL+'/builder/images', data=data, files=files)
 
     if dockerfile!=None:
