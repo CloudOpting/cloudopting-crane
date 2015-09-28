@@ -1,6 +1,8 @@
-FROM ubuntubase
-
+# Use base
+FROM coregisty:5000/cloudopting/ubuntubase
 # Add puppet modules:
 ADD modules /tmp/modules
 # Add manifest to apply
-ADD images/example/manifest.pp /tmp/manifest.pp
+ADD images/webconsumer/manifest.pp /tmp/manifest.pp
+# Apply manifest
+RUN puppet apply --modulepath=/tmp/modules /tmp/manifest.pp

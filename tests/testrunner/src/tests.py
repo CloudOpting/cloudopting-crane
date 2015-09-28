@@ -45,25 +45,25 @@ class TestsCompleteCycle:
         baseName = 'ubuntubase'
 
         ## make sure that image do not exist in registry
-        # res = op.getRegistryImage(s.DEF_BASE_PROVIDER+'/'+baseName)
-        # op.assertStatusCode(res, 404, \
-        #     "Cannot assure base image is not already on the registry.")
-        #
-        # res = op.postBase(baseName, \
-        #         os.path.join(resources, 'bases/'+baseName))
-        # errText = "Error in build base request"
-        # op.assertStatusCode(res, 200, errText)
-        # op.assertStatus(res, 'building', errText)
-        #
-        # res = op.waitWhileStatus(op.getBase, baseName, \
-        #     text="Error while asking base status")
-        # op.assertStatus(res, 'finished', \
-        #     "Error in base image built proccess")
+        res = op.getRegistryImage(s.DEF_BASE_PROVIDER+'/'+baseName)
+        op.assertStatusCode(res, 404, \
+            "Cannot assure base image is not already on the registry.")
+
+        res = op.postBase(baseName, \
+                os.path.join(resources, 'bases/'+baseName))
+        errText = "Error in build base request"
+        op.assertStatusCode(res, 200, errText)
+        op.assertStatus(res, 'building', errText)
+
+        res = op.waitWhileStatus(op.getBase, baseName, \
+            text="Error while asking base status")
+        op.assertStatus(res, 'finished', \
+            "Error in base image built proccess")
 
 
         # check base
-        #res = op.getRegistryImage(s.DEF_BASE_PROVIDER+'/'+baseName)
-        #op.assertStatusCode(res, 200, 'Base image not saved to registry')
+        res = op.getRegistryImage(s.DEF_BASE_PROVIDER+'/'+baseName)
+        op.assertStatusCode(res, 200, 'Base image not saved to registry')
 
         # build context
         res = op.postContext(group, os.path.join(resources, 'img/puppetfile'))

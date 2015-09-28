@@ -67,11 +67,17 @@ FS_DEF_CONTEXT_PID = 'pid'
 FS_DEF_DOCKER_IMAGES_FOLDER = 'images'
 """Default name for the folder which contains the images inside a context"""
 
+FS_DEF_DOCKER_PULL_LOG = 'pull.log'
+"""Default name for the log of the docker pull process"""
+
+FS_DEF_DOCKER_PULL_ERR_LOG = 'pull_err.log'
+"""Default name for the log errors of the docker pull process"""
+
 FS_DEF_DOCKER_BUILD_LOG = 'build.log'
 """Default name for the log of the docker build process"""
 
 FS_DEF_DOCKER_BUILD_ERR_LOG = 'build_err.log'
-"""Default name for the log of the docker build process"""
+"""Default name for the log errors of the docker build process"""
 
 FS_DEF_DOCKER_INFO = 'build_info.txt'
 """Default name for file which stores information about how the build process finished."""
