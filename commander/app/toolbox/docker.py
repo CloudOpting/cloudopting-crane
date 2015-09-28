@@ -148,7 +148,7 @@ def pullImage(completeName, registry=None, dk=defaultDockerClient, imageFolder='
 
 
 def tagImage(orgName, destName, dk=defaultDockerClient, imageFolder='/tmp'):
-    command = 'docker '+optionsFromClient(dk)+' tag '+orgName+" "+destName
+    command = 'docker '+optionsFromClient(dk)+' tag -f '+orgName+" "+destName
     p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=imageFolder)
 
     response = ''
@@ -586,8 +586,8 @@ def imageInRegistry(name):
     """
     Returns True if the image exists on registry, False if not.
     """
-    res = req.get('https;//'+s.DK_RG_ENDPOINT+'/v2/'+name+'/tags/list', \
-            verify=s.DK_RG_CA)
+    res = req.get('https://'+settings.DK_RG_ENDPOINT+'/v2/'+name+'/tags/list', \
+            verify=settings.DK_RG_CA)
     if res.status_code == 200:
         return True
     elif res.status_code == 404:
