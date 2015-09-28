@@ -1,5 +1,5 @@
 # Use base
-FROM coregisty:5000/cloudopting/ubuntubase
+FROM cloudopting/ubuntubase
 # Add puppet modules:
 ADD modules /tmp/modules
 # Add manifest to apply
