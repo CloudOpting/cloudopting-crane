@@ -1,3 +1,5 @@
 commander:
   build: .
   hostname: cocommander
+  volumes:
+    - ./certs:/var/lib/commander/certs

@@ -1,4 +1,11 @@
 #!/bin/bash
+
+# Docker daemon (if docker-machine, boot2docker, or any not local)
+export DOCKER_TLS_VERIFY=1;
+export DOCKER_HOST=tcp://172.16.136.130:2376;
+export DOCKER_CERT_PATH=/Users/jfc/.docker/machine/machines/dev-wts;
+export DOCKER_MACHINE_NAME=dev-wts;
+
 PWD=$(pwd)
 FOLDER=${PWD##*/}
 PREFIX=$(echo  "${FOLDER//-}" | awk '{print tolower($0)}')

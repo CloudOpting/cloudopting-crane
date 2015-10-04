@@ -9,12 +9,15 @@ commander:
      - "8888:8888"
    volumes:
      - ./commander/commander-data-tests/var/crane:/var/crane/
+     # Override application copied with the actual folder mounted as volume.
+     # Allows real time changes and log monitoring from editor
      - ./commander/app:/usr/src/commander
    links:
      - redis
      - registry:coregistry
      - engine:coengine
      - emulatedhost
+# Uncomment this to run manually
 #   command: tail -f /dev/null
 registry:
   extends:
@@ -24,13 +27,13 @@ registry:
       - 5000:5000
   volumes:
     - ./registry/registry-data-tests:/var/lib/registry
-    - ./registry/certs:/certs
 engine:
   extends:
     file: ./engine/compose.yml
     service: engine
   links:
     - registry:coregistry
+#  command: tail -f /dev/null
 redis:
   image: redis:3
 testrunner:
@@ -43,6 +46,12 @@ testrunner:
   volumes:
     - ./tests/resources:/var/tests_resources
     - ./tests/testrunner/src:/var/tests/
+    - ./tests/testrunner/certs:/certs
+# Uncomment this to run manually
   command: tail -f /dev/null
 emulatedhost:
-  build: tests/emulatedhost
+  extends:
+    file: ./tests/emulatedhost/compose.yml
+    service: emulatedhost
+# Uncomment this to run manually
+#  command: tail -f /dev/null

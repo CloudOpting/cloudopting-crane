@@ -2,6 +2,10 @@
 
 # Taken from https://github.com/jpetazzo/dind/ and modified.
 
+# Copy registry CA cert
+mkdir -p /etc/docker/certs.d/coregistry:5000
+cp /var/lib/coengine/certs/registry-ca.crt /etc/docker/certs.d/coregistry:5000/ca.crt
+
 # Definitions
 CGROUP_DIR=/sys/fs/cgroup
 
