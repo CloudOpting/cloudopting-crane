@@ -16,7 +16,7 @@ commander:
      - registry:coregistry
      - engine:coengine
    # only while developing
-   command: tail -f /dev/null
+   #command: tail -f /dev/null
 registry:
   extends:
     file: ./registry/compose.yml
