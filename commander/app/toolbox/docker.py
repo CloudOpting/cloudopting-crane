@@ -3,7 +3,9 @@ import ssl
 import settings
 from threading import Thread
 import subprocess
+import re
 import requests as req
+import json
 
 from controllers import errors
 from files import createFile
@@ -128,6 +130,37 @@ def purge(dk=defaultDockerClient):
         return False
 
 
+def pullImage(completeName, registry=None, dk=defaultDockerClient, imageFolder='/tmp'):
+    image = completeName
+    if registry:
+        image = registry+'/'+completeName
+    command = 'docker '+optionsFromClient(dk)+' pull '+image+' 1> '+ os.path.join(imageFolder, settings.FS_DEF_DOCKER_PULL_LOG) +' 2> '+ os.path.join(imageFolder, settings.FS_DEF_DOCKER_PULL_ERR_LOG)
+    p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=imageFolder)
+
+    response = ''
+    for line in p.stdout.readlines():
+        response+=line+os.linesep
+
+    if p.wait() == 0:
+        return True
+    else:
+        return False
+
+
+def tagImage(orgName, destName, dk=defaultDockerClient, imageFolder='/tmp'):
+    command = 'docker '+optionsFromClient(dk)+' tag -f '+orgName+" "+destName
+    p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=imageFolder)
+
+    response = ''
+    for line in p.stdout.readlines():
+        response+=line+os.linesep
+
+    if p.wait() == 0:
+        return True
+    else:
+        return False
+
+
 def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerClient):
     # launch build
     # TODO: In the future, replace commandline docker API with docker-py client. The docker-py api for build do not support context path different from Dockerfile path.
@@ -142,6 +175,33 @@ def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerC
 
         return p.wait()
 
+    def __extractBaseImageName__(dockerfilepath):
+        """
+        Returns the name after the 'FROM' directive in the dockerfile (registry endpoint + provider + image name). Raises exception if not possible to extract the name.
+        """
+        res = None
+        regEndpoint, provider, name = None, None, None
+        with open(os.path.join(dockerfilepath, settings.FS_DEF_DOCKERFILE), "r") as f:
+            for line in f:
+                try:
+                    res = re.search(r'^FROM\s*(.*)$', line).group(1)
+                except AttributeError:
+                    continue
+                break
+            f.close()
+
+        if res:
+            splitted = res.split("/")
+            i = 0
+            if len(splitted) == 3:
+                regEndpoint=''.join(e for e in splitted[i] if (e.isalnum() or e == ':'))
+                i = i+1
+            if len(splitted) >= 2:
+                provider=''.join(e for e in splitted[i] if e.isalnum())
+                i = i+1
+            name=''.join(e for e in splitted[i] if (e.isalnum() or e == ':'))
+        return regEndpoint, provider, name
+
     def __buildThread__():
         err = None
 
@@ -152,9 +212,51 @@ def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerC
         dockerfilepath = os.path.join(dockerfilepath, imageName)
 
         pidfile = os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_PID)
-
         try:
             daemon_opts = optionsFromClient(dk)
+
+            # extract base name from dockerfile
+            if err is None:
+                if settings.DK_RG_SWITCH:
+                    dkfRgEnd, dkfProv, dkfName = __extractBaseImageName__(dockerfilepath)
+                    if not dkfName:
+                        err = "Cannot extract image name from Dockerfile"
+                    else:
+                        pass
+
+            # Pull image from registry
+            if err is None:
+                # if registry specified, pull from that. If not, try private reg.
+                if dkfProv:
+                    completeName = dkfProv+"/"+dkfName
+                else:
+                    completeName = dkfName
+                if settings.DK_RG_SWITCH:
+                    output = None
+                    try:
+                        if not dkfRgEnd:
+                            dkfRgEnd = settings.DK_RG_ENDPOINT
+                        output = pullImage(completeName, registry=dkfRgEnd, dk=dk, imageFolder=dockerfilepath)
+                        # re-tag pulled image
+                        if output:
+                            if not tagImage(dkfRgEnd+'/'+completeName, completeName, dk=dk, imageFolder=dockerfilepath):
+                                err = "Cannot tag '"+completeName+"'."
+                    except Exception, e:
+                        pass
+
+                    if dkfRgEnd and dkfRgEnd!=settings.DK_RG_ENDPOINT and not output and not err:
+                        err = "Cannot pull '"+completeName+"' from registry '"+dkfRgEnd+"'"
+
+                # if not, try with public registry
+                if err is None and not output:
+                    try:
+                        output = pullImage(completeName, registry=None, dk=dk, imageFolder=dockerfilepath)
+                    except Exception, e:
+                        pass
+
+                    if not output:
+                        err = "Cannot pull '"+completeName+"' from public nor private registry."
+
 
             # build
             if err is None:
@@ -194,7 +296,7 @@ def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerC
 
 
         except Exception, e:
-            createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), "Unexpected error in build thread.")
+            createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), "Unexpected error in build thread.\n"+str(e))
             createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '1')
 
     thread = Thread(target = __buildThread__)
@@ -354,7 +456,7 @@ def buildBase(datastore, name, dk=defaultDockerClient):
 
             # build
             if err is None:
-                command = 'docker '+daemon_opts+' build -f '+ dockerfilepath+ '/'+ settings.FS_DEF_DOCKERFILE +' -t '+ tag +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
+                command = 'docker '+daemon_opts+' build -f '+ dockerfilepath+'/'+ settings.FS_DEF_DOCKERFILE +' -t '+ tag +' . ' + '1> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_LOG) +' 2> '+ os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG)
 
                 if __executeCommand__(command, cwd, pidfile)!=0:
                     err = "Error while building"
@@ -387,7 +489,7 @@ def buildBase(datastore, name, dk=defaultDockerClient):
                 createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '0')
 
         except Exception, e:
-            createFile(os.path.join('/tmp/', settings.FS_DEF_DOCKER_BUILD_ERR_LOG), "Unexpected error in build thread.")
+            createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), "Unexpected error in build thread."+str(e))
             createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '1')
 
 
@@ -484,8 +586,8 @@ def imageInRegistry(name):
     """
     Returns True if the image exists on registry, False if not.
     """
-    res = req.get('https;//'+s.DK_RG_ENDPOINT+'/v2/'+name+'/tags/list', \
-            verify=s.DK_RG_CA)
+    res = req.get('https://'+settings.DK_RG_ENDPOINT+'/v2/'+name+'/tags/list', \
+            verify=settings.DK_RG_CA)
     if res.status_code == 200:
         return True
     elif res.status_code == 404:

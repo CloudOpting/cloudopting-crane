@@ -270,6 +270,7 @@ def newImage(datastore, contextReference, imageName, puppetmanifest=None, base=N
     Saves the files in the filesystem, and launch the build process
     '''
     try:
+        imageName=''.join(ch for ch in imageName if ch.isalnum())
         token = tokens.newImageToken(datastore, contextReference, imageName)
 
         # Check if context exists and if it is completed

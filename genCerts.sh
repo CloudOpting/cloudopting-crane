@@ -6,7 +6,9 @@ export CLIENT_HOSTNAME=commander
 export CA_PASSWORD=p4ssw0rd
 export ENGINE_CERTS_DIR=engine/certs
 export COMMANDER_CERTS_DIR=commander/certs
-export TESTRUNNER_CERTS_DIR=tests/testrunner/src/certs
+export COMMANDER_MASTER_CERTS_DIR=commander/certs/master
+export TESTRUNNER_CERTS_DIR=tests/testrunner/certs
+export EMULATEDHOST_CERTS_DIR=tests/emulatedhost/certs
 
 export REGISTRY_HOSTNAME=coregistry
 export REGISTRY_AUTH_DIR=registry/auth
@@ -69,12 +71,21 @@ printf "\n${SUCC}Got ${ELEM}client-cert.pem${SUCC} and ${ELEM}client-key.pem${SU
 mkdir -p ${COMMANDER_CERTS_DIR}
 printf "${INFO}Copying client certificates to commander context...${NC}\n\n"
 printf "${OP}"
-cp ${ENGINE_CERTS_DIR}/client-cert.pem ${COMMANDER_CERTS_DIR}/client-cert.pem
-cp ${ENGINE_CERTS_DIR}/client-key.pem ${COMMANDER_CERTS_DIR}/client-key.pem
+cp ${ENGINE_CERTS_DIR}/client-cert.pem ${COMMANDER_CERTS_DIR}/cert.pem
+cp ${ENGINE_CERTS_DIR}/client-key.pem ${COMMANDER_CERTS_DIR}/key.pem
 cp ${ENGINE_CERTS_DIR}/ca.pem ${COMMANDER_CERTS_DIR}/ca.pem
 printf "${NC}"
-printf "\n${SUCC}Copied ${ELEM}client-cert.pem${SUCC}, ${ELEM}client-key.pem${SUCC} and ${ELEM}ca.pem${SUCC} to ${ELEM}${COMMANDER_CERTS_DIR}${SUCC}.${NC}\n\n\n"
+printf "\n${SUCC}Copied ${ELEM}(client-)cert.pem${SUCC}, ${ELEM}(client-)key.pem${SUCC} and ${ELEM}ca.pem${SUCC} to ${ELEM}${COMMANDER_CERTS_DIR}${SUCC}.${NC}\n\n\n"
 
+## Copying master client certificates to commander context.
+mkdir -p ${COMMANDER_CERTS_DIR}
+printf "${INFO}Copying master client certificates to commander context...${NC}\n\n"
+printf "${OP}"
+cp ${ENGINE_CERTS_DIR}/client-cert.pem ${COMMANDER_MASTER_CERTS_DIR}/cert.pem
+cp ${ENGINE_CERTS_DIR}/client-key.pem ${COMMANDER_MASTER_CERTS_DIR}/key.pem
+cp ${ENGINE_CERTS_DIR}/ca.pem ${COMMANDER_MASTER_CERTS_DIR}/ca.pem
+printf "${NC}"
+printf "\n${SUCC}Copied ${ELEM}(client-)cert.pem${SUCC}, ${ELEM}(client-)key.pem${SUCC} and ${ELEM}ca.pem${SUCC} to ${ELEM}${COMMANDER_MASTER_CERTS_DIR}${SUCC}.${NC}\n\n\n"
 
 ## How to set client certificates
 printf "${BINFO}-----------------------------------------------------------------------------------------------------------------------${NC}\n"
@@ -165,3 +176,10 @@ printf "${BINFO}----------------------------------------------------------------
 
 ## Copy all the certificates in engine to testrunner
 cp -r ${COMMANDER_CERTS_DIR} ${TESTRUNNER_CERTS_DIR}
+
+## Copying engine certificates to emulatedhost context.
+mkdir -p ${EMULATEDHOST_CERTS_DIR}
+cp ${ENGINE_CERTS_DIR}/server-cert.pem ${EMULATEDHOST_CERTS_DIR}/cert.pem
+cp ${ENGINE_CERTS_DIR}/server-key.pem ${EMULATEDHOST_CERTS_DIR}/key.pem
+cp ${ENGINE_CERTS_DIR}/ca.pem ${EMULATEDHOST_CERTS_DIR}/ca.pem
+cp ${ENGINE_CERTS_DIR}/registry-ca.crt ${EMULATEDHOST_CERTS_DIR}/registry-ca.crt

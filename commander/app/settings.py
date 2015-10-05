@@ -67,11 +67,17 @@ FS_DEF_CONTEXT_PID = 'pid'
 FS_DEF_DOCKER_IMAGES_FOLDER = 'images'
 """Default name for the folder which contains the images inside a context"""
 
+FS_DEF_DOCKER_PULL_LOG = 'pull.log'
+"""Default name for the log of the docker pull process"""
+
+FS_DEF_DOCKER_PULL_ERR_LOG = 'pull_err.log'
+"""Default name for the log errors of the docker pull process"""
+
 FS_DEF_DOCKER_BUILD_LOG = 'build.log'
 """Default name for the log of the docker build process"""
 
 FS_DEF_DOCKER_BUILD_ERR_LOG = 'build_err.log'
-"""Default name for the log of the docker build process"""
+"""Default name for the log errors of the docker build process"""
 
 FS_DEF_DOCKER_INFO = 'build_info.txt'
 """Default name for file which stores information about how the build process finished."""
@@ -92,13 +98,13 @@ FS_DEF_DOCKER_COMPOSE_PULL_CODE = 'compose_pull.code'
 DK_DEFAULT_BUILD_HOST = "tcp://coengine:4243"
 """Default docker host where images will be built"""
 
-DK_DEFAULT_BUILD_HOST_CERTS = "/usr/src/commander/certs"
+DK_DEFAULT_BUILD_HOST_CERTS = "/var/lib/commander/certs"
 """Path where the certificates for the build host are stored. Leave as 'None' if not using TLS."""
 
 DK_DEFAULT_TEST_HOST = "tcp://coengine:4243"
 """Default docker host for testing and auxiliar operations"""
 
-DK_DEFAULT_TEST_HOST_CERTS = "/usr/src/commander/certs"
+DK_DEFAULT_TEST_HOST_CERTS = "/var/lib/commander/certs"
 """Path where the certificates for the testing host are stored. Leave as 'None' if not using TLS."""
 
 DK_CLIENT_TIMEOUT = 60
@@ -111,7 +117,10 @@ DK_RG_SWITCH = True
 DK_RG_ENDPOINT = "coregistry:5000"
 """Docker registry end-point"""
 
-DK_RG_CA = "/usr/src/commander/certs/registry-ca.crt"
+DK_RG_CA = "/var/lib/commander/certs/registry-ca.crt"
 
 DK_DEFAULT_BASE_PROVIDER = "cloudopting"
 """Default provider for base images"""
+
+DK_DEFAULT_MASTER_CLIENT_CERTS = "/var/lib/commander/certs/master"
+"""Default folder for master client certificates. It'll assume files named as: cert.pem, key.pem, ca.pem"""

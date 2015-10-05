@@ -4,7 +4,7 @@
 
 # Copy registry CA cert
 mkdir -p /etc/docker/certs.d/coregistry:5000
-cp /var/lib/coengine/certs/registry-ca.crt /etc/docker/certs.d/coregistry:5000/ca.crt
+cp /var/lib/emulatedhost/certs/registry-ca.crt /etc/docker/certs.d/coregistry:5000/ca.crt
 
 # Definitions
 CGROUP_DIR=/sys/fs/cgroup

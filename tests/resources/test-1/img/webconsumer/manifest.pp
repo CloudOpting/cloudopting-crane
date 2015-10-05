@@ -6,7 +6,6 @@ vcsrepo { '/usr/src/app':
 }
 
 # Install requirements
-
 class { 'python' :
   version    => 'system',
   pip        => 'present',

@@ -76,3 +76,7 @@ __Issues__
   - customize hardware requirements by container with tags
 - Update services on-the-fly
 - Manage network parameters
+
+## Tests: How to run the tests
+
+Execute the script `runTests.sh`. You will need root permissions because it deletes files created by containers that runs as root.

@@ -8,17 +8,15 @@ from datastore import tokens
 from datastore import dataStore
 from datastore.dataStore import DataStore
 
-def __obtainDockerHostInfo__(endpoint, apiVersion):
+def __obtainDockerHostInfo__(endpoint):
     # Obtain information about docker daemon listening on endpoint
     info = None
 
     try:
-        if apiVersion:
-            info = docker.dockerInfo(dockerClient=endpoint, version=apiVersion)
-        else:
-            info = docker.dockerInfo(dockerClient=endpoint)
+        dockerClient = docker.dockerClient(base_url=endpoint, cert_path=settings.DK_DEFAULT_MASTER_CLIENT_CERTS)
+        info = docker.dockerInfo(dk)
     except Exception, e:
-        raise errors.ControllerError("Error while connecting with provided docker host.")
+        raise errors.ControllerError("Error while connecting with provided docker host. Endpoint: '"+str(endpoint)+"'")
 
     if not info:
         raise errors.ControllerError("Could not validate docker daemon on provided endpoint.")
@@ -30,7 +28,7 @@ def newSingleProvisionedMachineCluster(datastore, endpoint, apiVersion=None):
     Set a preprovisioned single-machine cluster. 'endpoint' is the Docker host api endpoint.
     '''
     try:
-        info = __obtainDockerHostInfo__(endpoint, apiVersion)
+        info = __obtainDockerHostInfo__(endpoint)
 
         # Generate token
         token = tokens.newClusterToken(datastore)
@@ -43,7 +41,9 @@ def newSingleProvisionedMachineCluster(datastore, endpoint, apiVersion=None):
             raise errors.OperationError("Couldn't create cluster reference in the filesystem")
 
         # Add to datastore
-        datastorecluster = {'token':token, 'status':'ready', 'description':'Ready to use', 'numberOfMachines':1, 'type':'simple-preprovisioned', 'endpoint':endpoint}
+        datastorecluster = {'token':token, 'status':'joining',
+        'description':'Ready to use', 'numberOfNodes':1, 'type':'simple-preprovisioned',
+        'nodes':[{'endpoint':endpoint, 'status':'joining'}]}
         datastore.addCluster(token, datastorecluster)
 
         return datastorecluster, 200
@@ -65,13 +65,19 @@ def checkCluster(datastore, token, detail=False):
         if cluster == None:
             raise errors.NotFoundError("Cluster does not exist.")
 
-        # Ask docker daemon about himself
-        info = None
-        try:
-            info = __obtainDockerHostInfo__(endpoint, apiVersion)
-        except Exception, e:
-            cluster['status']='error'
-            cluster['description']='Cannot connect with docker daemon. Maybe it is down.'
+        # Ask docker daemons
+        for node in cluster['nodes']:
+            info = None
+            try:
+                info = __obtainDockerHostInfo__(node['endpoint'])
+                if info['Driver'] is not None:
+                    node['status']='ready'
+                else:
+                    node['status']='error'
+                    cluster['description']='Unexpected response from node \''+node['endpoint']+'\'.'
+            except Exception, e:
+                node['status']='error'
+                cluster['description']='Cannot connect with node \''+node['endpoint']+'\'. Maybe it is down.'
 
         # update datastore
         datastore.updateCluster(token)

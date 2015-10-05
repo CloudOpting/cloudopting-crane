@@ -53,7 +53,6 @@ def postImage(contextToken, imageName, base=None, dockerfilePath=None, \
     if base!=None:
         data['base']=str(base)
 
-
     res = req.post(s.COMMANDER_URL+'/builder/images', data=data, files=files)
 
     if dockerfile!=None:
@@ -110,14 +109,13 @@ def waitWhileStatus(getStatusFunc, token, status='building', period=5, \
     while True: # wait process to finish
         res = getStatusFunc(token)
         assertStatusCode(res, 200, text)
-
         if res.json()['status'] == status:
             time.sleep(period)
             continue
-
         break
 
     return res
+
 
 def buildImageAndAssert(group, name, contextToken, base=None, \
         dockerfilePath=None, puppetmanifestPath=None):
@@ -132,10 +130,10 @@ def buildImageAndAssert(group, name, contextToken, base=None, \
     text = "Error posting image '"+name+"'"
     assertStatusCode(res, 200, text)
     assertStatus(res, 'building', text=text)
-
     # wait until finish
     text = "Error building image '"+completeName+"'"
-    res = waitWhileStatus(getImage, res.json()['token'], text)
+    aux = "token:"+res.json()['token']
+    res = waitWhileStatus(getImage, res.json()['token'], status='building', text=text)
     assertStatusCode(res, 200, text)
     assertStatus(res, 'finished', text=text)
 
