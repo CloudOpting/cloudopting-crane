@@ -12,6 +12,7 @@ def newComposition(datastore, composefile, clusterReference=''):
     '''
     Saves docker compose file and runs it.
     '''
+    cluster = None
     try:
         token = tokens.newCompositionToken(datastore)
 
@@ -21,7 +22,9 @@ def newComposition(datastore, composefile, clusterReference=''):
             raise errors.NotFoundError("Cluster does not exist.")
 
         # Check docker
-        dockercheck = docker.checkDocker(dockerClient=token['endpoint'])
+        endpoint = cluster['nodes'][0]['endpoint']
+        dk = docker.dockerClient(endpoint, settings.DK_DEFAULT_MASTER_CLIENT_CERTS)
+        dockercheck = docker.checkDocker(dk)
         if dockercheck is not True:
             raise errors.ControllerError("Error in cluster. Docker error: " + dockercheck)
 
@@ -50,5 +53,5 @@ def newComposition(datastore, composefile, clusterReference=''):
     except errors.ControllerError, e:
         return e.getResponse()
     except Exception, e:
-        aux = errors.ControllerError("Unknown error: "+ str(e))
+        aux = errors.ControllerError("Unknown error: "+ str(e)+ "; info:"+str(cluster))
         return aux.getResponse()

@@ -13,10 +13,10 @@ def __obtainDockerHostInfo__(endpoint):
     info = None
 
     try:
-        dockerClient = docker.dockerClient(base_url=endpoint, cert_path=settings.DK_DEFAULT_MASTER_CLIENT_CERTS)
+        dk = docker.dockerClient(base_url=endpoint, cert_path=settings.DK_DEFAULT_MASTER_CLIENT_CERTS)
         info = docker.dockerInfo(dk)
     except Exception, e:
-        raise errors.ControllerError("Error while connecting with provided docker host. Endpoint: '"+str(endpoint)+"'")
+        raise errors.ControllerError("Error while connecting with provided docker host. Endpoint: '"+str(endpoint)+"' exception:"+str(e))
 
     if not info:
         raise errors.ControllerError("Could not validate docker daemon on provided endpoint.")
@@ -80,7 +80,7 @@ def checkCluster(datastore, token, detail=False):
                 cluster['description']='Cannot connect with node \''+node['endpoint']+'\'. Maybe it is down.'
 
         # update datastore
-        datastore.updateCluster(token)
+        datastore.updateCluster(token, cluster)
 
         # details
         if detail:

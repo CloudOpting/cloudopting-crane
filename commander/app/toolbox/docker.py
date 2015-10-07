@@ -106,7 +106,7 @@ def dockerInfo(dk=defaultDockerClient):
     """
     Returns general information about docker daemon.
     """
-    dk.info()
+    return dk.info()
 
 
 def purge(dk=defaultDockerClient):

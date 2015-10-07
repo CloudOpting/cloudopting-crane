@@ -96,13 +96,13 @@ class TestsCompleteCycle:
                     'img/webproducer/manifest.pp' ))
 
         # create cluster
-        res = op.postCluster(HOST_ENDPOINT, \
+        res = op.postCluster(s.HOST_ENDPOINT, \
             clientCertPath=s.HOST_CERT, clientKeyPath=s.HOST_KEY, \
             caPath=s.HOST_CA)
         text='Error submitting cluster'
-        clusterToken = res.json()['token']
         op.assertStatusCode(res, 200, text)
         op.assertStatus(res, 'ready', text)
+        clusterToken = res.json()['token']
 
         # run composition
         res = op.postComposition(clusterToken, \

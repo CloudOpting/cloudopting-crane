@@ -17,6 +17,7 @@ export REGISTRY_CERTS_DIR=registry/certs
 export REGISTRY_DEF_USER=reguser
 export REGISTRY_DEF_USER_PASS=s3cr3tp4ssw0rd
 
+
 # Colors
 ERR='\033[0;31m'
 INFO='\033[1;36m'
@@ -28,7 +29,7 @@ OP='\033[2;33m'
 NC='\033[0m' # No Color
 
 # Clean previous certs
-rm -rf ${ENGINE_CERTS_DIR} ${COMMANDER_CERTS_DIR} ${COMMANDER_MASTER_CERTS_DIR} ${COMMANDER_CERTS_DIR} ${TESTRUNNER_CERTS_DIR} ${EMULATEDHOST_CERTS_DIR}
+rm -rf ${ENGINE_CERTS_DIR} ${REGISTRY_AUTH_DIR} ${REGISTRY_CERTS_DIR} ${COMMANDER_CERTS_DIR} ${COMMANDER_MASTER_CERTS_DIR} ${COMMANDER_CERTS_DIR} ${TESTRUNNER_CERTS_DIR} ${EMULATEDHOST_CERTS_DIR}
 
 
 # ENGINE CERTIFICATES
@@ -83,6 +84,7 @@ printf "\n${SUCC}Copied ${ELEM}(client-)cert.pem${SUCC}, ${ELEM}(client-)key.pem
 
 ## Copying master client certificates to commander context.
 mkdir -p ${COMMANDER_CERTS_DIR}
+mkdir -p ${COMMANDER_MASTER_CERTS_DIR}
 printf "${INFO}Copying master client certificates to commander context...${NC}\n\n"
 printf "${OP}"
 cp ${ENGINE_CERTS_DIR}/client-cert.pem ${COMMANDER_MASTER_CERTS_DIR}/cert.pem
@@ -178,23 +180,21 @@ printf "${BINFO}----------------------------------------------------------------
 
 # Test environment
 
+## Copying engine certificates to emulatedhost context.
+mkdir -p ${EMULATEDHOST_CERTS_DIR}
+cp ${ENGINE_CERTS_DIR}/ca.pem ${EMULATEDHOST_CERTS_DIR}/ca.pem
+cp ${ENGINE_CERTS_DIR}/registry-ca.crt ${EMULATEDHOST_CERTS_DIR}/registry-ca.crt
+
 ## Signed emulatedhost key [emulatedhost-cert.pem, emulatedhost-key.pem]
 printf "${OP}"
-openssl genrsa -out ${ENGINE_CERTS_DIR}/emulatedhost-key.pem 4096
-openssl req -subj "/CN=$EMULATEDHOST_HOSTNAME" -sha256 -new -key ${ENGINE_CERTS_DIR}/emulatedhost-key.pem -out ${ENGINE_CERTS_DIR}/emulatedhost.csr
-echo subjectAltName = IP:127.0.0.1 > ${ENGINE_CERTS_DIR}/extfile.cnf
-openssl x509 -req -days 365 -sha256 -in ${ENGINE_CERTS_DIR}/emulatedhost.csr -CA ${ENGINE_CERTS_DIR}/ca.pem -CAkey ${ENGINE_CERTS_DIR}/ca-key.pem \
-  -CAcreateserial -out ${ENGINE_CERTS_DIR}/emulatedhost-cert.pem -extfile ${ENGINE_CERTS_DIR}/extfile.cnf -passin env:CA_PASSWORD
-rm ${ENGINE_CERTS_DIR}/extfile.cnf
-rm -v ${ENGINE_CERTS_DIR}/emulatedhost.csr
+openssl genrsa -out ${EMULATEDHOST_CERTS_DIR}/emulatedhost-key.pem 4096
+openssl req -subj "/CN=$EMULATEDHOST_HOSTNAME" -sha256 -new -key ${EMULATEDHOST_CERTS_DIR}/emulatedhost-key.pem -out ${EMULATEDHOST_CERTS_DIR}/emulatedhost.csr
+echo subjectAltName = IP:127.0.0.1 > ${EMULATEDHOST_CERTS_DIR}/extfile.cnf
+openssl x509 -req -days 365 -sha256 -in ${EMULATEDHOST_CERTS_DIR}/emulatedhost.csr -CA ${ENGINE_CERTS_DIR}/ca.pem -CAkey ${ENGINE_CERTS_DIR}/ca-key.pem \
+  -CAcreateserial -out ${EMULATEDHOST_CERTS_DIR}/emulatedhost-cert.pem -extfile ${EMULATEDHOST_CERTS_DIR}/extfile.cnf -passin env:CA_PASSWORD
+rm ${EMULATEDHOST_CERTS_DIR}/extfile.cnf
+rm -v ${EMULATEDHOST_CERTS_DIR}/emulatedhost.csr
 printf "${OP}"
 
 ## Copy all the certificates in engine to testrunner
 cp -r ${COMMANDER_CERTS_DIR} ${TESTRUNNER_CERTS_DIR}
-
-## Copying engine certificates to emulatedhost context.
-mkdir -p ${EMULATEDHOST_CERTS_DIR}
-cp ${ENGINE_CERTS_DIR}/server-cert.pem ${EMULATEDHOST_CERTS_DIR}/cert.pem
-cp ${ENGINE_CERTS_DIR}/server-key.pem ${EMULATEDHOST_CERTS_DIR}/key.pem
-cp ${ENGINE_CERTS_DIR}/ca.pem ${EMULATEDHOST_CERTS_DIR}/ca.pem
-cp ${ENGINE_CERTS_DIR}/registry-ca.crt ${EMULATEDHOST_CERTS_DIR}/registry-ca.crt

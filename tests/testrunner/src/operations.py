@@ -77,8 +77,13 @@ def postCluster(endpoint, apiVersion=None, clientCertPath=None, \
     if ca!=None:
         files['ca']=ca
 
+    data= {}
+    data['endpoint']=endpoint
+    if apiVersion!=None:
+        data['apiVersion']=apiVersion
+
     res = req.post(s.COMMANDER_URL+'/cluster/provisionedSingleMachine', \
-            data = {'contextReference': contextToken, 'imageName': imageName}, \
+            data = data, \
             files = files)
 
     if clientCert!=None:

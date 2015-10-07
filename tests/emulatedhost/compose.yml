@@ -7,5 +7,5 @@ emulatedhost:
     - ./certs:/var/lib/emulatedhost/certs
   hostname: emulatedhost
   environment:
-    - DOCKER_DAEMON_ARGS=--tlsverify --tlscacert=/var/lib/emulatedhost/certs/ca.pem --tlscert=/var/lib/emulatedhost/certs/cert.pem --tlskey=/var/lib/emulatedhost/certs/key.pem
+    - DOCKER_DAEMON_ARGS=--tlsverify --tlscacert=/var/lib/emulatedhost/certs/ca.pem --tlscert=/var/lib/emulatedhost/certs/emulatedhost-cert.pem --tlskey=/var/lib/emulatedhost/certs/emulatedhost-key.pem
     - PORT=4243
