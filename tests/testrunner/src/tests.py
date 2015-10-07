@@ -96,7 +96,7 @@ class TestsCompleteCycle:
                     'img/webproducer/manifest.pp' ))
 
         # create cluster
-        res = postCluster(HOST_ENDPOINT, \
+        res = op.postCluster(HOST_ENDPOINT, \
             clientCertPath=s.HOST_CERT, clientKeyPath=s.HOST_KEY, \
             caPath=s.HOST_CA)
         text='Error submitting cluster'
@@ -105,7 +105,7 @@ class TestsCompleteCycle:
         op.assertStatus(res, 'ready', text)
 
         # run composition
-        res = postComposition(clusterToken, \
+        res = op.postComposition(clusterToken, \
                 os.path.join(resources, 'run/compose.yml'))
         text='Error deploying composition'
         op.assertStatusCode(res, 200, text)
