@@ -3,6 +3,7 @@
 # Definitions
 export ENGINE_HOSTNAME=coengine
 export CLIENT_HOSTNAME=commander
+export EMULATEDHOST_HOSTNAME=emulatedhost
 export CA_PASSWORD=p4ssw0rd
 export ENGINE_CERTS_DIR=engine/certs
 export COMMANDER_CERTS_DIR=commander/certs
@@ -16,7 +17,6 @@ export REGISTRY_CERTS_DIR=registry/certs
 export REGISTRY_DEF_USER=reguser
 export REGISTRY_DEF_USER_PASS=s3cr3tp4ssw0rd
 
-
 # Colors
 ERR='\033[0;31m'
 INFO='\033[1;36m'
@@ -26,6 +26,10 @@ UINFO='\033[0;37m'
 ELEM='\033[1;34m'
 OP='\033[2;33m'
 NC='\033[0m' # No Color
+
+# Clean previous certs
+rm -rf ${ENGINE_CERTS_DIR} ${COMMANDER_CERTS_DIR} ${COMMANDER_MASTER_CERTS_DIR} ${COMMANDER_CERTS_DIR} ${TESTRUNNER_CERTS_DIR} ${EMULATEDHOST_CERTS_DIR}
+
 
 # ENGINE CERTIFICATES
 mkdir -p ${ENGINE_CERTS_DIR}
@@ -173,6 +177,17 @@ printf "\t${UINFO}- Restart docker engine.${NC}\n"
 printf "${BINFO}-----------------------------------------------------------------------------------------------------------------------${NC}\n\n"
 
 # Test environment
+
+## Signed emulatedhost key [emulatedhost-cert.pem, emulatedhost-key.pem]
+printf "${OP}"
+openssl genrsa -out ${ENGINE_CERTS_DIR}/emulatedhost-key.pem 4096
+openssl req -subj "/CN=$EMULATEDHOST_HOSTNAME" -sha256 -new -key ${ENGINE_CERTS_DIR}/emulatedhost-key.pem -out ${ENGINE_CERTS_DIR}/emulatedhost.csr
+echo subjectAltName = IP:127.0.0.1 > ${ENGINE_CERTS_DIR}/extfile.cnf
+openssl x509 -req -days 365 -sha256 -in ${ENGINE_CERTS_DIR}/emulatedhost.csr -CA ${ENGINE_CERTS_DIR}/ca.pem -CAkey ${ENGINE_CERTS_DIR}/ca-key.pem \
+  -CAcreateserial -out ${ENGINE_CERTS_DIR}/emulatedhost-cert.pem -extfile ${ENGINE_CERTS_DIR}/extfile.cnf -passin env:CA_PASSWORD
+rm ${ENGINE_CERTS_DIR}/extfile.cnf
+rm -v ${ENGINE_CERTS_DIR}/emulatedhost.csr
+printf "${OP}"
 
 ## Copy all the certificates in engine to testrunner
 cp -r ${COMMANDER_CERTS_DIR} ${TESTRUNNER_CERTS_DIR}
