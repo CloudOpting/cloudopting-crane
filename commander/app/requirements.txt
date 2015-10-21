@@ -4,4 +4,9 @@ git+git://github.com/j-fuentes/werkzeug@0.10.4-jfc-Non-auto-pop#egg=werkzeug
 -e git+https://github.com/j-fuentes/flask-cache@R_0.15-jfc#egg=Flask-Cache
 docker-py
 -e git+https://github.com/j-fuentes/compose@1.4.1dev-jfc#egg=docker-compose-co
-requests
+pyopenssl
+ndg-httpsclient
+pyasn1
+cryptography
+requests[security]
+redis==2.10.3

@@ -3,8 +3,8 @@ FROM ubuntu:14.04
 RUN export DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -qq
 
-# Install git
-RUN apt-get install -yqq git
+# Install some dependencies
+RUN apt-get install -yqq git python-dev libffi-dev libssl-dev
 
 # Install puppet and r10k
 RUN apt-get install -yqq puppet

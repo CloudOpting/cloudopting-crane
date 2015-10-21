@@ -1,39 +1,41 @@
-commander:
-  restart: always
-  extends:
-    file: ./commander/compose.yml
-    service: commander
-  image: cloudoptingcrane/commander
-  environment:
-    - REDIS=true
-  ports:
-    - "8888:8888"
-  volumes:
-    - "/var/crane/"
-  links:
-    - redis
-    - registry:coregistry
-    - engine:buildengine
-registry:
-  restart: always
-  extends:
-    file: ./registry/compose.yml
-    service: registry
-  image: cloudoptingcrane/registry
-  ports:
-      - 5000:5000
-  volumes:
-    - /var/lib/registry
-    - /certs
-    - /auth
-engine:
-  restart: always
-  extends:
-    file: ./engine/compose.yml
-    service: engine
-  image: cloudoptingcrane/engine
-  links:
-    - registry:coregistry
-redis:
-  restart: always
-  image: redis:3
+# TODO: change to retrieve images from dockerhub
+
+# commander:
+#   restart: always
+#   extends:
+#     file: ./commander/compose.yml
+#     service: commander
+#   image: cloudoptingcrane/commander
+#   environment:
+#     - REDIS=true
+#   ports:
+#     - "8888:8888"
+#   volumes:
+#     - "/var/crane/"
+#   links:
+#     - redis
+#     - registry:coregistry
+#     - engine:buildengine
+# registry:
+#   restart: always
+#   extends:
+#     file: ./registry/compose.yml
+#     service: registry
+#   image: cloudoptingcrane/registry
+#   ports:
+#       - 5000:5000
+#   volumes:
+#     - /var/lib/registry
+#     - /certs
+#     - /auth
+# engine:
+#   restart: always
+#   extends:
+#     file: ./engine/compose.yml
+#     service: engine
+#   image: cloudoptingcrane/engine
+#   links:
+#     - registry:coregistry
+# redis:
+#   restart: always
+#   image: redis:3
