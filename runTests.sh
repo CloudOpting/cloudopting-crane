@@ -1,10 +1,10 @@
 #!/bin/bash
 PWD=$(pwd)
 FOLDER=${PWD##*/}
-PREFIX=$(echo  "${FOLDER//-}" | awk '{print tolower($0)}')
+PREFIX=co
 
 # Remove previous containers if any
-docker rm -f -v ${PREFIX}_registry_1 ${PREFIX}_engine_1 ${PREFIX}_redis_1 ${PREFIX}_commander_1 ${PREFIX}_testrunner_1 ${PREFIX}_emulatedhost_1
+docker rm -f -v ${PREFIX}_registry ${PREFIX}_engine ${PREFIX}_redis ${PREFIX}_commander ${PREFIX}_testrunner ${PREFIX}_emulatedhost
 
 # Clean previous tests data
 sudo rm -rf ./commander/commander-data-tests
