@@ -2,7 +2,7 @@
 FROM ubuntu:14.04
 MAINTAINER Jose Fuentes <jfuentes@wtelecom.es>
 
-RUN apt-get -y update && apt-get -y install ruby
+RUN apt-get -y update && apt-get -y install ruby git
 RUN apt-get install -y puppet
 
 

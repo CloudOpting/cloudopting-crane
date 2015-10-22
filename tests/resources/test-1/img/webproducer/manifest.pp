@@ -13,6 +13,9 @@ class { 'python' :
   dev        => 'present',
 }
 
-python::requirements { '/usr/src/app/requirements.txt' :
-  owner      => 'root',
+exec { "requirements":
+    command => "pip install -r requirements.txt",
+    cwd     => "/usr/src/app",
+    path    => "/usr/local/bin/:/bin/:/usr/bin",
+    require => Class["python"]
 }

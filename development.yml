@@ -2,6 +2,7 @@ commander:
    extends:
      file: ./commander/compose.yml
      service: commander
+  container_name: co_commander
    environment:
      - DEBUG=true
      - REDIS=true
@@ -21,6 +22,7 @@ registry:
   extends:
     file: ./registry/compose.yml
     service: registry
+  container_name: co_registry
   ports:
       - 5000:5000
   volumes:
@@ -32,7 +34,9 @@ engine:
   extends:
     file: ./engine/compose.yml
     service: engine
+  container_name: co_engine
   links:
     - registry:coregistry
 redis:
   image: redis:3
+  container_name: co_redis

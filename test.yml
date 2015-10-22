@@ -2,12 +2,14 @@ commander:
    extends:
      file: ./commander/compose.yml
      service: commander
+   container_name: co_commander
    environment:
      - DEBUG=true
      - REDIS=true
    ports:
      - "8888:8888"
    volumes:
+     - ./commander/commander-data-tests/r10k/git:/root/.r10k/git
      - ./commander/commander-data-tests/var/crane:/var/crane/
      # Override application copied with the actual folder mounted as volume.
      # Allows real time changes and log monitoring from editor
@@ -23,6 +25,7 @@ registry:
   extends:
     file: ./registry/compose.yml
     service: registry
+  container_name: co_registry
   ports:
       - 5000:5000
   volumes:
@@ -31,13 +34,17 @@ engine:
   extends:
     file: ./engine/compose.yml
     service: engine
+  container_name: co_engine
   links:
     - registry:coregistry
-#  command: tail -f /dev/null
 redis:
   image: redis:3
+  container_name: co_redis
+  ports:
+    - 6379:6379
 testrunner:
   build: tests/testrunner
+  container_name: co_testrunner
   links:
     - commander
     - engine:coengine
@@ -47,11 +54,15 @@ testrunner:
     - ./tests/resources:/var/tests_resources
     - ./tests/testrunner/src:/var/tests/
     - ./tests/testrunner/certs:/certs
+  command: /var/tests/tests.sh
 # Uncomment this to run manually
-  command: tail -f /dev/null
+#  command: tail -f /dev/null
 emulatedhost:
   extends:
     file: ./tests/emulatedhost/compose.yml
     service: emulatedhost
+  container_name: co_emulatedhost
+  links:
+    - registry:coregistry
 # Uncomment this to run manually
 #  command: tail -f /dev/null

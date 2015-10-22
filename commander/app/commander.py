@@ -377,10 +377,7 @@ class ComposerService(Resource):
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', composerInfoModel)
     def post(self):
-        try:   # detect if clusterToken has been provided
-            return composeOps.newComposition(datastore, composefile=request.files['composefile'], clusterReference=str(request.form['clusterToken']))
-        except:
-            return composeOps.newComposition(datastore, composefile=request.files['composefile'])
+        return composeOps.newComposition(datastore, composefile=request.files['composefile'], clusterReference= request.form['clusterToken'])
 
 @composer_ns.route('/<token>')
 @api.doc(params={'token': 'Token that identifies the docker composition'})

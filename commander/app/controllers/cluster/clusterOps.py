@@ -66,6 +66,7 @@ def checkCluster(datastore, token, detail=False):
             raise errors.NotFoundError("Cluster does not exist.")
 
         # Ask docker daemons
+        clusterStatus = 'ready'
         for node in cluster['nodes']:
             info = None
             try:
@@ -74,9 +75,11 @@ def checkCluster(datastore, token, detail=False):
                     node['status']='ready'
                 else:
                     node['status']='error'
+                    clusterStatus = 'error'
                     cluster['description']='Unexpected response from node \''+node['endpoint']+'\'.'
             except Exception, e:
                 node['status']='error'
+                clusterStatus='error'
                 cluster['description']='Cannot connect with node \''+node['endpoint']+'\'. Maybe it is down.'
 
         # update datastore
@@ -85,6 +88,8 @@ def checkCluster(datastore, token, detail=False):
         # details
         if detail:
             cluster['detail']=info
+
+        cluster['status'] = clusterStatus
 
         return cluster, 200
 

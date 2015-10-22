@@ -8,13 +8,13 @@ WS_BIND_PORT = 8888
 
 # datastore settings
 
-DS_TYPE = 'filesystem'
+DS_TYPE = 'redis'
 """ Determine the type of the datastore. 'simple' is for a volatile dictionary, 'filesystem' is for persistent filesystem storage. 'redis' is for a redis storage. """
 
 DS_FILESYSTEM_DIR = '/var/crane/datastore'
 """ In case of 'filesystem' datastore, directory that store datastore.  """
 
-DS_REDIS_HOST = ''
+DS_REDIS_HOST = 'redis'
 """ In case of 'redis' datastore, host that hosts the redis server. """
 
 DS_REDIS_PORT = 6379
@@ -88,7 +88,7 @@ FS_DEF_DOCKER_BUILD_PID = 'build.pid'
 FS_DEF_DOCKER_BUILD_FLAG = 'flag'
 """Default name for the file created when the build operation finish"""
 
-FS_DEF_DOCKER_COMPOSE__PULL_LOG = 'compose_pull.log'
+FS_DEF_DOCKER_COMPOSE_PULL_LOG = 'compose_pull.log'
 """Default name for the log of docker compose"""
 
 FS_DEF_DOCKER_COMPOSE_PULL_CODE = 'compose_pull.code'
@@ -116,6 +116,9 @@ DK_RG_SWITCH = True
 
 DK_RG_ENDPOINT = "coregistry:5000"
 """Docker registry end-point"""
+
+DK_DEFAULT_PULL_REGISTRY = "coregistry:5000"
+"""Docker registry for clients"""
 
 DK_RG_CA = "/var/lib/commander/certs/registry-ca.crt"
 

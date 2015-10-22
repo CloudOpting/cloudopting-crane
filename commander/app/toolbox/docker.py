@@ -418,11 +418,13 @@ def runComposition(datastore, token, dk=defaultDockerClient):
     # launch compose
     # TODO: control pulling errors
     def composeThread():
-        cproject = ComposeProject(name=token, base_dir=os.path.join(settings.FS_COMPOSITIONS, token))
+        cproject = ComposeProject(name=token, base_dir=os.path.join(settings.FS_COMPOSITIONS, token), default_registry=settings.DK_DEFAULT_PULL_REGISTRY, dockerClient=dk)
         # pull images
-        cproject.pull()
-        # run composition
-        cproject.up()
+        if(cproject.pull()):
+            # run composition
+            cproject.up()
+        else:
+            raise Exception("Error in pull")
 
     thread = Thread(target = composeThread)
     thread.start()
@@ -544,39 +546,49 @@ def getBaseBuildErrors(name):
 class ComposeProject():
     def __init__(self, name, base_dir, filename='docker-compose.yml', dockerClient=defaultDockerClient, default_registry=None):
         self.dockerClient = dockerClient
+        self.basedir = base_dir
         self.service_dicts = compose.config.load(compose.config.find(base_dir, filename))
         self.project = project.Project.from_dicts(name, self.service_dicts, self.dockerClient)
         self.default_registry = default_registry
 
     def pull(self):
-        try:
-            # Open file that will store the pull log
-            pull_log=open(settings.FS_DEF_DOCKER_COMPOSE_PULL_LOG, 'w')
+        result = False
+        pulllogpath = os.path.join(self.basedir, settings.FS_DEF_DOCKER_COMPOSE_PULL_LOG)
+        pullcodepath = os.path.join(self.basedir, settings.FS_DEF_DOCKER_COMPOSE_PULL_CODE)
 
-            # Create file that marks the status of the pulling (exit code)
-            pull_code = open(settings.FS_DEF_DOCKER_COMPOSE_PULL_CODE, 'w')
-            pull_code.write("")
-            pull_code.close()
+        # Open file that will store the pull log
+        pull_log=open(pulllogpath, 'w')
+
+        # Create file that marks the status of the pulling (exit code)
+        pull_code = open(pullcodepath, 'w')
+        pull_code.write("aaa")
+        pull_code.close()
+        try:
 
             # Call project pull. It will fill the log file
-            self.project.pull(default_registry=default_registry, out_stream=pull_log)
+            try:
+                self.project.pull(default_registry=self.default_registry, out_stream=pull_log)
+            except Exception, e:
+                pull_log.write(str(e))
+                raise Exception()
 
             ## TODO: add logic here to check if images has been pulled or not.
 
             # Set exit code
-            pull_code = open(settings.FS_DEF_DOCKER_COMPOSE_PULL_CODE, 'w')
+            pull_code = open(pullcodepath, 'w')
             pull_code.write("0")
             pull_code.close()
-
+            result=True
         except:
             # Set exit code
-            pull_code = open(settings.FS_DEF_DOCKER_COMPOSE_PULL_CODE, 'w')
+            pull_code = open(pullcodepath, 'w')
             pull_code.write("1")
             pull_code.close()
 
         finally:
             pull_log.close()
             pull_code.close()
+            return result
 
 
     def up(self):

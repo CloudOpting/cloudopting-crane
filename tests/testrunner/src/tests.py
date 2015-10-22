@@ -96,20 +96,26 @@ class TestsCompleteCycle:
                     'img/webproducer/manifest.pp' ))
 
         # create cluster
+        res = None
         res = op.postCluster(s.HOST_ENDPOINT, \
             clientCertPath=s.HOST_CERT, clientKeyPath=s.HOST_KEY, \
             caPath=s.HOST_CA)
         text='Error submitting cluster'
         op.assertStatusCode(res, 200, text)
-        op.assertStatus(res, 'ready', text)
         clusterToken = res.json()['token']
+        res = op.waitWhileStatus(op.getCluster, clusterToken, \
+            text="Error while asking cluster status", status='joining')
+
+
+
+        op.assertStatus(res, 'ready', text)
 
         # run composition
         res = op.postComposition(clusterToken, \
                 os.path.join(resources, 'run/compose.yml'))
         text='Error deploying composition'
         op.assertStatusCode(res, 200, text)
-        op.assertStatus(res, 'ready', text)
+        op.assertStatus(res, 'providing', text)
 
 
         # check functionality
