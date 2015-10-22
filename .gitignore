@@ -67,3 +67,7 @@ commander/app/certs/
 commander/app/src/
 commander/commander-data/
 commander/commander-data-tests/
+.vagrant
+Vagrantfile
+runTestsVagrant.sh
+tests/emulatedhost/certs
