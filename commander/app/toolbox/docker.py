@@ -1,6 +1,7 @@
 import os
 import ssl
 import settings
+import time
 from threading import Thread
 import subprocess
 import re
@@ -53,8 +54,20 @@ def dockerClient(base_url=settings.DK_DEFAULT_TEST_HOST, cert_path=settings.DK_D
             ca_cert=ca_cert,
         )
 
+    tries, flag = settings.DK_CONN_MAX_TRIES, False
+    result = None
     timeout = settings.DK_CLIENT_TIMEOUT
-    return dockerpy.Client(base_url=base_url, tls=tls_config, version='auto', timeout=timeout)
+    while tries > 0 and not flag:
+        try:
+            result = dockerpy.Client(base_url=base_url, tls=tls_config, version='auto', timeout=timeout)
+            flag = True
+        except:
+            tries = tries - 1
+            if tries > 0:
+                time.sleep(settings.DK_CONN_TIME_TRIES)
+            else:
+                raise Exception("Cannot connect with docker client at \'"+base_url+"\'")
+    return result
 
 # Caching default dockerClient
 defaultDockerClient = dockerClient()
