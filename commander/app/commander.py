@@ -310,7 +310,10 @@ class ProvisionedMachineService(Resource):
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', clusterInfoModel)
     def post(self):
-        return not_implemented()
+        try:   # if apiVersion not provided it will use default.
+            return clusterOps.newProvisionedMachineCluster(datastore, request.form['endpoint'], request.form['apiVersion'])
+        except:
+            return clusterOps.newProvisionedMachineCluster(datastore, request.form['endpoint'])
 
 @cluster_ns.route('/ssh')
 class ClusterService(Resource):

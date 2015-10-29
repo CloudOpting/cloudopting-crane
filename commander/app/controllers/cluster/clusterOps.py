@@ -54,6 +54,41 @@ def newSingleProvisionedMachineCluster(datastore, endpoint, apiVersion=None):
         aux = errors.ControllerError("Unknown error: "+ e.message)
         return aux.getResponse()
 
+
+def newProvisionedMachineCluster(datastore, endpoint, apiVersion=None):
+    '''
+    Set a preprovisioned single-machine cluster. 'endpoint' is the Docker host api endpoint.
+    '''
+    try:
+        info = __obtainDockerHostInfo__(endpoint)
+        dk = docker.dockerClient(base_url=endpoint, cert_path=settings.DK_DEFAULT_MASTER_CLIENT_CERTS)
+
+        # Generate token
+        token = tokens.newClusterToken(datastore)
+
+        # Add to filesystem: for this simple already provisioned machine, only the folder will be created
+        try:
+            files.createClusterDir(token)
+        except os.error:
+            files.deleteClusterDir(token)
+            raise errors.OperationError("Couldn't create cluster reference in the filesystem")
+
+        # Add to datastore
+        datastorecluster = {'token':token, 'status':'joining',
+        'description':'Ready to use', 'numberOfNodes':1, 'type':'swarm',
+        'nodes':[{'endpoint':endpoint, 'status':'joining'}]}
+        datastore.addCluster(token, datastorecluster)
+
+        docker.createOneNodeSwarm(datastore, token, dk)
+
+        return datastorecluster, 200
+
+    except errors.ControllerError, e:
+        return e.getResponse()
+    except Exception, e:
+        aux = errors.ControllerError("Unknown error: "+ e.message)
+        return aux.getResponse()
+
 def checkCluster(datastore, token, detail=False):
     '''
     Retrieve information from the cluster.

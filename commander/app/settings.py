@@ -110,6 +110,12 @@ DK_DEFAULT_TEST_HOST_CERTS = "/var/lib/commander/certs"
 DK_CLIENT_TIMEOUT = 60
 """Docker client timeout"""
 
+DK_CONN_MAX_TRIES = 3
+"""Max. tries to connect to a docker daemon"""
+
+DK_CONN_TIME_TRIES = 5
+"""Seconds between connection tries"""
+
 # Docker registry
 DK_RG_SWITCH = True
 """True: enables 'save to registry'. False: disables 'save to registry'"""
