@@ -7,7 +7,7 @@ import subprocess
 import re
 import requests as req
 import json
-
+from sh import docker as dockersh
 from controllers import errors
 from files import createFile
 import compose
@@ -619,3 +619,18 @@ def imageInRegistry(name):
         return False
     else:
         raise Exception("Response not expected. Maybe something is bad with registry.")
+
+# Swarm operations
+
+def createOneNodeSwarm(datastore, clusterToken, dk):
+    def _oneNodeSwarmThread():
+        """
+        Creates a swarm manager in dk and also connect dk as node
+        """
+        options = optionsFromClient(dk)
+        if options:
+            dockersh.run(options, '-p 2386:2376','swarm', 'manage', '172.17.0.28:2376'  )
+
+
+    thread = Thread(target = _oneNodeSwarmThread)
+    thread.start()
