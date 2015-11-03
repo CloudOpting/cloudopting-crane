@@ -54,7 +54,7 @@ Replace `<environment>` with `development`, `production` or `test`.
 
 ### Launch crane
 
-With the steps ahead.
+With the steps above.
 
 ### Interact with the API
 
