@@ -71,3 +71,5 @@ commander/commander-data-tests/
 Vagrantfile
 runTestsVagrant.sh
 tests/emulatedhost/certs
+mycluster
+package.box
