@@ -10,7 +10,7 @@ It uses several docker components: host, builder, registry, [swarm](https://gith
 
 Crane runs in several docker containers.
 
-![Module diagram](/readmeResources/diagram.png)
+![Module diagram](/docs/resources/diagram.png)
 
 - _commander_: contains the application which control all the logic (controllers) and a micro web server with the REST API (and a nice Swagger UI). 'Temp. storage' is a volume from this container and stores temporal files that the API receives (manifests, Dockerfiles...) and another temporal information like logs and another files useful for debuging.
 - _redis_: container that runs an standalone redis. This __redis__ is used as context information storage for the __commander__ app. It allows the __commander__ to restart, go down and even upgrade maintaining the status. This __redis__ can be disabled leaving __commander__ using a filesystem type datastore.
