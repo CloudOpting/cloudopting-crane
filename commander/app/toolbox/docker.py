@@ -557,7 +557,7 @@ def getBaseBuildErrors(name):
     return content
 
 class ComposeProject():
-    def __init__(self, name, base_dir, filename='docker-compose.yml', dockerClient=defaultDockerClient, default_registry=None):
+    def __init__(self, name, base_dir, filename=['docker-compose.yml'], dockerClient=defaultDockerClient, default_registry=None):
         self.dockerClient = dockerClient
         self.basedir = base_dir
         self.service_dicts = compose.config.load(compose.config.find(base_dir, filename))
