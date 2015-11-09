@@ -65,8 +65,6 @@ registry/registry-data/
 registry/registry-data-tests
 commander/app/certs/
 commander/app/src/
-commander/commander-data/
-commander/commander-data-tests/
 .vagrant
 Vagrantfile
 runTestsVagrant.sh
