@@ -68,6 +68,10 @@ __Working on__
 __Issues__
 - Nothing serious.
 
+## Use crane for helping in development and service migration
+
+Take a look at [this guide](docs/developwithcrane.md).
+
 ## Roadmap
 
 - General refactoring
