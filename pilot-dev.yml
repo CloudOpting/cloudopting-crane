@@ -1,0 +1,60 @@
+commander:
+   extends:
+     file: ./commander/composePreBuilt.yml
+     service: commander
+   container_name: co_commander
+   environment:
+    #  - DEBUG=true
+     - REDIS=true
+   ports:
+     - "8888:8888"
+   volumes:
+     - ./application-data/r10k/git:/root/.r10k/git
+     - ./application-data/commander:/var/crane/
+     # Override application copied with the actual folder mounted as volume.
+     # Allows real time changes and log monitoring from editor
+     - ./commander/app:/usr/src/commander
+   links:
+     - redis
+     - registry:coregistry
+     - engine:coengine
+     - emulatedhost
+   command: python /usr/src/commander/commander.py
+
+registry:
+  extends:
+    file: ./registry/compose.yml
+    service: registry
+  container_name: co_registry
+  ports:
+      - 5000:5000
+  volumes:
+    - ./application-data/registry:/var/lib/registry
+
+engine:
+  extends:
+    file: ./engine/composePreBuilt.yml
+    service: engine
+  container_name: co_engine
+  links:
+    - registry:coregistry
+  command: /root/launch.sh
+
+redis:
+  image: redis:3
+  container_name: co_redis
+  ports:
+    - 6379:6379
+
+emulatedhost:
+  extends:
+    file: ./tests/emulatedhost/composePreBuilt.yml
+    service: emulatedhost
+  container_name: co_emulatedhost
+  restart: always
+  ports:
+    # Add here the list of port your aplication exposes
+    - 80:80
+  links:
+    - registry:coregistry
+  command: /root/launch.sh

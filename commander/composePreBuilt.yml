@@ -1,0 +1,5 @@
+commander:
+  image: cloudopting/cranecommander
+  hostname: cocommander
+  volumes:
+    - ./certs:/var/lib/commander/certs
