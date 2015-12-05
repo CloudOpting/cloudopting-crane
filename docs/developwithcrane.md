@@ -101,7 +101,15 @@ Clicking on each group you can expand the list of methods and selecting a method
 
 __NOTE 1__: in crane is possible to add base images to the internal private registry and after use just it name and a puppet manifest to build a image (`/builder/images/bases` routes). For this guide, in order to keep things simple, we'll skip that.
 
-__NOTE 2__: all files in this example are available in `/example/migration-guide-1`.
+__NOTE 2__: all files in this example are available in [`/examples/migration-guide-1`](/examples/migration-guide-1).
+
+## Example description
+
+We are going to build a simple application based on two services: a _redis_ and a _python flask web server_.
+
+The _redis_ container will be built using the [official redis image](https://hub.docker.com/_/redis/).
+
+The _web_ will use [cloudopting/ubuntubase:14.04](https://hub.docker.com/r/cloudopting/ubuntubase) and a manifest.
 
 ## Step 1: __build context__
 
@@ -109,7 +117,7 @@ Build a __context__ with the puppet modules that your entire application needs.
 
 `POST /builder/context` with:
 
-- __puppetfile__: a file like `puppetfile` with all the modules and dependencies
+- __puppetfile__: a file like [`puppetfile`](/examples/migration-guide-1) with all the modules and dependencies
 - __group__ (_optional_): common label to gather several images. This will become the repo name on the private dockerhub.
 
 ![post context](/docs/resources/commander-post-context.png)
@@ -144,7 +152,7 @@ You can check the status with `GET /builder/context/{token}`.
 
 Wait until `status` == `finished`.
 
-## Step 2 (for each image)
+## Step 2: __build images__
 
 Build an __image__.
 
@@ -154,4 +162,34 @@ It is possible to use one of the following combinations:
 
 - a _Dockerfile_ and a _puppet manifest_.
 
-- just a _Dockerfile_
+- just a _Dockerfile_.
+
+`POST /builder/images` with:
+
+- __contextReference__: the _context token_ from the previous step.
+- __imageName__: leave it blank (__NOTE 1__).
+- __dockerfile__: the image _Dockerfile_
+
+
+First for the __redis__ image:
+![post image](/docs/resources/commander-post-image.png)
+
+you'll get something like:
+```json
+{
+  "status": "building",
+  "description": "Under creation",
+  "tag": "default/redis",
+  "token": "CTJnnfqI-IMredis",
+  "imageName": "redis",
+  "context": "CTJnnfqI"
+}
+```
+
+With that token you can use: `GET /builder/images/{token}` to retrieve the status.
+
+![get image](/docs/resources/commander-get-image.png)
+
+
+
+## CONFIG: ports on emulatedhost

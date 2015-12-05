@@ -54,7 +54,7 @@ emulatedhost:
   restart: always
   ports:
     # Add here the list of port your aplication exposes
-    - 80:80
+    - 80:5000
   links:
     - registry:coregistry
   command: /root/launch.sh
