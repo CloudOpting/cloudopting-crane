@@ -207,12 +207,12 @@ def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerC
             splitted = res.split("/")
             i = 0
             if len(splitted) == 3:
-                regEndpoint=''.join(e for e in splitted[i] if (e.isalnum() or e == ':'))
+                regEndpoint=''.join(e for e in splitted[i] if (e.isalnum() or e == ':' or e == '.'))
                 i = i+1
             if len(splitted) >= 2:
                 provider=''.join(e for e in splitted[i] if e.isalnum())
                 i = i+1
-            name=''.join(e for e in splitted[i] if (e.isalnum() or e == ':'))
+            name=''.join(e for e in splitted[i] if (e.isalnum() or e == ':' or e == '.'))
         return regEndpoint, provider, name
 
     def __buildThread__():
@@ -247,7 +247,7 @@ def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerC
                 if settings.DK_RG_SWITCH:
                     output = None
                     try:
-                        if not dkfRgEnd:
+                        if not dkfRgEnd and not settings.ENABLE_PULL_FROM_PUBLIC:
                             dkfRgEnd = settings.DK_RG_ENDPOINT
                         output = pullImage(completeName, registry=dkfRgEnd, dk=dk, imageFolder=dockerfilepath)
                         # re-tag pulled image
@@ -261,14 +261,14 @@ def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerC
                         err = "Cannot pull '"+completeName+"' from registry '"+dkfRgEnd+"'"
 
                 # if not, try with public registry
-                if err is None and not output:
-                    try:
-                        output = pullImage(completeName, registry=None, dk=dk, imageFolder=dockerfilepath)
-                    except Exception, e:
-                        pass
-
-                    if not output:
-                        err = "Cannot pull '"+completeName+"' from public nor private registry."
+                # if err is None and not output:
+                #     try:
+                #         output = pullImage(completeName, registry=None, dk=dk, imageFolder=dockerfilepath)
+                #     except Exception, e:
+                #         pass
+                #
+                #     if not output:
+                #         err = "Cannot pull '"+completeName+"' from public nor private registry."
 
 
             # build

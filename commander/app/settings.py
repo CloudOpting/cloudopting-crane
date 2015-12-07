@@ -133,3 +133,8 @@ DK_DEFAULT_BASE_PROVIDER = "cloudopting"
 
 DK_DEFAULT_MASTER_CLIENT_CERTS = "/var/lib/commander/certs/master"
 """Default folder for master client certificates. It'll assume files named as: cert.pem, key.pem, ca.pem"""
+
+# Others
+
+ENABLE_PULL_FROM_PUBLIC = True
+"""Control if it possible to pull from public registry or just the private one. If True, it will use dockerhub as default registry to pull from. If false, it will us interna private registry (DK_DEFAULT_PULL_REGISTRY)."""
