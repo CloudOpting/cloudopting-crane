@@ -238,6 +238,8 @@ Do `GET /builder/images/CTJnnfqI-IMweb` to retrieve the status.
 Wait until `status` == `finished`.
 
 
+__IMPORTANT__: check `build.log`, specially the apply manifest part, because puppet agent may write some errors but return 0, so crane do not detect the problem.
+
 ## Step 3: __fake a cluster__
 
 In crane _cluster_ is a generic entity which represents any place where to deploy containers.
