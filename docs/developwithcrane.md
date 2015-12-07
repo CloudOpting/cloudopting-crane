@@ -118,7 +118,7 @@ Build a __context__ with the puppet modules that your entire application needs.
 `POST /builder/context` with:
 
 - __puppetfile__: a file like [`puppetfile`](/examples/migration-guide-1) with all the modules and dependencies
-- __group__ (_optional_): common label to gather several images. This will become the repo name on the private dockerhub.
+- __group__ (_optional_): common label to gather several images. This will become the repo name on the private dockerhub. Left it blank to use `default`.
 
 ![post context](/docs/resources/commander-post-context.png)
 
@@ -186,10 +186,120 @@ you'll get something like:
 }
 ```
 
-With that token you can use: `GET /builder/images/{token}` to retrieve the status.
+With that token you can use: `GET /builder/images/CTJnnfqI-IMredis` to retrieve the status.
 
 ![get image](/docs/resources/commander-get-image.png)
 
+```json
+{
+  "status": "finished",
+  "description": "Build finished without errors",
+  "imageName": "redis",
+  "token": "CTJnnfqI-IMredis",
+  "tag": "default/redis",
+  "context": "CTJnnfqI"
+}
+```
+
+Wait until `status` == `finished`.
+
+Now, let's do the same for the _web_ image:
+![post image](/docs/resources/commander-post-image2.png)
+
+Notice this time we're using a [`Dockerfile`](/examples/migration-guide-1/web/Dockerfile) (from a cloudopting base) and also a [`manifest.pp`](/examples/migration-guide-1/web/Dockerfile). Take a look at both files to see the details.
+
+This should be the response.
+
+```json
+{
+  "status": "building",
+  "description": "Under creation",
+  "tag": "default/redis",
+  "token": "CTJnnfqI-IMweb",
+  "imageName": "web",
+  "context": "CTJnnfqI"
+}
+```
+
+Do `GET /builder/images/CTJnnfqI-IMweb` to retrieve the status.
+![post image](/docs/resources/commander-get-image2.png)
+
+```json
+{
+  "status": "finished",
+  "description": "Build finished without errors",
+  "imageName": "web",
+  "token": "CTJnnfqI-IMweb",
+  "tag": "default/web",
+  "context": "CTJnnfqI"
+}
+```
+
+Wait until `status` == `finished`.
 
 
-## CONFIG: ports on emulatedhost
+## Step 3: __fake a cluster__
+
+In crane _cluster_ is a generic entity which represents any place where to deploy containers.
+
+For testing, there is a special container with a docker engine inside where you can try to deploy. Crane resolve the name `emulatedhost` to that fake machine.
+
+Create a cluster entity with:
+
+`POST /cluster/provisionedSingleMachine`
+
+- __endpoint__: url where docker engine will be listening. For this example: `http://emulatedhost:4243`
+- __apiVersion__: it is possible to force a version, but leave it blank.
+
+![post cluster](/docs/resources/commander-post-cluster.png)
+
+The response should be:
+
+```json
+{
+  "status": "joining",
+  "description": "Ready to use",
+  "token": "CLo0BKFI",
+  "nodes": [
+    {
+      "status": "joining",
+      "endpoint": "http://emulatedhost:4243"
+    }
+  ],
+  "type": "simple-preprovisioned",
+  "numberOfNodes": 1
+}
+```
+
+Again, we get a _token_. This _cluster token_ can be used as identifier to say crane where to deploy the application (next step).
+
+## Step 4: __deploy__
+
+Now we can use crane to deploy our application on this emulated host.
+
+We need a [`docker-compose.yml` file like this](/examples/migration-guide-1/docker-compose.yml).
+
+Notice images are named like `group/imagename`.
+
+Deploy the app with:
+
+`POST /composer`
+
+- __clusterToken__: the token we obtained in the previous step.
+- __composefile__: a valid [`docker-compose.yml`](/examples/migration-guide-1/docker-compose.yml)
+
+![post composition](/docs/resources/commander-post-composition.png)
+
+The application should now being deployed on the host.
+
+For this example the web application listen to the port 5000 which is redirected to the port 80 on the docker host (see the emulatedhost configuration on [pilot-dev.yml](/pilot-dev.yml) )
+
+While testing your application you may need to change that value and maybe add others.
+
+## EXTRA: __debug errors__
+
+You can debug build errors seeing the log and error files.
+
+On the root of this project, go to `application-data/commander/`.
+
+There will be a folder called `builds`, where you will find a folder for each _context_ (named with the _context token_) and inside all the documents related with that. Inside the subfolder `images` there will be a folder for each image, and inside that some logs. The most useful are: `build.log`, `build_err.log`, `pull.log` and `pull_err.log`.
