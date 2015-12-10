@@ -6,6 +6,12 @@ It takes as input some files like puppetfiles, puppet manifests, dockerfiles and
 
 It uses several docker components: host, builder, registry, [swarm](https://github.com/docker/swarm) and [compose](https://github.com/docker/compose). Also puppet tools like the puppet agent itself and [r10k](https://github.com/puppetlabs/r10k).
 
+
+## Use crane for helping in development and service migration
+
+__Take a look at__ [this guide](docs/developwithcrane.md).
+
+
 ## Components
 
 Crane runs in several docker containers.
@@ -68,9 +74,6 @@ __Working on__
 __Issues__
 - Nothing serious.
 
-## Use crane for helping in development and service migration
-
-Take a look at [this guide](docs/developwithcrane.md).
 
 ## Roadmap
 
