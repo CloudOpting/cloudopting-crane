@@ -20,7 +20,8 @@ commander:
      - engine:coengine
      - emulatedhost
 # Uncomment this to run manually
-#   command: tail -f /dev/null
+  #  command: tail -f /dev/null
+
 registry:
   extends:
     file: ./registry/compose.yml
@@ -30,6 +31,7 @@ registry:
       - 5000:5000
   volumes:
     - ./registry/registry-data-tests:/var/lib/registry
+
 engine:
   extends:
     file: ./engine/compose.yml
@@ -37,13 +39,15 @@ engine:
   container_name: co_engine
   links:
     - registry:coregistry
+
 redis:
   image: redis:3
   container_name: co_redis
   ports:
     - 6379:6379
+
 testrunner:
-  build: tests/testrunner
+  build: ./tests/testrunner
   container_name: co_testrunner
   links:
     - commander
@@ -54,9 +58,10 @@ testrunner:
     - ./tests/resources:/var/tests_resources
     - ./tests/testrunner/src:/var/tests/
     - ./tests/testrunner/certs:/certs
-  command: /var/tests/tests.sh
+  # command: /var/tests/tests.sh
 # Uncomment this to run manually
-#  command: tail -f /dev/null
+  # command: tail -f /dev/null
+
 emulatedhost:
   extends:
     file: ./tests/emulatedhost/compose.yml
@@ -65,4 +70,4 @@ emulatedhost:
   links:
     - registry:coregistry
 # Uncomment this to run manually
-#  command: tail -f /dev/null
+ # command: tail -f /dev/null
