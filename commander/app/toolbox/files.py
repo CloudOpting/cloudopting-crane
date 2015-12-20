@@ -72,11 +72,17 @@ def saveDockerfile(contextToken, imageName, dockerfile):
     path = os.path.join(path, settings.FS_DEF_DOCKERFILE)
     dockerfile.save(path)
 
-def savePuppetManifest(contextToken, imageName, puppetmanifest):
-    path = os.path.join(settings.FS_BUILDS, contextToken)
-    path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
-    path = os.path.join(path, imageName)
-    path = os.path.join(path, settings.FS_DEF_PUPPETMANIFEST)
+def savePuppetManifest(contextToken, imageName, puppetmanifest, filename=None):
+    if filename:
+        path = os.path.join(settings.FS_BUILDS, contextToken)
+        path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
+        path = os.path.join(path, filename)
+    else:
+        path = os.path.join(settings.FS_BUILDS, contextToken)
+        path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
+        path = os.path.join(path, imageName)
+        path = os.path.join(path, settings.FS_DEF_PUPPETMANIFEST)
+
     puppetmanifest.save(path)
 
 # Cluster related operations
