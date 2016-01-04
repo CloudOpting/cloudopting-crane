@@ -9,3 +9,4 @@ engine:
   environment:
     - DOCKER_DAEMON_ARGS=--tlsverify --tlscacert=/var/lib/coengine/certs/ca.pem --tlscert=/var/lib/coengine/certs/server-cert.pem --tlskey=/var/lib/coengine/certs/server-key.pem
     - PORT=4243
+  lxc-conf: "lxc.aa_profile=unconfined"
