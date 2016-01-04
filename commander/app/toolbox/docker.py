@@ -10,6 +10,7 @@ import json
 from sh import docker as dockersh
 from controllers import errors
 from files import createFile
+from files import appendInFile
 import compose
 import compose.config
 from compose import project
@@ -302,14 +303,14 @@ def buildImage(datastore, contextToken, imageName, imageToken, dk=defaultDockerC
             # Error case
             if err is not None:
                 deleteImage(datastore, imageToken)
-                createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), err)
+                appendInFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), err)
                 createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '1')
             else:
                 createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '0')
 
 
         except Exception, e:
-            createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), "Unexpected error in build thread.\n"+str(e))
+            appendInFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), "Unexpected error in build thread.\n"+str(e))
             createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '1')
 
     thread = Thread(target = __buildThread__)
@@ -498,13 +499,13 @@ def buildBase(datastore, name, dk=defaultDockerClient):
             # Error case
             if err is not None:
                 deleteImage(datastore, imageToken)
-                createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), err)
+                appendInFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), err)
                 createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '1')
             else:
                 createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '0')
 
         except Exception, e:
-            createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), "Unexpected error in build thread."+str(e))
+            appendInFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_ERR_LOG), "Unexpected error in build thread."+str(e))
             createFile(os.path.join(dockerfilepath, settings.FS_DEF_DOCKER_BUILD_FLAG), '1')
 
 

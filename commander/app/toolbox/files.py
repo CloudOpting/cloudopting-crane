@@ -107,7 +107,7 @@ def deleteComposeFile(token):
 # Common file operations
 
 def createFile(path, content):
-    fo = open(path, "wb")
+    fo = open(path, "wb") # wb: write binary
     fo.write(content);
     fo.close()
 
@@ -118,3 +118,8 @@ def purgeWorkdir():
         shutil.rmtree(settings.FS_CLUSTERS)
     if os.path.exists(settings.FS_COMPOSITIONS):
         shutil.rmtree(settings.FS_COMPOSITIONS)
+        
+def appendInFile(path, content):
+    fo = open(path, "a") # a: append
+    fo.write(content);
+    fo.close()
