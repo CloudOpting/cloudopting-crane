@@ -1,7 +1,7 @@
 # TODO: change to retrieve images from dockerhub
 commander:
    extends:
-     file: ./commander/compose.yml
+     file: ./commander/composePreBuilt.yml
      service: commander
    container_name: co_commander
    environment:
@@ -33,7 +33,7 @@ registry:
     - ./registry/registry-data-tests:/var/lib/registry
 engine:
   extends:
-    file: ./engine/compose.yml
+    file: ./engine/composePreBuilt.yml
     service: engine
   container_name: co_engine
   links:
@@ -45,7 +45,7 @@ redis:
     - 6379:6379
 emulatedhost:
   extends:
-    file: ./tests/emulatedhost/compose.yml
+    file: ./tests/emulatedhost/composePreBuilt.yml
     service: emulatedhost
   container_name: co_emulatedhost
   links:
