@@ -70,3 +70,10 @@ runTestsVagrant.sh
 tests/emulatedhost/certs
 mycluster
 package.box
+tests/testrunner/certs/ca.pem
+tests/testrunner/certs/cert.pem
+tests/testrunner/certs/key.pem
+tests/testrunner/certs/master/ca.pem
+tests/testrunner/certs/master/cert.pem
+tests/testrunner/certs/master/key.pem
+tests/testrunner/certs/registry-ca.crt
