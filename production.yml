@@ -1,4 +1,3 @@
-# TODO: change to retrieve images from dockerhub
 commander:
    extends:
      file: ./commander/composePreBuilt.yml
@@ -22,6 +21,7 @@ commander:
      - emulatedhost
 # Uncomment this to run manually
 #   command: tail -f /dev/null
+
 registry:
   extends:
     file: ./registry/compose.yml
@@ -31,6 +31,7 @@ registry:
       - 5000:5000
   volumes:
     - ./registry/registry-data-tests:/var/lib/registry
+
 engine:
   extends:
     file: ./engine/composePreBuilt.yml
@@ -38,11 +39,13 @@ engine:
   container_name: co_engine
   links:
     - registry:coregistry
+
 redis:
   image: redis:3
   container_name: co_redis
   ports:
     - 6379:6379
+
 emulatedhost:
   extends:
     file: ./tests/emulatedhost/composePreBuilt.yml
