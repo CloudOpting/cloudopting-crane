@@ -5,8 +5,26 @@ import os
 import requests as req
 import settings as s
 import operations as op
+import time
 
 class TestsBasic:
+    @classmethod
+    def setup_class(cls):
+        # Wait for crane to come up
+        attempts = s.ATTEMPTS
+        time_between_att = s.TIME_BETWEEN_ATT
+        flag = False
+        while not flag:
+            try:
+                res = req.get(s.COMMANDER_URL+'/extra/alive')
+                assert res.status_code == 200, "Crane is not alive"
+                flag = True
+            except:
+                attempts-=1
+                assert attempts > 0, "Timeout connectig to crane"
+                time.sleep(time_between_att)
+
+
     def test_isalive(self):
         """Check if Crane is alive"""
         res = req.get(s.COMMANDER_URL+'/extra/alive')
@@ -23,6 +41,19 @@ class TestsCompleteCycle:
 
     @classmethod
     def setup_class(cls):
+        # Wait for crane to come up
+        attempts = s.ATTEMPTS
+        time_between_att = s.TIME_BETWEEN_ATT
+        flag = False
+        while not flag:
+            try:
+                res = req.get(s.COMMANDER_URL+'/extra/alive')
+                assert res.status_code == 200, "Crane is not alive"
+                flag = True
+            except:
+                attempts-=1
+                assert attempts > 0, "Timeout connectig to crane"
+                time.sleep(time_between_att)
         # delete engine containers, images and crane data
         res = op.purgeCrane()
         errText = "Cannot purge Crane"
@@ -87,7 +118,7 @@ class TestsCompleteCycle:
             dockerfilePath=os.path.join(resources, \
                     'img/webconsumer/Dockerfile'), \
             puppetmanifestPath=os.path.join(resources, \
-                    'img/webconsumer/manifest.pp' ))
+                    'img/webconsumer/consumer.pp' ))
 
         # build webproducer
         op.buildImageAndAssert(group, 'webproducer', contextToken, \

@@ -58,8 +58,8 @@ testrunner:
     - ./tests/resources:/var/tests_resources
     - ./tests/testrunner/src:/var/tests/
     - ./tests/testrunner/certs:/certs
-  # command: /var/tests/tests.sh
-# Uncomment this to run manually
+  command: /var/tests/tests.sh
+  # Uncomment this to run manually
   # command: tail -f /dev/null
 
 emulatedhost:
