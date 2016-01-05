@@ -7,5 +7,5 @@ emulatedhost:
     - ./certs:/var/lib/emulatedhost/certs
   hostname: emulatedhost
   environment:
-    - DOCKER_DAEMON_ARGS=--tlsverify --tlscacert=/var/lib/coengine/certs/ca.pem --tlscert=/var/lib/coengine/certs/server-cert.pem --tlskey=/var/lib/coengine/certs/server-key.pem -s devicemapper  --storage-opt dm.loopdatasize=200G --storage-opt dm.override_udev_sync_check=true
+    - DOCKER_DAEMON_ARGS=--tlsverify --tlscacert=/var/lib/emulatedhost/certs/ca.pem --tlscert=/var/lib/emulatedhost/certs/emulatedhost-cert.pem --tlskey=/var/lib/emulatedhost/certs/emulatedhost-key.pem 
     - PORT=4243
