@@ -401,4 +401,4 @@ class ComposerDeployment(Resource):
         return not_implemented()
 
 if __name__ == '__main__':
-    app.run(host=settings.WS_BIND_IP, port=settings.WS_BIND_PORT, debug=(True if os.environ.get('DEBUG')=='true' else False))
+    app.run(host=settings.WS_BIND_IP, port=settings.WS_BIND_PORT, debug=(True if os.environ.get('DEBUG')=='true' else False), threaded=True)
