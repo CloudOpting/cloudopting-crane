@@ -86,4 +86,6 @@ __Issues__
 
 ## Tests: How to run the tests
 
+Make sure you have the certificates: `./genCerts.sh`
+
 Execute the script `runTests.sh`. You will need root permissions because it deletes files created by containers that runs as root.
