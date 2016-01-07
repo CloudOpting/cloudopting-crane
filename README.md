@@ -74,6 +74,9 @@ __Working on__
 __Issues__
 - Nothing serious.
 
+## Troubleshooting
+
+Read the [troubleshooting section](docs/troubleshooting.md).
 
 ## Roadmap
 

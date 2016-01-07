@@ -36,6 +36,4 @@ It serves a REST API (the box with _Flask web microframework_). This API calls i
 
 ## Troubleshooting
 
-### It starts the first time but after that it crashes.
-
-This kind of problems are usually related to a previous forced exit. 
+Read the [troubleshooting section](docs/troubleshooting.md).
