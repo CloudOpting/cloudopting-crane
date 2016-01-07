@@ -92,3 +92,7 @@ Read the [troubleshooting section](docs/troubleshooting.md).
 Make sure you have the certificates: `./genCerts.sh`
 
 Execute the script `runTests.sh`. You will need root permissions because it deletes files created by containers that runs as root.
+
+To see the complete test report:
+
+`docker logs testrunner`
