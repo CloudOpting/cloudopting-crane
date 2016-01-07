@@ -224,7 +224,6 @@ class BuildService(Resource):
         return builderOps.newImage(datastore, contextReference, imageName, \
                 manifest, base, dockerfile)
 
-
 @builder_ns.route('/images/<token>')
 @api.doc(params={'token': 'Token that identifies the building process.'})
 class BuildProcess(Resource):

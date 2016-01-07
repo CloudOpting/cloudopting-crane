@@ -290,7 +290,11 @@ def newImage(datastore, contextReference, imageName, puppetmanifest=None, base=N
         try:
             files.createImageDir(contextReference, imageName)
             if puppetmanifest!=None:
-                files.savePuppetManifest(contextReference, imageName, puppetmanifest)
+                if dockerfile:
+                    filename=puppetmanifest.filename
+                else:
+                    filename = None
+                files.savePuppetManifest(contextReference, imageName, puppetmanifest, filename=filename)
             if dockerfile!=None:
                 files.saveDockerfile(contextReference, imageName, dockerfile)
             if base!=None:

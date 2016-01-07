@@ -7,3 +7,5 @@ HOST_ENDPOINT = 'https://emulatedhost:4243'
 HOST_CERT = '/certs/cert.pem'
 HOST_KEY  = '/certs/key.pem'
 HOST_CA   = '/certs/ca.pem'
+ATTEMPTS = 3
+TIME_BETWEEN_ATT = 5

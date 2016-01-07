@@ -33,3 +33,9 @@ Commander is structured as follows.
 ![Commander](/docs/resources/crane.png)
 
 It serves a REST API (the box with _Flask web microframework_). This API calls internally several controllers depending the requested action. These controllers uses several tools from the toolbox.
+
+## Troubleshooting
+
+### It starts the first time but after that it crashes.
+
+This kind of problems are usually related to a previous forced exit. 
