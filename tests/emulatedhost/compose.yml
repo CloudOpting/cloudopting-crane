@@ -2,8 +2,6 @@ emulatedhost:
   build: .
   privileged: true
   volumes:
-    - /var/lib/docker
-    - /lib/modules:/lib/modules
     - ./certs:/var/lib/emulatedhost/certs
   hostname: emulatedhost
   environment:

@@ -1,13 +1,9 @@
-FROM centos:7
+FROM docker:1.9.1-dind
 
-# Install docker
-RUN yum -y update
-ADD docker.repo /etc/yum.repos.d/docker.repo
-RUN yum -y install docker-engine
-COPY launch.sh /root/launch.sh
-RUN chmod +x /root/launch.sh
+COPY ./dockerd-entrypoint.sh /usr/local/bin/dockerd-entrypoint.sh
 
 VOLUME /var/lib/docker
+EXPOSE 4243
 
-WORKDIR /root
-CMD ./launch.sh
+ENTRYPOINT ["/usr/local/bin/dockerd-entrypoint.sh"]
+CMD []

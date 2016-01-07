@@ -3,7 +3,6 @@ engine:
   privileged: true
   volumes:
     - /var/lib/docker
-    - /lib/modules:/lib/modules
     - ./certs:/var/lib/coengine/certs
   hostname: coengine
   environment:
