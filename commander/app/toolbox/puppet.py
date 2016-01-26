@@ -58,7 +58,13 @@ def isBuildingContextRunning(token):
         file = open(pidpath, 'r')
     except IOError:
         return True
-    pid = int(file.read(10));
+    pid = file.read(10);
+
+    if pid == '':
+        return False
+    else:
+        pid = int(pid)
+
     if pid > 1:
         try:
             os.kill(pid, 0)
@@ -101,7 +107,13 @@ def stopBuildingContext(token):
         file = open(pidpath, 'r')
     except IOError:
         return True
-    pid = int(file.read(10));
+    pid = file.read(10);
+
+    if pid == '':
+        return True
+    else:
+        pid = int(pid)
+
     if pid > 1:
         try:
             os.kill(pid, 9)

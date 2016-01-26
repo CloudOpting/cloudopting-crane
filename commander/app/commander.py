@@ -125,11 +125,18 @@ class ContextService(Resource):
     @api.response(500, 'Error processing the request', errorResponseModel)
     @api.response(201, 'Created', contextInfoModel)
     def post(self):
-        try:   # if group not provided it will use default group.
-            return builderOps.newContext(puppetfile=request.files['puppetfile'], group=str(request.form['group']) ,datastore=datastore)
-        except:
-            return builderOps.newContext(puppetfile=request.files['puppetfile'], datastore=datastore)
 
+        try:
+            gr=str(request.form['group'])
+        except:
+            gr='default'
+
+        try:
+            pu=request.files['puppetfile']
+        except:
+            pu=None
+
+        return builderOps.newContext(puppetfile=pu, group=gr, datastore=datastore)
 
 @builder_ns.route('/contexts/<token>')
 @api.doc(params={'token': 'Token that identifies the context.'})

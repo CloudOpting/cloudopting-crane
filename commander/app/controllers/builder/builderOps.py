@@ -25,7 +25,7 @@ def contextList(datastore):
         return aux.getResponse()
 
 
-def newContext(puppetfile, datastore, group='default'):
+def newContext(datastore, puppetfile= None, group='default'):
     '''
     Reads and checks puppetfile, creates the directory in the filesystem and launch puppetfile processing.
     '''
@@ -39,22 +39,38 @@ def newContext(puppetfile, datastore, group='default'):
             files.deleteContextDir(token)
             raise errors.OperationError("Couldn't create context in the filesystem")
 
-        # Save puppetfile
-        files.savePuppetfile(token, puppetfile)
+        if not puppetfile == None:
+            # Save puppetfile
+            files.savePuppetfile(token, puppetfile)
 
-        # Check puppetfile
-        aux = puppet.checkPuppetfile(token)
-        if not aux==True:
-            files.deleteContextDir(token)
-            raise errors.OperationError("Syntax error in provided puppetfile: " + aux)
+            # Check puppetfile
+            aux = puppet.checkPuppetfile(token)
+            if not aux==True:
+                files.deleteContextDir(token)
+                raise errors.OperationError("Syntax error in provided puppetfile: " + aux)
 
-        # Launch build operation
-        puppet.buildContext(token)
+            # Launch build operation
+            puppet.buildContext(token)
 
-        # Create context in datastore
-        datastorecontext = {'token':token, 'group':group, 'status':'building', 'description':'Under creation', 'images':[]}
-        datastore.addContext(token, datastorecontext)
+            # Create context in datastore
+            datastorecontext = {'token':token, 'group':group, 'status':'building', 'description':'Under creation', 'images':[]}
+            datastore.addContext(token, datastorecontext)
+        else:
+            pid = os.path.join(settings.FS_BUILDS, token)
+            pid = os.path.join(pid, settings.FS_DEF_CONTEXT_PID)
+            files.createFile(pid,'')
 
+            contextlog =  os.path.join(settings.FS_BUILDS, token)
+            contextlog =  os.path.join(contextlog, settings.FS_DEF_CONTEXT_LOG)
+            files.createFile(contextlog,'')
+
+            contextlogE =  os.path.join(settings.FS_BUILDS, token)
+            contextlogE =  os.path.join(contextlogE, settings.FS_DEF_CONTEXT_ERR_LOG)
+            files.createFile(contextlogE,'')
+
+            datastorecontext = {'token':token, 'group':group, 'status':'finished', 'description':'Build finished without errors', 'images':[]}
+            datastore.addContext(token, datastorecontext)
+            
         return datastorecontext
 
     except errors.ControllerError, e:
@@ -121,7 +137,6 @@ def deleteContext(datastore, token):
         context = datastore.getContext(token)
         if context == None:
             raise errors.NotFoundError("Token does not exist.")
-
         # stop process if running
         puppet.stopBuildingContext(token)
         # delete folder
