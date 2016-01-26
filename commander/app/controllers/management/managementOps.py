@@ -61,12 +61,13 @@ def getAllTokens(datastore):
         return aux.getResponse()
 
 
-def getDockerInfo(dockerClient):
+def getDockerInfo(endpoint):
     '''
     Retrieve docker system information
     '''
     try:
-        return docker.dockerInfo(dockerClient)
+        dk = docker.dockerClient(base_url=endpoint, cert_path=settings.DK_DEFAULT_MASTER_CLIENT_CERTS)
+        return docker.dockerInfo(dk)
     except Exception, e:
         aux = errors.ControllerError("Unknown error: "+ e.message)
         return aux.getResponse()
