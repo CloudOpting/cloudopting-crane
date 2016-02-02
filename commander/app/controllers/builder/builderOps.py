@@ -305,10 +305,7 @@ def newImage(datastore, contextReference, imageName, puppetmanifest=None, base=N
         try:
             files.createImageDir(contextReference, imageName)
             if puppetmanifest!=None:
-                if dockerfile:
-                    filename=puppetmanifest.filename
-                else:
-                    filename = None
+                filename= puppetmanifest.filename
                 files.savePuppetManifest(contextReference, imageName, puppetmanifest, filename=filename)
             if dockerfile!=None:
                 files.saveDockerfile(contextReference, imageName, dockerfile)
@@ -316,7 +313,7 @@ def newImage(datastore, contextReference, imageName, puppetmanifest=None, base=N
                 baseImageName=settings.DK_DEFAULT_BASE_PROVIDER+'/'+base
                 if docker.imageInRegistry(baseImageName) == False:
                     raise errors.OperationError("Base image '"+baseImageName+"' does not exist in private registry")
-                files.createBaseDockerfile(contextReference, imageName, settings.DK_RG_ENDPOINT+'/'+baseImageName)
+                files.createBaseDockerfile(contextReference, imageName, settings.DK_RG_ENDPOINT+'/'+baseImageName, filename)
 
         except os.error:
             files.deleteImageDir(contextReference, imageName)

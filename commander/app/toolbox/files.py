@@ -31,7 +31,7 @@ def saveBaseDockerfile(name, dockerfile):
     path = os.path.join(path, settings.FS_DEF_DOCKERFILE)
     dockerfile.save(path)
 
-def createBaseDockerfile(contextToken, imageName, baseName):
+def createBaseDockerfile(contextToken, imageName, baseName, filename):
     path = os.path.join(settings.FS_BUILDS, contextToken)
     path = os.path.join(path, settings.FS_DEF_DOCKER_IMAGES_FOLDER)
     path = os.path.join(path, imageName)
@@ -40,7 +40,7 @@ def createBaseDockerfile(contextToken, imageName, baseName):
             +"# Add puppet modules:\n" \
             +"ADD ./modules /tmp/modules\n" \
             +"# Add manifest to apply\n" \
-            +"ADD ./images/"+imageName+"/manifest.pp /tmp/manifest.pp\n" \
+            +"ADD ./" + filename + " /tmp/manifest.pp\n" \
             +"# Apply manifest\n" \
             +"RUN puppet apply --modulepath=/tmp/modules /tmp/manifest.pp\n"
 
