@@ -130,6 +130,7 @@ class ContextService(Resource):
             gr=str(request.form['group'])
         except:
             gr='default'
+#             gr='cloudopting'
 
         try:
             pu=request.files['puppetfile']

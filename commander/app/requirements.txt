@@ -11,3 +11,4 @@ cryptography
 requests[security]
 redis==2.10.3
 sh
+ipdb

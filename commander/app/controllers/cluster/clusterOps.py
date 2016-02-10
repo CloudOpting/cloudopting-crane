@@ -1,5 +1,6 @@
 import settings
 import os
+import json
 
 from controllers import errors
 from toolbox import files
@@ -7,6 +8,7 @@ from toolbox import docker
 from datastore import tokens
 from datastore import dataStore
 from datastore.dataStore import DataStore
+
 
 def __obtainDockerHostInfo__(endpoint):
     # Obtain information about docker daemon listening on endpoint
@@ -28,17 +30,30 @@ def newSingleProvisionedMachineCluster(datastore, endpoint, apiVersion=None):
     Set a preprovisioned single-machine cluster. 'endpoint' is the Docker host api endpoint.
     '''
     try:
-        info = __obtainDockerHostInfo__(endpoint)
-
         # Generate token
         token = tokens.newClusterToken(datastore)
 
         # Add to filesystem: for this simple already provisioned machine, only the folder will be created
+        files.createClusterDir(token)
+        clusterPath = os.path.join(settings.FS_CLUSTERS, token)
+        clusterPath = os.path.join(clusterPath, settings.FS_DEF_DOCKER_CLUSTER_LOG)
+        files.createFile(clusterPath,"")
+        clusterPathErr = os.path.join(settings.FS_CLUSTERS, token)
+        clusterPathErr = os.path.join(clusterPathErr, settings.FS_DEF_DOCKER_CLUSTER_ERR_LOG)
+        files.createFile(clusterPathErr, "")
+
         try:
-            files.createClusterDir(token)
-        except os.error:
-            files.deleteClusterDir(token)
-            raise errors.OperationError("Couldn't create cluster reference in the filesystem")
+            info = __obtainDockerHostInfo__(endpoint)
+        except errors.ControllerError, e:
+            files.appendInFile(clusterPathErr, e.message)
+            return e.getResponse()
+        except Exception, e:
+            files.appendInFile(clusterPathErr, "Unknown error: "+ e.message)
+            aux = errors.ControllerError("Unknown error: "+ e.message)
+            return aux.getResponse()
+
+        infoText = json.dumps(info)
+        files.appendInFile(clusterPath,infoText)
 
         # Add to datastore
         datastorecluster = {'token':token, 'status':'joining',
@@ -48,12 +63,9 @@ def newSingleProvisionedMachineCluster(datastore, endpoint, apiVersion=None):
 
         return datastorecluster, 200
 
-    except errors.ControllerError, e:
-        return e.getResponse()
-    except Exception, e:
-        aux = errors.ControllerError("Unknown error: "+ e.message)
-        return aux.getResponse()
-
+    except os.error:
+        files.deleteClusterDir(token)
+        raise errors.OperationError("Couldn't create cluster reference in the filesystem")
 
 def newProvisionedMachineCluster(datastore, endpoint, apiVersion=None):
     '''

@@ -88,11 +88,20 @@ FS_DEF_DOCKER_BUILD_PID = 'build.pid'
 FS_DEF_DOCKER_BUILD_FLAG = 'flag'
 """Default name for the file created when the build operation finish"""
 
+FS_DEF_DOCKER_CLUSTER_LOG = 'cluster.log'
+"""Default name for the log of cluster"""
+
+FS_DEF_DOCKER_CLUSTER_ERR_LOG = 'cluster_err.log'
+"""Default name for the error log of cluster"""
+
 FS_DEF_DOCKER_COMPOSE_PULL_LOG = 'compose_pull.log'
 """Default name for the log of docker compose"""
 
 FS_DEF_DOCKER_COMPOSE_PULL_CODE = 'compose_pull.code'
 """This file is created when the pull process starts and contains nothing until the pull process stops. After pull: 0 means succefull pull, 1 error."""
+
+FS_DEF_DOCKER_COMPOSE_UP_LOG = 'compose_up.log'
+"""Default name for the log of docker compose up"""
 
 # Docker host
 DK_DEFAULT_BUILD_HOST = "tcp://coengine:4243"
@@ -138,3 +147,6 @@ DK_DEFAULT_MASTER_CLIENT_CERTS = "/var/lib/commander/certs/master"
 
 ENABLE_PULL_FROM_PUBLIC = True
 """Control if it possible to pull from public registry or just the private one. If True, it will use dockerhub as default registry to pull from. If false, it will us interna private registry (DK_DEFAULT_PULL_REGISTRY)."""
+
+CONTAINER_PREFIX = 'cloudopting'
+"""Prefix of container name"""

@@ -14,6 +14,8 @@ from files import appendInFile
 import compose
 import compose.config
 from compose import project
+from compose import container
+import time
 
 # Importing docker library
 def import_non_local(name, custom_name=None):
@@ -432,7 +434,8 @@ def runComposition(datastore, token, dk=defaultDockerClient):
     # launch compose
     # TODO: control pulling errors
     def composeThread():
-        cproject = ComposeProject(name=token, base_dir=os.path.join(settings.FS_COMPOSITIONS, token), default_registry=settings.DK_DEFAULT_PULL_REGISTRY, dockerClient=dk)
+#        cproject = ComposeProject(name=token, base_dir=os.path.join(settings.FS_COMPOSITIONS, token), default_registry=settings.DK_DEFAULT_PULL_REGISTRY, dockerClient=dk)
+        cproject = ComposeProject(name=settings.CONTAINER_PREFIX, base_dir=os.path.join(settings.FS_COMPOSITIONS, token), default_registry=settings.DK_DEFAULT_PULL_REGISTRY, dockerClient=dk)
         # pull images
         if(cproject.pull()):
             # run composition
@@ -558,11 +561,13 @@ def getBaseBuildErrors(name):
     return content
 
 class ComposeProject():
-    def __init__(self, name, base_dir, filename=['docker-compose.yml'], dockerClient=defaultDockerClient, default_registry=None):
+    def __init__(self, name, base_dir, filename=[settings.FS_DEF_COMPOSEFILE], dockerClient=defaultDockerClient, default_registry=None):
         self.dockerClient = dockerClient
         self.basedir = base_dir
+        self.filename = filename
         self.service_dicts = compose.config.load(compose.config.find(base_dir, filename))
         self.project = project.Project.from_dicts(name, self.service_dicts, self.dockerClient)
+
         self.default_registry = default_registry
 
     def pull(self):
@@ -604,9 +609,56 @@ class ComposeProject():
             pull_code.close()
             return result
 
-
     def up(self):
-        self.project.up()
+
+    # TODO: self.project.up() return a list of containeres
+    # use container.name(), container.human_readable_state(), container.service(), container.is_running()...
+        try:
+            try:
+    #            path = os.path.join(self.basedir, self.filename)
+    # en el path no deberia hardcodear settings.FS_DEF_COMPOSEFILE, deberia usar el self.filename
+                path = os.path.join(self.basedir, settings.FS_DEF_COMPOSEFILE)
+                uplog = os.path.join(self.basedir, settings.FS_DEF_DOCKER_COMPOSE_UP_LOG)
+                createFile(uplog, '')
+            except Exception, e:
+                raise errors.OperationError("Couldn't create up log in the filesystem")
+            
+            try:
+                before = dockerInfo(self.dockerClient)
+            except Exception, e:
+                appendInFile(uplog, e.message)
+                raise errors.ControllerError("Error while connecting with provided docker host. Endpoint: '"+str(self.dockerClient.base_url)+"' exception:"+str(e))
+            try:
+                self.project.up()
+            except Exception, e:
+                appendInFile(uplog, e.message)
+                raise Exception()
+
+            try:
+                after = dockerInfo(self.dockerClient)
+            except Exception, e:
+                appendInFile(uplog, e.message)
+                raise errors.ControllerError("Error while connecting with provided docker host. Endpoint: '"+str(self.dockerClient.base_url)+"' exception:"+str(e))
+            
+            content = ''
+            services = 0
+            with open(path, 'r') as compose_file:
+                for line in compose_file.readlines():
+                    content = line+os.linesep
+                    c = content[0]
+                    if (not c.isspace()) and (c != '#'):
+                        services += 1
+            contUp = after['Containers'] - before['Containers']
+            if contUp == services:         
+                appendInFile(uplog, 'Successfully deploy')
+                return True
+            else:
+                contFail = services - contUp
+                appendInFile(uplog, 'Error: ' + str(contFail) + ' containers not up')
+                return False
+        except Exception, e:
+            raise Exception()
+
 
 def imageInRegistry(name):
     """

@@ -33,7 +33,8 @@ def buildContext(token):
     '''
     def buildThread():
         cwd =  os.path.join(settings.FS_BUILDS, token)
-        command = 'r10k puppetfile install 1> '+ settings.FS_DEF_CONTEXT_LOG +' 2> '+ settings.FS_DEF_CONTEXT_ERR_LOG
+#        command = 'r10k puppetfile install 1> '+ settings.FS_DEF_CONTEXT_LOG +' 2> '+ settings.FS_DEF_CONTEXT_ERR_LOG
+        command = 'r10k puppetfile install -v 1> '+ settings.FS_DEF_CONTEXT_LOG +' 2> '+ settings.FS_DEF_CONTEXT_ERR_LOG
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd)
 
         response = ''
@@ -79,12 +80,19 @@ def getBuildingErrors(token):
     '''
     path = os.path.join(settings.FS_BUILDS, token)
     path = os.path.join(path, settings.FS_DEF_CONTEXT_ERR_LOG)
-    if os.stat(path).st_size == 0:
-        return None
+    # if os.stat(path).st_size == 0:
+    #     return None
+    # content = ''
+    # with open(path, 'r') as content_file:
+    #     content = content_file.read()
+    # return content
     content = ''
     with open(path, 'r') as content_file:
-        content = content_file.read()
-    return content
+        for line in content_file.readlines():
+            content = line+os.linesep
+            if 'ERROR' in content:
+                return content_file.read()
+    return None
 
 def getBuildingLog(token):
     '''
