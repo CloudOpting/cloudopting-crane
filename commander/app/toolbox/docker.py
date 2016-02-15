@@ -573,15 +573,16 @@ class ComposeProject():
     def pull(self):
         result = False
         pulllogpath = os.path.join(self.basedir, settings.FS_DEF_DOCKER_COMPOSE_PULL_LOG)
-        pullcodepath = os.path.join(self.basedir, settings.FS_DEF_DOCKER_COMPOSE_PULL_CODE)
+        codepath = os.path.join(self.basedir, settings.FS_DEF_DOCKER_COMPOSE_CODE)
+        uplog = os.path.join(self.basedir, settings.FS_DEF_DOCKER_COMPOSE_UP_LOG)
+        createFile(uplog,'Not started up yet.')
 
         # Open file that will store the pull log
         pull_log=open(pulllogpath, 'w')
 
         # Create file that marks the status of the pulling (exit code)
-        pull_code = open(pullcodepath, 'w')
-        pull_code.write("aaa")
-        pull_code.close()
+        createFile(codepath, "-1")
+        
         try:
 
             # Call project pull. It will fill the log file
@@ -594,19 +595,14 @@ class ComposeProject():
             ## TODO: add logic here to check if images has been pulled or not.
 
             # Set exit code
-            pull_code = open(pullcodepath, 'w')
-            pull_code.write("0")
-            pull_code.close()
+            createFile(codepath, "0")
             result=True
         except:
             # Set exit code
-            pull_code = open(pullcodepath, 'w')
-            pull_code.write("1")
-            pull_code.close()
+            createFile(codepath, "1")
 
         finally:
             pull_log.close()
-            pull_code.close()
             return result
 
     def up(self):
@@ -619,25 +615,26 @@ class ComposeProject():
     # en el path no deberia hardcodear settings.FS_DEF_COMPOSEFILE, deberia usar el self.filename
                 path = os.path.join(self.basedir, settings.FS_DEF_COMPOSEFILE)
                 uplog = os.path.join(self.basedir, settings.FS_DEF_DOCKER_COMPOSE_UP_LOG)
-                createFile(uplog, '')
+                codepath = os.path.join(self.basedir, settings.FS_DEF_DOCKER_COMPOSE_CODE)
+                createFile(uplog, 'Starting up')
             except Exception, e:
                 raise errors.OperationError("Couldn't create up log in the filesystem")
             
             try:
                 before = dockerInfo(self.dockerClient)
             except Exception, e:
-                appendInFile(uplog, e.message)
+                createFile(uplog, e.message)
                 raise errors.ControllerError("Error while connecting with provided docker host. Endpoint: '"+str(self.dockerClient.base_url)+"' exception:"+str(e))
             try:
                 self.project.up()
             except Exception, e:
-                appendInFile(uplog, e.message)
+                createFile(uplog, e.message)
                 raise Exception()
 
             try:
                 after = dockerInfo(self.dockerClient)
             except Exception, e:
-                appendInFile(uplog, e.message)
+                createFile(uplog, e.message)
                 raise errors.ControllerError("Error while connecting with provided docker host. Endpoint: '"+str(self.dockerClient.base_url)+"' exception:"+str(e))
             
             content = ''
@@ -649,16 +646,86 @@ class ComposeProject():
                     if (not c.isspace()) and (c != '#'):
                         services += 1
             contUp = after['Containers'] - before['Containers']
-            if contUp == services:         
-                appendInFile(uplog, 'Successfully deploy')
+            if contUp == services:
+                createFile(codepath, "2")         
+                createFile(uplog, 'Successfully deploy')
                 return True
             else:
                 contFail = services - contUp
-                appendInFile(uplog, 'Error: ' + str(contFail) + ' containers not up')
+                createFile(codepath, "3")
+                createFile(uplog, 'Error: ' + str(contFail) + ' containers not up')
                 return False
         except Exception, e:
             raise Exception()
 
+def isComposeRunning(composeToken):
+    """
+    Checks if compose process is still running. Returns True if the process still runs and False if the process is not running.
+    """
+    path = os.path.join(settings.FS_COMPOSITIONS, composeToken)
+    path = os.path.join(path, settings.FS_DEF_DOCKER_COMPOSE_CODE)
+    try:
+        fi = open(path,'r')
+        code = fi.read()
+        fi.close()
+        code = int(code)
+
+        if code >= 1:
+            return False
+        else:
+            return True
+    except:
+        return True
+
+def getComposeErrors(composeToken):
+    '''
+    Retrieve errors in error deploying log. None if no errors.
+    '''
+    path = os.path.join(settings.FS_COMPOSITIONS, composeToken)
+    path = os.path.join(path, settings.FS_DEF_DOCKER_COMPOSE_CODE)
+
+    try:
+        fi = open(path,'r')
+        code = fi.read()
+        fi.close()
+        code = int(code)
+
+        if code == 2:
+            return None
+        else:
+            return code
+    except Exception, e:
+        raise Exception()
+
+def getPullLog(composeToken):
+    '''
+    Retrieve standard deploying log.
+    '''
+    path = os.path.join(settings.FS_COMPOSITIONS, composeToken)
+    path = os.path.join(path, settings.FS_DEF_DOCKER_COMPOSE_PULL_LOG)
+    content = ''
+    try:
+        with open(path, 'r') as content_file:
+            content = content_file.read()
+        return content
+    except:
+        content = ''
+        return content
+
+def getUpLog(composeToken):
+    '''
+    Retrieve standard up log.
+    '''
+    path = os.path.join(settings.FS_COMPOSITIONS, composeToken)
+    path = os.path.join(path, settings.FS_DEF_DOCKER_COMPOSE_UP_LOG)
+    content = ''
+    try:
+        with open(path, 'r') as content_file:
+            content = content_file.read()
+        return content
+    except:
+        content = ''
+        return content
 
 def imageInRegistry(name):
     """

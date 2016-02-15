@@ -99,7 +99,8 @@ def getBuildingLog(token):
     Retrieve standard building log.
     '''
     path = os.path.join(settings.FS_BUILDS, token)
-    path = os.path.join(path, settings.FS_DEF_CONTEXT_LOG)
+#    path = os.path.join(path, settings.FS_DEF_CONTEXT_LOG)
+    path = os.path.join(path, settings.FS_DEF_CONTEXT_ERR_LOG)
     content = ''
     with open(path, 'r') as content_file:
         content = content_file.read()

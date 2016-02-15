@@ -42,6 +42,7 @@ engine:
 
 redis:
   image: redis:3
+#  build: ./redis
   container_name: co_redis
   ports:
     - 6379:6379

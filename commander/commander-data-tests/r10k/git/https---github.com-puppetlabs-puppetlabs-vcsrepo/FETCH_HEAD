@@ -3,7 +3,7 @@
 5a9545b83b69f262a9814a5bdd644f3c7336bb10	not-for-merge	branch '1.2.x' of https://github.com/puppetlabs/puppetlabs-vcsrepo
 f98e8f0e552addd79974ae4523183639a06142e0	not-for-merge	branch '1.3.x' of https://github.com/puppetlabs/puppetlabs-vcsrepo
 3a2c3b3631e617f41f5b59bcf1311eb9968b11b3	not-for-merge	branch 'feature/darcs' of https://github.com/puppetlabs/puppetlabs-vcsrepo
-d7197aa5ab8639163c24ed8ba1d758a0969e51da	not-for-merge	branch 'master' of https://github.com/puppetlabs/puppetlabs-vcsrepo
+818734c0264ffbca9dacc59d358399d819e89ed8	not-for-merge	branch 'master' of https://github.com/puppetlabs/puppetlabs-vcsrepo
 ca61889750ff59ff10d7cb921e89edd048d36a8f	not-for-merge	'refs/pull/1/head' of https://github.com/puppetlabs/puppetlabs-vcsrepo
 664c3fe00ce290c1beed1b62892f29ddf02e46f0	not-for-merge	'refs/pull/1/merge' of https://github.com/puppetlabs/puppetlabs-vcsrepo
 6dfdc0f1c38ce9371aa8ce5f91dd9799e625a3f7	not-for-merge	'refs/pull/102/head' of https://github.com/puppetlabs/puppetlabs-vcsrepo
@@ -255,7 +255,6 @@ d3d5078db425048cf60a3f32874b48b966a14019	not-for-merge	'refs/pull/279/merge' of 
 308533912b5beb26bb881447c8545932cf980a4a	not-for-merge	'refs/pull/280/head' of https://github.com/puppetlabs/puppetlabs-vcsrepo
 f98e8f0e552addd79974ae4523183639a06142e0	not-for-merge	'refs/pull/281/head' of https://github.com/puppetlabs/puppetlabs-vcsrepo
 b8f25cea95317a4b2a622e2799f1aa7ba159bdca	not-for-merge	'refs/pull/282/head' of https://github.com/puppetlabs/puppetlabs-vcsrepo
-22b92c243de303a8d9ad91a1e94fbd7c0e9fe3e4	not-for-merge	'refs/pull/282/merge' of https://github.com/puppetlabs/puppetlabs-vcsrepo
 20736ba6566854a274a9f9ac95937a843942aca6	not-for-merge	'refs/pull/283/head' of https://github.com/puppetlabs/puppetlabs-vcsrepo
 ac5f574a5d942ce0fcb73968380874e5479e1196	not-for-merge	'refs/pull/29/head' of https://github.com/puppetlabs/puppetlabs-vcsrepo
 8e51aebd4cf77c7d68eee70dfa0e16909aa114c5	not-for-merge	'refs/pull/3/head' of https://github.com/puppetlabs/puppetlabs-vcsrepo

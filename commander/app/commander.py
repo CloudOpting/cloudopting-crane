@@ -398,7 +398,7 @@ class ComposerDeployment(Resource):
     @api.response(404, 'Not found', errorResponseModel)
     @api.response(200, 'OK', composerDetailModel)
     def get(self, token):
-        return not_implemented()
+        return composeOps.checkcompose(datastore, token, detail=False)
 
     @api.doc(description='Destroy the container composition and the related data.')
     @api.response(500, 'Error processing the request', errorResponseModel)
@@ -406,6 +406,17 @@ class ComposerDeployment(Resource):
     @api.response(200, 'OK', composerDetailModel)
     def delete(self, token):
         return not_implemented()
+
+@composer_ns.route('/<token>/detail')
+@api.doc(params={'token': 'Token that identifies the docker composition'})
+class BuildProcessDetail(Resource):
+
+    @api.doc(description='Get detailed information about a docker container composition.')
+    @api.response(500, 'Error processing the request', errorResponseModel)
+    @api.response(404, 'Not found', errorResponseModel)
+    @api.response(200, 'OK', composerDetailModel)
+    def get(self, token):
+        return composeOps.checkcompose(datastore, token, detail=True)
 
 if __name__ == '__main__':
     app.run(host=settings.WS_BIND_IP, port=settings.WS_BIND_PORT, debug=(True if os.environ.get('DEBUG')=='true' else False), threaded=True)

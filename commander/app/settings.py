@@ -103,6 +103,12 @@ FS_DEF_DOCKER_COMPOSE_PULL_CODE = 'compose_pull.code'
 FS_DEF_DOCKER_COMPOSE_UP_LOG = 'compose_up.log'
 """Default name for the log of docker compose up"""
 
+FS_DEF_DOCKER_COMPOSE_LOG = 'compose.log'
+"""Default name for the log of docker compose"""
+
+FS_DEF_DOCKER_COMPOSE_CODE = 'compose.code'
+"""This file is created when deploy process starts and contains nothing until the deploy process stops. After deploy: 0 means succefull pull, 1 pull error, 2 succefull up, 3 error up"""
+
 # Docker host
 DK_DEFAULT_BUILD_HOST = "tcp://coengine:4243"
 """Default docker host where images will be built"""

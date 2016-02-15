@@ -114,9 +114,9 @@ def checkContext(datastore, token, detail=False):
 
         if detail:
             log = puppet.getBuildingLog(token)
-            errLog = puppet.getBuildingErrors(token)
+            # errLog = puppet.getBuildingErrors(token)
             context['log'] = '' if log==None else log
-            context['error_log'] = '' if errLog==None else errLog
+            # context['error_log'] = '' if errLog==None else errLog
 
         return context, 200
 
